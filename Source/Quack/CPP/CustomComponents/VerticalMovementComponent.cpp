@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Headers/Quack.h"
-#include "VerticalMovementComponent.h"
+#include "Headers/CustomComponents/VerticalMovementComponent.h"
 
 
 // Sets default values for this component's properties

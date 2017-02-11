@@ -31,4 +31,19 @@ class QUACK_API AQuackAIRangedPawn : public AQuackAIPawn
 	UPROPERTY(VisibleDefaultsOnly, Category = "Projectile")
 		class UArrowComponent* ProjectileSpawn;
 
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		float AttackRange;
+
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		float FleeRange;
+
+	FTimerHandle DelayTimer;
+
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		float FireDelay;
+
+	void ClearTimer();
+
+	bool CanFire;
+
 };

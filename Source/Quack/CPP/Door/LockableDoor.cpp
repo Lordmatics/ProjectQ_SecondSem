@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Headers/Quack.h"
-#include "LockableDoor.h"
+#include "Headers/Door/LockableDoor.h"
 #include "Headers/Character/QuackCharacter.h"
 
 // Sets default values

@@ -5,6 +5,8 @@
 #include "Headers/Character/QuackCharacter.h"
 #include "Headers/Misc/QuackProjectile.h"
 #include "Classes/Components/ArrowComponent.h"
+#include "Headers/AIEnemies/QuackAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 AQuackAIRangedPawn::AQuackAIRangedPawn()
 {
@@ -20,6 +22,7 @@ AQuackAIRangedPawn::AQuackAIRangedPawn()
 void AQuackAIRangedPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	CanFire = true;
 }
 // Called every frame
 void AQuackAIRangedPawn::Tick(float DeltaTime)
@@ -40,20 +43,44 @@ void AQuackAIRangedPawn::Attack()
 	AQuackCharacter* PlayerCharacter = Cast<AQuackCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (PlayerCharacter != nullptr)
 	{
-		if (ProjectileSpawn != nullptr)
+		if (GetDistanceTo(PlayerCharacter) > AttackRange)
 		{
-			if (Projectile != nullptr)
+			return;
+		}
+		else
+			if (GetDistanceTo(PlayerCharacter) <= FleeRange)
 			{
-				UWorld* World = GetWorld();
-				if (World != nullptr)
+				AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
+				if (TempController != nullptr)
 				{
-					FVector Location = ProjectileSpawn->GetComponentLocation();
-					FRotator Rotation = ProjectileSpawn->GetComponentRotation();
-					AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile, Location, Rotation);
+					TempController->Blackboard->SetValueAsBool("ShouldFlee", true);
 				}
 			}
-		}
+			else
+			{
+				if (ProjectileSpawn != nullptr)
+				{
+					if (Projectile != nullptr)
+					{
+						UWorld* World = GetWorld();
+						if (World != nullptr)
+						{
+							if (CanFire)
+							{
+								FVector Location = ProjectileSpawn->GetComponentLocation();
+								FRotator Rotation = ProjectileSpawn->GetComponentRotation();
+								AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile, Location, Rotation);
+								World->GetTimerManager().SetTimer(DelayTimer, this, &AQuackAIRangedPawn::ClearTimer, FireDelay, false);
+								CanFire = false;
+							}
+						}
+					}
+				}
+			}
 	}
 }
 
-
+void AQuackAIRangedPawn::ClearTimer()
+{
+	CanFire = true;
+}
