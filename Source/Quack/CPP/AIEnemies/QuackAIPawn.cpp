@@ -5,9 +5,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Components/DestructibleComponent.h"
-#include "Headers/Character/QuackCharacter.h"
-#include "Headers/AIEnemies/QuackAIController.h"
 #include "Headers/Managers/TutorialManager.h"
 
 // Sets default values
@@ -23,9 +20,6 @@ AQuackAIPawn::AQuackAIPawn()
 	//SkeletalComp->SetupAttachment(SceneComponent);
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 	BoxCollision->SetupAttachment(GetCapsuleComponent());
-	ExplodingMesh = CreateDefaultSubobject<UDestructibleComponent>(TEXT("DestructibleMesh"));
-	ExplodingMesh->OnComponentFracture.AddDynamic(this, &AQuackAIPawn::OnComponentFracture);
-	ExplodingMesh->SetupAttachment(GetCapsuleComponent());
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 }
 
@@ -33,7 +27,6 @@ AQuackAIPawn::AQuackAIPawn()
 void AQuackAIPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	ExplodingMesh->SetVisibility(false);
 	CurrentHealth = MaxHealth;
 
 }
@@ -54,45 +47,7 @@ void AQuackAIPawn::SetupPlayerInputComponent(class UInputComponent* _InputCompon
 
 void AQuackAIPawn::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Get Attacked"));
-	AQuackCharacter* PlayerCharacter = Cast<AQuackCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (PlayerCharacter != nullptr)
-	{
-		//PlayerCharacter->GetCharacterMovement()->AddImpulse(GetActorLocation() - PlayerCharacter->GetActorLocation());
-		PlayerCharacter->DecreaseHealth(Damage);
-		GetMesh()->SetVisibility(false);
-		//do attack stuff
-		ExplodingMesh->SetVisibility(true);
-		ExplodingMesh->ApplyRadiusDamage(100, ExplodingMesh->GetComponentLocation(), 20, 10000, true);
-		if (TutorialManager != nullptr)
-		{
-			TutorialManager->WormDiedAt(WormID);
-		}
-		AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
-		if (TempController != nullptr)
-		{
-			TempController->Blackboard->SetValueAsBool("Dead", true);
-			//TempController->GetBrainComponent()->StopLogic(TEXT("Dead"));
-		}
-		//Destroy();	
-	}
-}
 
-void AQuackAIPawn::OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection)
-{
-	BoxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ExplodingMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	FTimerHandle DestroyTimer;
-	GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &AQuackAIPawn::DestroyThis, 2.0f, false);
-	if(OnEnemyDestroyed.IsBound())
-		OnEnemyDestroyed.Broadcast(this);
-	if (OnEnemyDestroyedRoom.IsBound())
-		OnEnemyDestroyedRoom.Broadcast(this);
-}
-
-void AQuackAIPawn::DestroyThis()
-{
-	Destroy();
 }
 
 void AQuackAIPawn::TakeDamages(float DamageIn)
@@ -111,13 +66,5 @@ void AQuackAIPawn::Die()
 		TutorialManager->WormDiedAt(WormID);
 
 	}
-	GetMesh()->SetVisibility(false);
-	ExplodingMesh->SetVisibility(true);
-	ExplodingMesh->ApplyRadiusDamage(100, ExplodingMesh->GetComponentLocation(), 20, 10000, true);
-	AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
-	if (TempController != nullptr)
-	{
-		//TempController->GetBrainComponent()->StopLogic(TEXT("Dead"));
-		TempController->Blackboard->SetValueAsBool("Dead", true);
-	}
+	Destroy();
 }

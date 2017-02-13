@@ -40,12 +40,6 @@ protected:
 	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		float Damage;
 
-	UPROPERTY(Category = Character, EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UDestructibleComponent* ExplodingMesh;
-
-	UFUNCTION()
-	void DestroyThis();
-
 public:
 	// Sets default values for this pawn's properties
 	AQuackAIPawn();
@@ -60,10 +54,7 @@ public:
 
 	virtual void TakeDamages(float DamageIn);
 
-	void Die();
-
-	UFUNCTION()
-		void OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection);
+	virtual void Die();
 
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
