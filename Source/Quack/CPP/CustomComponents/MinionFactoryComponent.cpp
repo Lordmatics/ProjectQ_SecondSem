@@ -43,6 +43,7 @@ void UMinionFactoryComponent::SpawnMinionWaveA()
 	for (size_t i = 0; i < SpawnPointsA.Num(); i++)
 	{
 		int EnemyIndex = i > EnemyFactoryA.Num() - 1 ? 0 : FMath::RandRange(0, EnemyFactoryA.Num() - 1);
+		if (SpawnPointsA[i] == nullptr) return;
 		AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactoryA[EnemyIndex], SpawnPointsA[i]->GetActorLocation(), FRotator::ZeroRotator);
 		if (Minion != nullptr)
 		{
@@ -61,6 +62,7 @@ void UMinionFactoryComponent::SpawnMinionWaveB()
 	for (size_t i = 0; i < SpawnPointsB.Num(); i++)
 	{
 		int EnemyIndex = i > EnemyFactoryB.Num() - 1 ? 0 : FMath::RandRange(0, EnemyFactoryB.Num() - 1);
+		if (SpawnPointsB[i] == nullptr) return;
 		AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactoryB[EnemyIndex], SpawnPointsB[i]->GetActorLocation(), FRotator::ZeroRotator);
 		if (Minion != nullptr)
 		{

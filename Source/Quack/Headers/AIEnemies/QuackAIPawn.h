@@ -14,7 +14,7 @@ class QUACK_API AQuackAIPawn : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
+protected:
 
 	//UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	//	USceneComponent* SceneComponent;
@@ -58,7 +58,7 @@ public:
 
 	virtual void Attack();
 
-	void TakeDamages(float DamageIn);
+	virtual void TakeDamages(float DamageIn);
 
 	void Die();
 

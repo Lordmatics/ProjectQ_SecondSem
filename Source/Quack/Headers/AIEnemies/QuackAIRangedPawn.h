@@ -19,6 +19,8 @@ class QUACK_API AQuackAIRangedPawn : public AQuackAIPawn
 
 	virtual void BeginPlay() override;
 
+	virtual void TakeDamages(float DamageIn);
+
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 

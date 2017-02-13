@@ -84,3 +84,12 @@ void AQuackAIRangedPawn::ClearTimer()
 {
 	CanFire = true;
 }
+
+void AQuackAIRangedPawn::TakeDamages(float DamageIn)
+{
+	CurrentHealth -= DamageIn;
+	if (CurrentHealth <= 0)
+	{
+		Destroy();
+	}
+}
