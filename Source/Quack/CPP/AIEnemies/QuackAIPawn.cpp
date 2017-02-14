@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Headers/Managers/TutorialManager.h"
+#include "Headers/CustomComponents/AnimationComponent.h"
 
 // Sets default values
 AQuackAIPawn::AQuackAIPawn()
@@ -21,6 +22,8 @@ AQuackAIPawn::AQuackAIPawn()
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
 	BoxCollision->SetupAttachment(GetCapsuleComponent());
 	GetCharacterMovement()->bUseRVOAvoidance = true;
+
+	AnimationComponent = CreateDefaultSubobject<UAnimationComponent>(TEXT("AnimationComponent"));
 }
 
 // Called when the game starts or when spawned

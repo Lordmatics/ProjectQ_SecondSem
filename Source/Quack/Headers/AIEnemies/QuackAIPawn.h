@@ -25,6 +25,9 @@ protected:
 	//UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		//USkeletalMeshComponent* SkeletalComp;
 
+	UPROPERTY(EditDefaultsOnly, Category = "C++ Animation")
+		class UAnimationComponent* AnimationComponent;
+
 	UPROPERTY(EditAnywhere, Category = "Tutorial Manager")
 		class ATutorialManager* TutorialManager;
 

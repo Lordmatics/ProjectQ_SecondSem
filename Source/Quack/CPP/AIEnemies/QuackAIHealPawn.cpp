@@ -21,6 +21,9 @@ void AQuackAIHealPawn::BeginPlay()
 	AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
 	if (TempController != nullptr)
 	{
+		// Pre-Assigned Pipe
+		// Might want to add logic, to make this
+		// More dynamic, depending on actual level design
 		if (Pipe != nullptr)
 		{
 			TempController->Blackboard->SetValueAsObject("Pipe", Pipe);
@@ -36,6 +39,7 @@ void AQuackAIHealPawn::Tick(float DeltaTime)
 	{
 		if (Pipe != nullptr)
 		{
+			// Guessing, descend determines if pipe is drained or not
 			if (!Pipe->GetDescend())
 			{
 				CurrentHealth += DeltaTime * 20;
@@ -84,9 +88,10 @@ bool AQuackAIHealPawn::GetDeath()
 
 void AQuackAIHealPawn::TakeDamages(float Damage)
 {
-	if (!Invincible) {
+	if (!Invincible) 
+	{
 		Super::TakeDamages(Damage);
-		if (CurrentHealth > 0 && CurrentHealth < MaxHealth / 2)
+		if (CurrentHealth > 0.0f && CurrentHealth < MaxHealth / 2.0f)
 		{
 			AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
 			if (TempController != nullptr)
@@ -96,4 +101,13 @@ void AQuackAIHealPawn::TakeDamages(float Damage)
 			}
 		}
 	}
+}
+
+void AQuackAIHealPawn::Die()
+{
+	if (OnEnemyDestroyed.IsBound())
+		OnEnemyDestroyed.Broadcast(this);
+	if (OnEnemyDestroyedRoom.IsBound())
+		OnEnemyDestroyedRoom.Broadcast(this);
+	Super::Die();
 }

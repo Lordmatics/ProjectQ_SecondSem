@@ -13,23 +13,27 @@ class QUACK_API AQuackAIHealPawn : public AQuackAIPawn
 {
 	GENERATED_BODY()
 
-		AQuackAIHealPawn();
+private:
+	
+	AQuackAIHealPawn();
 
 	virtual void BeginPlay() override;
 
-		virtual void Attack() override;
+	virtual void Attack() override;
 
-		virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 
-		virtual void TakeDamages(float Damage) override;
+	virtual void TakeDamages(float Damage) override;
 
-		void Heal();
+	virtual void Die() override;
 
-		bool IsHealing;
+	void Heal();
 
-		bool IsRunning;
+	bool IsHealing;
 
-		bool Invincible;
+	bool IsRunning;
+
+	bool Invincible;
 
 	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class APipe* Pipe;

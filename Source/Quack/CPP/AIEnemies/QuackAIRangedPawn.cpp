@@ -62,7 +62,7 @@ void AQuackAIRangedPawn::Attack()
 				{
 					if (Projectile != nullptr)
 					{
-						UWorld* World = GetWorld();
+						UWorld* const World = GetWorld();
 						if (World != nullptr)
 						{
 							if (CanFire)
@@ -90,6 +90,10 @@ void AQuackAIRangedPawn::TakeDamages(float DamageIn)
 	CurrentHealth -= DamageIn;
 	if (CurrentHealth <= 0)
 	{
+		if (OnEnemyDestroyed.IsBound())
+			OnEnemyDestroyed.Broadcast(this);
+		if (OnEnemyDestroyedRoom.IsBound())
+			OnEnemyDestroyedRoom.Broadcast(this);
 		Destroy();
 	}
 }
