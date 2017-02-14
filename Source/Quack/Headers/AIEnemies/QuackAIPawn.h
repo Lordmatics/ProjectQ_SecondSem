@@ -36,7 +36,10 @@ protected:
 
 	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		float MaxHealth;
-	float CurrentHealth;
+
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		float CurrentHealth;
+
 	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		float Damage;
 

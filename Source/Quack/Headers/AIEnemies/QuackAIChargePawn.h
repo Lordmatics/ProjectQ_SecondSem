@@ -13,7 +13,14 @@ class QUACK_API AQuackAIChargePawn : public AQuackAIPawn
 {
 	GENERATED_BODY()
 	
+		virtual void Die() override;
 	
-	
+	UFUNCTION()
+		void DestroyThis();
+
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Anim")
+		bool GetDeath();
 	
 };

@@ -21,9 +21,28 @@ class QUACK_API AQuackAIHealPawn : public AQuackAIPawn
 
 		virtual void Tick(float DeltaTime) override;
 
+		virtual void TakeDamages(float Damage) override;
+
 		void Heal();
 
+		bool IsHealing;
 
+		bool IsRunning;
+
+		bool Invincible;
+
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class APipe* Pipe;
 	
+
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Anim")
+		bool GetDeath();
+
+	UFUNCTION(BlueprintCallable, Category = "Anim")
+		bool GetHealing();
+
+	UFUNCTION(BlueprintCallable, Category = "Anim")
+		bool GetRunning();
 };

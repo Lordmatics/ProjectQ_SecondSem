@@ -392,7 +392,10 @@ void AQuackCharacter::UsePoison()
 			PlayerConfig.CurrentPipe->ChangeMeshColour();
 			PlayerConfig.CurrentPipe->SimulateDestroy();
 			PlayerConfig.CurrentPipe->ToggleHighlight(false);
-			PlayerConfig.CurrentPipe->OnPipeFinishedDraining.AddDynamic(TutorialManager, &ATutorialManager::RemoveAPipe);
+			if (TutorialManager != nullptr)
+			{
+				PlayerConfig.CurrentPipe->OnPipeFinishedDraining.AddDynamic(TutorialManager, &ATutorialManager::RemoveAPipe);
+			}
 			//TutorialManager->RemoveAPipe();
 			return;
 		}

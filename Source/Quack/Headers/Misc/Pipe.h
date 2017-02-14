@@ -110,6 +110,8 @@ public:
 		UParticleSystemComponent* LeakParticleSys;
 
 	FORCEINLINE bool IsFinishedDraining() const { return bFinishedDraining; }
+
+	FORCEINLINE bool GetDescend() const { return bDescend; }
 protected:
 
 };
