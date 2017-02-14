@@ -29,3 +29,13 @@ bool AQuackAIChargePawn::GetDeath()
 {
 	return (CurrentHealth <= 0);
 }
+
+void AQuackAIChargePawn::Attack()
+{
+	Attacking = true;
+}
+
+bool AQuackAIChargePawn::GetAttacking()
+{
+	return Attacking;
+}
