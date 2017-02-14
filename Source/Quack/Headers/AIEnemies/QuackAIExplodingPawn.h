@@ -29,5 +29,7 @@ class QUACK_API AQuackAIExplodingPawn : public AQuackAIPawn
 
 	UFUNCTION()
 	void DestroyThis();
-	
+
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+		TSubclassOf<class AQuackProjectile> Projectile;
 };

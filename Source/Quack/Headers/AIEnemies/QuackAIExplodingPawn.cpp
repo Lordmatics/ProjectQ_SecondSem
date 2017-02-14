@@ -9,6 +9,7 @@
 #include "Headers/AIEnemies/QuackAIController.h"
 #include "Components/DestructibleComponent.h"
 #include "Headers/Managers/TutorialManager.h"
+#include "Headers/Misc/QuackProjectile.h"
 
 AQuackAIExplodingPawn::AQuackAIExplodingPawn()
 {
@@ -55,6 +56,7 @@ void AQuackAIExplodingPawn::OnComponentFracture(const FVector& HitPoint, const F
 	ExplodingMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	FTimerHandle DestroyTimer;
 	GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &AQuackAIExplodingPawn::DestroyThis, 2.0f, false);
+	AQuackProjectile* Proj = GetWorld()->SpawnActor<AQuackProjectile>(Projectile, GetTransform().GetLocation(), GetTransform().GetRotation().Rotator());
 	if (OnEnemyDestroyed.IsBound())
 		OnEnemyDestroyed.Broadcast(this);
 	if (OnEnemyDestroyedRoom.IsBound())
