@@ -41,6 +41,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Armour Plate", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* BodyLR;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Armour Plate", meta = (AllowPrivateAccess = "true"))
+		UStaticMeshComponent* LaserCannon;
+
 	// THIS CLASS NEEDS REFACTORING PROPERLY
 	UPROPERTY(VisibleAnywhere, Category = "Shield")
 		uint32 bShieldUp : 1;

@@ -42,19 +42,32 @@ AQuackBoss::AQuackBoss()
 	//TailArrow->AttachTo(MySkeletalMesh, FName("Tail6"), EAttachLocation::SnapToTarget);
 
 	BodyPlate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyPlate"));
+	BodyPlate->SetWorldScale3D(FVector(200.0f));
+	BodyPlate->SetRelativeLocation(FVector(-0.002449f, 56.249912f, 827.373047f));
+	BodyPlate->SetRelativeRotation(FRotator(40.0f, 0.0f, 0.0f));
 	BodyPlate->SetupAttachment(MySkeletalMesh);
 
 	BodyUL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyUL"));
-	BodyUL->SetupAttachment(MySkeletalMesh);
+	BodyUL->SetWorldScale3D(FVector(1.0f));
+	BodyUL->SetupAttachment(BodyPlate);
 
 	BodyUR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyUR"));
-	BodyUR->SetupAttachment(MySkeletalMesh);
+	BodyUR->SetWorldScale3D(FVector(1.0f));
+	BodyUR->SetupAttachment(BodyPlate);
 
 	BodyLL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyLL"));
-	BodyLL->SetupAttachment(MySkeletalMesh);
+	BodyLL->SetWorldScale3D(FVector(1.0f));
+	BodyLL->SetupAttachment(BodyPlate);
 
 	BodyLR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyLR"));
-	BodyLR->SetupAttachment(MySkeletalMesh);
+	BodyLR->SetWorldScale3D(FVector(1.0f));
+	BodyLR->SetupAttachment(BodyPlate);
+
+	LaserCannon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LaserCannon"));
+	LaserCannon->SetWorldScale3D(FVector(100.0f));
+	LaserCannon->SetRelativeLocation(FVector(-0.002477f, 54.748207f, 832.158630f));
+	LaserCannon->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
+	LaserCannon->SetupAttachment(MySkeletalMesh);
 
 
 	//BodyPlate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT(""))
