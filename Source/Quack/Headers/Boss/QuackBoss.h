@@ -111,6 +111,10 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Boss Movement")
 		class UBossAttacksComponent* BossAttacksComponent;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Boss Armour")
+		class UBossArmourComponent* BossArmourComponent;
+
+
 	// Return true if should attack
 	bool CheckForMeleeAttack();
 

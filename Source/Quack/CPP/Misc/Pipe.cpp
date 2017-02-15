@@ -53,6 +53,14 @@ void APipe::BeginPlay()
 void APipe::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
+	if (bTargettedByBoss && bDescend)
+	{
+		ToggleHighlight(true);
+	}
+	else
+	{
+		ToggleHighlight(false);
+	}
 	if (bDescend)
 	{
 		BeginDescend(DeltaTime);
@@ -142,6 +150,7 @@ void APipe::ToggleHighlight(bool Glow)
 {
 	//MyStaticMesh->SetCustomDepthStencilValue((uint8)Colour);
 	PipeOuterBase->SetRenderCustomDepth(Glow);
+	PipeOuterBase->CustomDepthStencilValue = STENCIL_FRIENDLY_OUTLINE;
 
 }
 

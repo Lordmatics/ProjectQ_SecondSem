@@ -15,6 +15,7 @@
 #include "Headers/CustomComponents/AnimationComponent.h"
 #include "Headers/CustomComponents/BossAttacksComponent.h"
 #include "Classes/Animation/AnimInstance.h"
+#include "Headers/CustomComponents/BossArmourComponent.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -94,6 +95,7 @@ AQuackBoss::AQuackBoss()
 	ChandelierDropComponent = CreateDefaultSubobject<UVerticalMovementComponent>(TEXT("ChandelierDropComponent"));
 	AnimationComponent = CreateDefaultSubobject<UAnimationComponent>(TEXT("Animation Component"));
 	BossAttacksComponent = CreateDefaultSubobject<UBossAttacksComponent>(TEXT("BossAttacksComponent"));
+	BossArmourComponent = CreateDefaultSubobject<UBossArmourComponent>(TEXT("BossArmourComponent"));
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -111,6 +113,12 @@ void AQuackBoss::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	// Delegate collision onto the boss mesh
 	MySkeletalMesh->OnComponentBeginOverlap.AddDynamic(this, &AQuackBoss::OnTriggerEnter);
+	if (BodyPlate != nullptr)
+	{
+		FAttachmentTransformRules TransformRules = FAttachmentTransformRules::KeepWorldTransform;
+		//TransformRules.ScaleRule = EAttachmentRule::KeepWorld;
+		BodyPlate->AttachToComponent(MySkeletalMesh, TransformRules, TEXT("ArmourSocket"));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -134,6 +142,15 @@ void AQuackBoss::BeginPlay()
 	MouthArrow->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), TEXT("MouthSocket"));
 	//MouthArrow->SetRelativeRotation(FRotator(0.0f, -20.0f, 0.0f));
 //	MouthArrow->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+
+	BodyLL->SetRenderCustomDepth(true);
+	BodyLL->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
+	BodyLR->SetRenderCustomDepth(true);
+	BodyLR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
+	BodyUL->SetRenderCustomDepth(true);
+	BodyUL->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
+	BodyUR->SetRenderCustomDepth(true);
+	BodyUR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
 
 
 }
@@ -170,6 +187,11 @@ void AQuackBoss::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (BossHealth >= MaxBossHealth)
 	{
+		if (TargettedPipe != nullptr)
+		{
+			TargettedPipe->SetDescend(false);
+			TargettedPipe->ToggleHighlight(false);
+		}
 		// THIS IS SOMEWHAT OF AN EXPERIEMENT ... PLIS WORK -- RECOILD WHEN FULLY HEALED
 		//CurrentAnimationState = AnimationStates::E_AnimRecoil;		
 		if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour || CurrentBossState == BossStates::E_Poisoned)
