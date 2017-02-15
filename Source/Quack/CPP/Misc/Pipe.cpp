@@ -147,13 +147,17 @@ void APipe::ToggleHighlight(bool Glow)
 
 void APipe::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	// Known concern - if you are standing next to the pipe, before the boss leaches it, the highlight wont occur 
+	// A long winded fix, is to cache ref to player, and toggle a variable on them, to check if they
+	// are already within a close enough proximity to the pipe, then alert the highlight function to activate if that ref is
+	// not null, since u would null it when player leaves trigger
 	AQuackCharacter* MyCharacter = Cast<AQuackCharacter>(OtherActor);
 	if (MyCharacter != nullptr)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Poison Pipe enter"));
 		// Poisonable
 		if (bNotABossPipe) return;
-		if (!bPoisonedPipe && bTargettedByBoss)
+		if (!bPoisonedPipe && bTargettedByBoss && bDescend)
 		{
 			MyCharacter->PoisonConfig.bCanPoisonPipe = true;
 			ToggleHighlight(true);

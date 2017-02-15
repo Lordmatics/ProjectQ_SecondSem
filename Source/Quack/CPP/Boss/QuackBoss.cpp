@@ -235,17 +235,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 	{
 		case BossStates::E_Idle:
 		{
-			//if (BossHealth >= MaxBossHealth)
-			//{
-			//	CurrentAnimationState = AnimationStates::E_AnimRecoil;
-			//}
-			//else
-			//{
 			CurrentAnimationState = AnimationStates::E_AnimIdle;
-			//}
-			/*RotateTowardsPlayer();
-			ToggleShield(false);
-			break;*/
 			// Below 80% phase one healing
 			if (Pipes.Num() + 1 == 4 && TargettedPipe != nullptr)
 			{
@@ -971,21 +961,6 @@ void AQuackBoss::RotateTowardsPlayer()
 
 void AQuackBoss::RotateTowardsPipe()
 {
-	/*
-	//if (!bHealingOnPipe) return;
-	// IMPORTANT TO NOTE, STATIC/SKELETAL MESH MUST BE ORIENTATED CORRECTLY IN BP EXTENSION
-	//// Get your transform
-	const FVector MyLocation = GetActorLocation();
-	//// Get other transform
-	const FVector OtherLocation = CurrentTargettedPipeTransform.GetLocation();
-	//// Find vector that connects the transforms
-	FVector Direction = MyLocation - OtherLocation;
-	// Project it to 2D
-	Direction = FVector(Direction.X, Direction.Y, 0.0f);
-	// Apply rotation
-	SetActorRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
-	*/
-
 	FRotator MyRotation = GetActorRotation();
 	const FVector MyLocation = GetActorLocation();
 	//// Get other transform
@@ -1001,7 +976,6 @@ void AQuackBoss::RotateTowardsPipe()
 
 void AQuackBoss::BeginPipeDrain()
 {
-	
 	if (TargettedPipe != nullptr)
 	{
 		TargettedPipe->SetDescend(true);
