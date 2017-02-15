@@ -12,6 +12,15 @@ class QUACK_API AQuackBoss : public AActor
 	GENERATED_BODY()
 
 private:
+
+	// POtential hotfix to the swinging with tongue out
+	void StopFacingPipe();
+	UFUNCTION()
+		void SetFacingPipeOff();
+
+	/** Bool to determine if hes ready to latch and gulp when healing*/
+	uint32 bFacingTargettedPipe : 1;
+
 	FTimerHandle MeleeCheckTimerHandle;
 	FTimerHandle CharHitMeleeTimerHandle;
 	// bool to cache attack, so it doesnt instantly stop when u exit the distance check
@@ -193,29 +202,13 @@ public:
 
 	void SlamGround();
 
-	FTimerHandle BileTimer;
-
-	UPROPERTY(EditAnywhere, Category = "Bile")
-		float BileFireRate = 0.5f;
-	UPROPERTY(EditAnywhere, Category = "Bile")
-		uint32 bIsBileSpitting : 1;
 	void StartBileShot(float OverridenFireRate = 1.0f);
 	UFUNCTION()
 		void StopBileShot();
-		//void ShootBile(float DeltaTime);
 
-	FTimerHandle TailTimer;
-
-	UPROPERTY(EditAnywhere, Category = "Bile")
-		float TailFireRate = 5.0f;
-	UPROPERTY(EditAnywhere, Category = "Bile")
-		uint32 bIsTailShooting : 1;
 	void StartTailShot();
 	UFUNCTION()
 		void StopTailShot();
-	UFUNCTION()
-		void TailShoot();
-	//void ShootFromTail(float DeltaTime);
 
 	FTimerHandle AttackIterationTimer;
 	UPROPERTY(EditAnywhere, Category = "Bile")

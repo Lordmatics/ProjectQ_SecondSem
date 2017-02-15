@@ -248,46 +248,48 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_HealingOne:
 		{
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
 			RotateTowardsPipe();
-			BeginPipeDrain();
-
-			Regenerate(DeltaTime);
 			ToggleShield(true);
+			if (!bFacingTargettedPipe) return;
+			CurrentAnimationState = AnimationStates::E_AnimLatch;
+			BeginPipeDrain();
+			Regenerate(DeltaTime);
 			break;
 		}
 		case BossStates::E_HealingTwo:
 		{
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
 			RotateTowardsPipe();
-			BeginPipeDrain();
-
-			Regenerate(DeltaTime);
 			ToggleShield(true);
+			if (!bFacingTargettedPipe) return;
+			CurrentAnimationState = AnimationStates::E_AnimLatch;
+			BeginPipeDrain();
+			Regenerate(DeltaTime);
 			break;
 		}
 		case BossStates::E_HealingThree:
 		{
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
 			RotateTowardsPipe();
-			BeginPipeDrain();
-
-			Regenerate(DeltaTime);
 			ToggleShield(true);
+			if (!bFacingTargettedPipe) return;
+			CurrentAnimationState = AnimationStates::E_AnimLatch;
+			BeginPipeDrain();
+			Regenerate(DeltaTime);
 			break;
 		}
 		case BossStates::E_HealingFour:
 		{
+			RotateTowardsPipe();
+			ToggleShield(true);
+			if (!bFacingTargettedPipe) return;
 			CurrentAnimationState = AnimationStates::E_AnimLatch;
 			//CurrentAnimationState = AnimationStates::E_AnimGulp;
-			RotateTowardsPipe();
 			BeginPipeDrain();
 			Regenerate(DeltaTime);
-			ToggleShield(true);
 			break;
 		}
 		case BossStates::E_Poisoned:
 		{
+			StopFacingPipe();
 			RotateTowardsPipe();
 			CheckForPoisoned(DeltaTime);
 			ToggleShield(false);
@@ -297,6 +299,8 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		case BossStates::E_Recoiling:
 		{
 			CurrentAnimationState = AnimationStates::E_AnimRecoil;
+			StopFacingPipe();
+			if (bFacingTargettedPipe) return;
 			RotateTowardsPlayer();
 			ToggleShield(false);
 			EndPipeDrain();
@@ -304,56 +308,43 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_Fighting:
 		{
+			// MIGHT NEED THIS, SINCE RESUME FIGHTING, MIGHT NOT CHECK FOR THIS BOOL
+			if (bFacingTargettedPipe) return;
+
 			//ShootFromTail(DeltaTime);
 			ToggleShield(false);
 			RotateTowardsPlayer();
-			//SlamGround();
-			//ShootFromTail(DeltaTime);
-			//BeginMultipleAttacksPattern();
 			if (!CheckForMeleeAttack())
 			{
 				StartTailShot();
 			}
-
-											//StartTailShot();
-
+			//StartTailShot();
 			//ShootFromTail(DeltaTime);
 
 			break;
 		}
 		case BossStates::E_FightingTwo:
 		{
+			if (bFacingTargettedPipe) return;
 			ToggleShield(false);
 			RotateTowardsPlayer();
-			//SlamGround();
-			//ShootBile(DeltaTime);
-			//ShootFromTail(DeltaTime);
-			//ShootBile(DeltaTime);
 			if (!CheckForMeleeAttack())
 			{
 				BeginMultipleAttacksPattern();
 			}
-			//StartBileShot();
-
 			break;
 		}
 		case BossStates::E_FightingThree:
 		{
+			if (bFacingTargettedPipe) return;
 
 			RotateTowardsPlayer();
-			//SlamGround();
-			//ShootBile(DeltaTime);
-			//ShootFromTail(DeltaTime);
-
-			// demonstration only - change to melee when u get too close - subject to change
-			//CurrentAnimationState = AnimationStates::E_AnimMelee;
-			//CheckForMeleeAttack();
-			//bool Check = CheckForMeleeAttack();
 			//UE_LOG(LogTemp, Warning, TEXT("Fighting Three : Check for Melee Attack : %s"), Check ? TEXT("true") : TEXT("false"));
-			if (!CheckForMeleeAttack())
+			if (!CheckForMeleeAttack() && BossAttacksComponent != nullptr)
 			{
 				// Bile during spawn phase, but half as often - balance
-				StartBileShot(BileFireRate / 2);
+				float NewFireRate = BossAttacksComponent->GetBileFireRate() / 2;
+				StartBileShot(NewFireRate);
 			}
 			BeginWaveSpawningCycle();
 			if (MinionFactory != nullptr)
@@ -384,6 +375,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingFour:
 		{
+			if (bFacingTargettedPipe) return;
 
 			RotateTowardsPlayer();
 			if (!CheckForMeleeAttack())
@@ -418,6 +410,22 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			break;
 		}
 	}
+}
+
+void AQuackBoss::StopFacingPipe()
+{
+	if (bFacingTargettedPipe)
+	{
+		UWorld* const World = GetWorld();
+		if (World == nullptr) return;
+		FTimerHandle PipeHandle;
+		World->GetTimerManager().SetTimer(PipeHandle, this, &AQuackBoss::SetFacingPipeOff, 2.0f, false);
+	}
+}
+
+void AQuackBoss::SetFacingPipeOff()
+{
+	bFacingTargettedPipe = false;
 }
 
 void AQuackBoss::ResetMelee()
@@ -924,6 +932,15 @@ void AQuackBoss::RotateTowardsPipe()
 	FRotator EndRotation = Direction.Rotation();
 	MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 2);
 	SetActorRotation(MyRotation);
+	//UE_LOG(LogTemp, Warning, TEXT("MyRotation: %s , Pipe rotation: %s"), *MyRotation.ToString(), *EndRotation.ToString());
+	if (FMath::IsNearlyEqual(MyRotation.Yaw, EndRotation.Yaw, 1.0f))
+	{
+		bFacingTargettedPipe = true;
+	}
+	else
+	{
+		bFacingTargettedPipe = false;
+	}
 }
 
 void AQuackBoss::BeginPipeDrain()
@@ -1047,17 +1064,6 @@ void AQuackBoss::StartTailShot()
 			CurrentAnimationState = AnimationStates::E_AnimTailShot;
 		}
 	}
-
-	//if (bIsTailShooting) return;
-	//UWorld* const World = GetWorld();
-	//if (World != nullptr)
-	//{
-	//	//ShootBile();
-	//	TailShoot();
-	//	World->GetTimerManager().SetTimer(TailTimer, this, &AQuackBoss::TailShoot, 1.0f / TailFireRate, true);
-	//	bIsTailShooting = true;
-	//	bWasTailMostRecent = true;
-	//}
 }
 
 void AQuackBoss::StopTailShot()
@@ -1067,74 +1073,6 @@ void AQuackBoss::StopTailShot()
 		BossAttacksComponent->StopTailShoot();
 	}
 }
-
-void AQuackBoss::TailShoot()
-{
-	//if (TailArrow != nullptr)
-	//{
-	//	if (Projectile[0] != nullptr)
-	//	{
-	//		UWorld* const World = GetWorld();
-	//		if (World != nullptr)
-	//		{
-	//			CurrentAnimationState = AnimationStates::E_AnimTailShot;
-	//			const FVector Location = TailArrow->GetComponentLocation();
-	//			const FRotator Rotation = TailArrow->GetComponentRotation();
-	//			World->SpawnActor<AQuackProjectile>(Projectile[0], Location, Rotation);
-	//		}
-	//	}
-	//}
-}
-
-//void AQuackBoss::ShootFromTail(float DeltaTime)
-//{
-//	//if (ProjectileSpawns.Num() == 0) return;
-//	//if (ProjectileSpawns[0] != nullptr && Projectile[0] != nullptr)
-//	//{
-//	//	CurrentAnimationState = AnimationStates::E_AnimTailShot;
-//	//	UWorld* const World = GetWorld();
-//	//	if (World != nullptr)
-//	//	{
-//	//		RunningTime += DeltaTime;
-//	//		if (RunningTime >= FireCooldown)
-//	//		{
-//	//			const FVector Location = ProjectileSpawns[0]->GetComponentLocation();
-//	//			const FRotator Rotation = ProjectileSpawns[0]->GetComponentRotation();
-//	//			AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile[0], Location, Rotation);
-//	//			if (Proj != nullptr)
-//	//			{
-//	//				//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Firing")));
-//	//				FireCooldown += FireRate;
-//	//			}
-//	//		}
-//
-//	//	}
-//	//}
-//
-//	if (TailArrow != nullptr)
-//	{
-//		if (Projectile[0] != nullptr)
-//		{
-//			CurrentAnimationState = AnimationStates::E_AnimTailShot;
-//			UWorld* const World = GetWorld();
-//			if (World != nullptr)
-//			{
-//				RunningTime += DeltaTime;
-//				if (RunningTime >= FireCooldown)
-//				{
-//					const FVector Location = TailArrow->GetComponentLocation();
-//					const FRotator Rotation = TailArrow->GetComponentRotation();
-//					AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile[0], Location, Rotation);
-//					if (Proj != nullptr)
-//					{
-//						//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("Firing")));
-//						FireCooldown += FireRate;
-//					}
-//				}
-//			}
-//		}
-//	}
-//}
 
 void AQuackBoss::RotateTowardsWall()
 {
