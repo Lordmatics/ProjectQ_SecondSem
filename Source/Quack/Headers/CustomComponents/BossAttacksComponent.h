@@ -12,7 +12,24 @@ class QUACK_API UBossAttacksComponent : public UActorComponent
 {
 	GENERATED_BODY()
 private:
+	// My Variables
+	FTimerHandle BileTimer;
 
+	/** Bool to determine if boss is bile shooting*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		uint32 bIsBileSpitting : 1;
+
+	/** Float to determine how frequently boss shoots*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		float BileFireRate = 0.5f;
+
+	/** Int to determine how far the boss should shoot*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		int BileShotsFired = 1;
+
+	/** Array of projectiles that the boss could potentially use*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		TArray <TSubclassOf<class AQuackProjectile>> BossProjectilesArray;
 public:	
 	// Sets default values for this component's properties
 	UBossAttacksComponent();
@@ -23,6 +40,30 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-		
+	// My Functions
+
+	/** Function to initiate the bile spitting*/
+	UFUNCTION()
+		void StartBileSpitting(class UArrowComponent* MouthArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent, float OverridenFireRate = 1.0f);
+
+	/** Function that plays the animation for the attack, with an appropriate delay, for the attack to match the animation*/
+	UFUNCTION()
+		void BeginShootTheBile(UArrowComponent* MouthArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent);
+
+	/** Function that actually fires the projectile*/
+	UFUNCTION()
+		void ShootTheBile(class UArrowComponent* MouthArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent);
+
+	/** Function to end the bile spitting*/
+	void StopBileSpitting();
+
+	/** Utility function to determine is bile spitting in motion*/
+	FORCEINLINE bool GetIsBileSpitting() const { return bIsBileSpitting; }
+
+	/** Utility function to get the current fire rate of the boss*/
+	FORCEINLINE float GetBileFireRate() const { return BileFireRate; }
+public:
+	// My Variables
+
 	
 };

@@ -22,6 +22,21 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "C++ Animations")
 		UAnimMontage* DeathAnim;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Animations")
+		UAnimMontage* MeleeLeft;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Animations")
+		UAnimMontage* MeleeRight;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Animations")
+		UAnimMontage* MeleeBoth;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Animations")
+		UAnimMontage* TailShoot;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Animations")
+		UAnimMontage* BileSpit;
 public:	
 	// Sets default values for this component's properties
 	UAnimationComponent();
@@ -38,5 +53,11 @@ public:
 	FORCEINLINE UAnimMontage* GetAttackAnimMontageC() const { return AttackAnim_C; }
 
 	FORCEINLINE UAnimMontage* GetDeathAnimMontage() const { return DeathAnim; }
-	
+
+	// Boss Attack Animations
+	FORCEINLINE UAnimMontage* GetMeleeAnimLeft() const { return MeleeLeft; }
+	FORCEINLINE UAnimMontage* GetMeleeAnimRight() const { return MeleeRight; }
+	FORCEINLINE UAnimMontage* GetMeleeAnimBoth() const { return MeleeBoth; }
+	FORCEINLINE UAnimMontage* GetTailShootAnim() const { return TailShoot; }
+	FORCEINLINE UAnimMontage* GetBileSpitAnim() const { return BileSpit; }	
 };

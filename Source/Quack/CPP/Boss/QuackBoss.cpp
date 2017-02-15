@@ -14,6 +14,7 @@
 #include "Headers/CustomComponents/VerticalMovementComponent.h"
 #include "Headers/CustomComponents/AnimationComponent.h"
 #include "Headers/CustomComponents/BossAttacksComponent.h"
+#include "Classes/Animation/AnimInstance.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -87,7 +88,7 @@ AQuackBoss::AQuackBoss()
 	////	MouthArrow->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 
 	InitialisePlayerCharacterReference();
-	InitialiseRockSpawnerReference();
+	//InitialiseRockSpawnerReference();
 
 	MinionFactory = CreateDefaultSubobject<UMinionFactoryComponent>(TEXT("MinionFactory"));
 	ChandelierDropComponent = CreateDefaultSubobject<UVerticalMovementComponent>(TEXT("ChandelierDropComponent"));
@@ -108,22 +109,8 @@ AQuackBoss::AQuackBoss()
 void AQuackBoss::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	// Obtain Static Meshes References
-	// DEPRECATED - Except sphere shield
-	//InitialiseStaticMeshes();
-	///InitialiseSkeletalMeshes();
-	///InitialiseArrowComponent();
 	// Delegate collision onto the boss mesh
 	MySkeletalMesh->OnComponentBeginOverlap.AddDynamic(this, &AQuackBoss::OnTriggerEnter);
-	///if (SkeletalMeshes.Num() == 0) return;
-	///SkeletalMeshes[0]->OnComponentBeginOverlap.AddDynamic(this, &AQuackBoss::OnTriggerEnter);
-	//if (SkeletalMesh != nullptr)
-	//{
-	//	SkeletalMesh->bGenerateOverlapEvents = true;
-	//	SkeletalMesh->OnComponentBeginOverlap.AddDynamic(this, &AQuackBoss::OnTriggerEnter);
-	//}
-	//if (StaticMeshes.Num() == 0) return;
-	//StaticMeshes[0]->OnComponentBeginOverlap.AddDynamic(this, &AQuackBoss::OnTriggerEnter);
 }
 
 // Called when the game starts or when spawned
@@ -140,11 +127,11 @@ void AQuackBoss::BeginPlay()
 	LocateNearbyPipe();
 	ToggleShield(false);
 
-	TailArrow->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), TEXT("Tail6"));
+	TailArrow->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), TEXT("Tail6Socket"));
 	//TailArrow->SetRelativeRotation(FRotator(0.0f, -20.0f, 0.0f));
 //	TailArrow->SetRelativeLocation(FVector(0.0f, 0.0f , 50.0f));
 
-	MouthArrow->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), TEXT("Mouth"));
+	MouthArrow->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), TEXT("MouthSocket"));
 	//MouthArrow->SetRelativeRotation(FRotator(0.0f, -20.0f, 0.0f));
 //	MouthArrow->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 
@@ -207,12 +194,6 @@ void AQuackBoss::ToggleShield(bool Visiblity)
 		Shield->SetVisibility(Visiblity);
 		bShieldUp = Visiblity;
 	}
-	//if (StaticMeshes.Num() >= 1)
-	//{
-	//	if (StaticMeshes[0] == nullptr) return;
-	//	StaticMeshes[0]->SetVisibility(Visiblity);
-	//	bShieldUp = Visiblity;
-	//}
 }
 
 void AQuackBoss::BeginAscend()
@@ -633,32 +614,50 @@ void AQuackBoss::ChangeAttack()
 	//}
 
 	// Start on bile spit
-	if (bIsBileSpitting)
+
+	// THIS WILL CHANGE AT SOME POINT
+	// WHEN NEW ATTACKS ARE READY
+	if (BossAttacksComponent != nullptr)
 	{
-		StopBileShot();
-		StartTailShot();
-	}
-	else if(bIsTailShooting)
-	{
-		StopTailShot();
-		// set bilespitting to true once then repeat the attack function
-		StartBileShot();
-	}
-	else
-	{
-		// This case is coz when he resets his phase, both attacks are false so, in that event, choose one randomly
-		int Rand = FMath::RandRange(0, 3);
-		if (Rand == 0)
+		if (BossAttacksComponent->GetIsBileSpitting())
 		{
-			StopTailShot();
-			StartBileShot();
+			StopBileShot();
+			StartTailShot();
 		}
 		else
 		{
-			StartBileShot();
 			StopTailShot();
+			// set bilespitting to true once then repeat the attack function
+			StartBileShot();
 		}
 	}
+
+	//if (bIsBileSpitting)
+	//{
+	//	StopBileShot();
+	//	StartTailShot();
+	//}
+	//else if(bIsTailShooting)
+	//{
+	//	StopTailShot();
+	//	// set bilespitting to true once then repeat the attack function
+	//	StartBileShot();
+	//}
+	//else
+	//{
+	//	// This case is coz when he resets his phase, both attacks are false so, in that event, choose one randomly
+	//	int Rand = FMath::RandRange(0, 3);
+	//	if (Rand == 0)
+	//	{
+	//		StopTailShot();
+	//		StartBileShot();
+	//	}
+	//	else
+	//	{
+	//		StartBileShot();
+	//		StopTailShot();
+	//	}
+	//}
 }
 
 void AQuackBoss::ResetMultipleAttacksPattern()
@@ -704,56 +703,6 @@ void AQuackBoss::ShouldEnterHealingPhase()
 		}
 	}
 }
-void AQuackBoss::InitialiseStaticMeshes()
-{
-	// Obtain references to all static meshes on this blueprint extension
-	// First index will be the sphere mesh
-	TArray<UActorComponent*> Components = GetComponentsByClass(UStaticMeshComponent::StaticClass());
-
-	if (Components.Num() == 0) return;
-	for (size_t i = 0; i < Components.Num(); i++)
-	{
-		UStaticMeshComponent* BossMesh = Cast<UStaticMeshComponent>(Components[i]);
-		if (BossMesh != nullptr)
-		{
-			//BossMesh->bGenerateOverlapEvents = true;
-			StaticMeshes.Add(BossMesh);
-		}
-	}
-}
-
-void AQuackBoss::InitialiseSkeletalMeshes()
-{
-	//Obtain references to all skeletal meshes on this blueprint extension
-	//First index will be the boss mesh
-	TArray<UActorComponent*> Components = GetComponentsByClass(USkeletalMeshComponent::StaticClass());
-
-	if (Components.Num() == 0) return;
-	for (size_t i = 0; i < Components.Num(); i++)
-	{
-		USkeletalMeshComponent* BossMesh = Cast<USkeletalMeshComponent>(Components[i]);
-		if (BossMesh != nullptr)
-		{
-			BossMesh->bGenerateOverlapEvents = true;
-			SkeletalMeshes.Add(BossMesh);
-		}
-	}
-}
-
-void AQuackBoss::InitialiseArrowComponent()
-{
-	TArray<UActorComponent*> Components = GetComponentsByClass(UArrowComponent::StaticClass());
-
-	if (Components.Num() == 0) return;
-	for (size_t i = 0; i < Components.Num(); i++)
-	{
-		UArrowComponent* SpawnPoint = Cast<UArrowComponent>(Components[i]);
-		if (SpawnPoint != nullptr)
-		{
-			ProjectileSpawns.Add(SpawnPoint);
-		}
-	}
-}
 
 void AQuackBoss::InitialisePlayerCharacterReference()
 {
@@ -764,18 +713,6 @@ void AQuackBoss::InitialisePlayerCharacterReference()
 		for (TActorIterator<AQuackCharacter> ActorItr(World); ActorItr; ++ActorItr)
 		{
 			MyCharacter = *ActorItr;
-		}
-	}
-}
-
-void AQuackBoss::InitialiseRockSpawnerReference()
-{
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
-	{
-		for (TActorIterator<ARockSpawner> ActorItr(World); ActorItr; ++ActorItr)
-		{
-			RockSpawner = *ActorItr;
 		}
 	}
 }
@@ -1049,7 +986,6 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 	{
 		if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour)
 		{
-			ActivateSomeRocks();
 			CurrentBossState = DesiredState;
 		}
 		else
@@ -1059,107 +995,119 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 	}
 }
 
-// DEPRECATED, SINCE WE REMOVED GRAV GUN
-void AQuackBoss::ActivateSomeRocks()
-{
-	//if (RockSpawner != nullptr)
-	//{
-	//	if (RockSpawner->ActiveRocks.Num() >= 6)
-	//	{
-	//		int Random = FMath::RandRange(5, RockSpawner->ActiveRocks.Num() - 1);
-	//		int MaxRock = Random - 1;
-	//		int Index = 0;
-	//		for (size_t i = 0; i < Random; i++)
-	//		{
-	//			Index = FMath::RandRange(0, MaxRock);
-	//			if(RockSpawner->ActiveRocks[Index] != nullptr)
-	//			RockSpawner->ActiveRocks[Index]->ToggleGravity(true);
-	//			int RandomChance = FMath::RandRange(0, 10);
-	//			if (RandomChance > 0)
-	//			{
-	//				if (RockSpawner->ActiveRocks[Index] != nullptr)
-	//					RockSpawner->ActiveRocks[Index]->InitiateSelfDestruct();
-	//			}
-	//			RockSpawner->ActiveRocks.RemoveAt(Index);
-	//			RockSpawner->ReplaceFallingRocks(Index);
-	//			MaxRock--;
-	//		}
-	//	}
-	//}
-}
-
 void AQuackBoss::SlamGround()
 {
 	//SLAMEBERRY		
 }
 void AQuackBoss::StartBileShot(float OverridenFireRate)
 {
-	if (bIsBileSpitting) return;
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
+	//if (AnimationComponent != nullptr)
+	//{
+	//	UAnimInstance* AnimInstance = MySkeletalMesh->GetAnimInstance();
+	//	if (AnimInstance != nullptr)
+	//	{
+	//		if (AnimationComponent->GetBileSpitAnim() == nullptr) return;
+	//		float BileAnimDuration = AnimInstance->Montage_Play(AnimationComponent->GetBileSpitAnim(), 1.0f);
+	//		UWorld* const World = GetWorld();
+	//		if (World != nullptr)
+	//		{
+	//			if (BossAttacksComponent != nullptr)
+	//			{
+	//				if (MouthArrow == nullptr) return;
+	//				FTimerHandle BileAnimHandle;
+	//				FTimerDelegate BileAnimDel;
+	//				FVector Location = MouthArrow->GetComponentLocation();
+	//				FRotator Rotation = MouthArrow->GetComponentRotation();
+	//				BileAnimDel.BindUFunction(BossAttacksComponent, FName("StartBileSpitting"), Location, Rotation, BossAttacksComponent->GetBileFireRate());
+	//				World->GetTimerManager().SetTimer(BileAnimHandle, BileAnimDel, 4 * (BileAnimDuration / 5), false);
+	//			}
+	//		}
+	//	}
+	//	
+	//}
+	if (BossAttacksComponent != nullptr)
 	{
-		//ShootBile();
-		// NOTE: not sure how to make this fire rate match the animation
-		// Kris might know
-		// Ideally at the end of each loop of the bile spit animation - wanna shoot a projectile, but yeah just guess work here 
-		float Rate = 1.0f / BileFireRate;
-		if (OverridenFireRate < 1.0f)
+		if (MouthArrow == nullptr) return;
+		//FVector Location = MouthArrow->GetComponentLocation();
+		//FRotator Rotation = MouthArrow->GetComponentRotation();
+		UAnimInstance* AnimInst = MySkeletalMesh->GetAnimInstance();
+		if (AnimInst != nullptr && AnimationComponent != nullptr)
 		{
-		//	UE_LOG(LogTemp, Warning, TEXT("Msg to self: Overriden fire rate success"));
-			Rate = 1.0f / OverridenFireRate;
-
+			BossAttacksComponent->StartBileSpitting(MouthArrow, AnimInst, AnimationComponent);
 		}
-		ShootBile();
-		World->GetTimerManager().SetTimer(BileTimer, this, &AQuackBoss::ShootBile, Rate, true);
-		bIsBileSpitting = true;
-		bWasBileMostRecent = true;
 	}
+
+	//if (bIsBileSpitting) return;
+	//UWorld* const World = GetWorld();
+	//if (World != nullptr)
+	//{
+	//	//ShootBile();
+	//	// NOTE: not sure how to make this fire rate match the animation
+	//	// Kris might know
+	//	// Ideally at the end of each loop of the bile spit animation - wanna shoot a projectile, but yeah just guess work here 
+	//	float Rate = 1.0f / BileFireRate;
+	//	if (OverridenFireRate < 1.0f)
+	//	{
+	//	//	UE_LOG(LogTemp, Warning, TEXT("Msg to self: Overriden fire rate success"));
+	//		Rate = 1.0f / OverridenFireRate;
+
+	//	}
+	//	ShootBile();
+	//	World->GetTimerManager().SetTimer(BileTimer, this, &AQuackBoss::ShootBile, Rate, true);
+	//	bIsBileSpitting = true;
+	//	bWasBileMostRecent = true;
+	//}
 }
 
 void AQuackBoss::ShootBile()
 {
-	if (MouthArrow != nullptr)
-	{
-		if (Projectile[1] != nullptr)
-		{
-			UWorld* const World = GetWorld();
-			if (World != nullptr)
-			{
-				CurrentAnimationState = AnimationStates::E_AnimBileSpit;
-				const FVector Location = MouthArrow->GetComponentLocation();
-				const FRotator Rotation = MouthArrow->GetComponentRotation();
-				AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile[1], Location, Rotation);
-				if (Proj != nullptr)
-				{
-					float NewScale = 0.5f; // 0.5f * BileShotsFired;
+	// DEPRECATED INTO BOSS ATTACKS COMPONENT
+	//if (MouthArrow != nullptr)
+	//{
+	//	if (Projectile[1] != nullptr)
+	//	{
+	//		UWorld* const World = GetWorld();
+	//		if (World != nullptr)
+	//		{
+	//			CurrentAnimationState = AnimationStates::E_AnimBileSpit;
+	//			const FVector Location = MouthArrow->GetComponentLocation();
+	//			const FRotator Rotation = MouthArrow->GetComponentRotation();
+	//			AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile[1], Location, Rotation);
+	//			if (Proj != nullptr)
+	//			{
+	//				float NewScale = 0.5f; // 0.5f * BileShotsFired;
 
-					BileShotsFired++;
-					if (BileShotsFired > 3)
-						BileShotsFired = 1;
-					// far close med
-					if (BileShotsFired == 1)
-						NewScale = 0.5f;
-					else if (BileShotsFired == 2)
-						NewScale = 0.25f;
-					else if (BileShotsFired == 3)
-						NewScale = 0.875f;
-					Proj->AdjustProjectileMovementScale(NewScale);
-				}
-			}
-		}
-	}
+	//				BileShotsFired++;
+	//				if (BileShotsFired > 3)
+	//					BileShotsFired = 1;
+	//				// far close med
+	//				if (BileShotsFired == 1)
+	//					NewScale = 0.5f;
+	//				else if (BileShotsFired == 2)
+	//					NewScale = 0.25f;
+	//				else if (BileShotsFired == 3)
+	//					NewScale = 0.875f;
+	//				Proj->AdjustProjectileMovementScale(NewScale);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void AQuackBoss::StopBileShot()
 {
-	bIsBileSpitting = false;
-	bWasBileMostRecent = false;
-	//if (!BileTimer.IsValid()) return;
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
+	if (BossAttacksComponent != nullptr)
 	{
-		World->GetTimerManager().ClearTimer(BileTimer);
+		BossAttacksComponent->StopBileSpitting();
 	}
+	//bIsBileSpitting = false;
+	//bWasBileMostRecent = false;
+	////if (!BileTimer.IsValid()) return;
+	//UWorld* const World = GetWorld();
+	//if (World != nullptr)
+	//{
+	//	World->GetTimerManager().ClearTimer(BileTimer);
+	//}
 }
 
 //void AQuackBoss::ShootBile(float DeltaTime)
