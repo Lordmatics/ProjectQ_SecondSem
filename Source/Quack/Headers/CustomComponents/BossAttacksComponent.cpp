@@ -56,7 +56,7 @@ void UBossAttacksComponent::StartBileSpitting(UArrowComponent* MouthArrow, UAnim
 		World->GetTimerManager().SetTimer(BileTimer, TimerDel, Rate, true);
 		//World->GetTimerManager().SetTimer(BileTimer, this, &UBossAttacksComponent::ShootTheBile, Rate, true);
 		bIsBileSpitting = true;
-		UE_LOG(LogTemp, Warning, TEXT("UBossAttacksComponent: StartBileSpitting: Rate: %f"), Rate);
+		//UE_LOG(LogTemp, Warning, TEXT("UBossAttacksComponent: StartBileSpitting: Rate: %f"), Rate);
 		//bWasBileMostRecent = true;
 	}
 }
@@ -134,21 +134,25 @@ void UBossAttacksComponent::StartTailShooting(class UArrowComponent* TailArrow, 
 	if (World != nullptr)
 	{
 		float Rate = TailFireRate;
-		if (OverridenFireRate != TailFireRate)
+		if (OverridenFireRate > TailFireRate)
 		{
 			Rate = OverridenFireRate;
 		}
 		//ShootTheBile(MouthArrow, BossAnimInstance, BossAnimComponent);
 		FTimerDelegate TimerDel;
-		TimerDel.BindUFunction(this, FName("BeginTailShoot"), TailArrow, BossAnimInstance, BossAnimComponent);
-		World->GetTimerManager().SetTimer(TailTimer, TimerDel, Rate, true);
+		TimerDel.BindUFunction(this, FName("TailShoot"), TailArrow, BossAnimInstance, BossAnimComponent);
+		World->GetTimerManager().SetTimer(TailTimer, TimerDel, 1.0f / Rate, true);
 		bIsTailShooting = true;
-		UE_LOG(LogTemp, Warning, TEXT("UBossAttacksComponent: StartTailShooting: Rate: %f"), Rate);
+		//UE_LOG(LogTemp, Warning, TEXT("UBossAttacksComponent: StartTailShooting: Rate: %f"), Rate);
 	}
 }
 
+// DEPRECATED INTO ANIM BP SINCE LOOPED
 void UBossAttacksComponent::BeginTailShoot(UArrowComponent* TailArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent)
 {
+	// OKAY, IF ITS A LOOPED ATTACK - DONT DO THIS, SINCE ANIM BP IS BETTER
+	// TESTED AND CONFIRMED
+	// BUT FOR SINGLE INSTANCES DO IT
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
 	if (BossAnimComponent != nullptr && BossAnimInstance != nullptr)

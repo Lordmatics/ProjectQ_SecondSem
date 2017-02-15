@@ -1044,6 +1044,7 @@ void AQuackBoss::StartTailShot()
 		if (AnimInst != nullptr && AnimationComponent != nullptr)
 		{
 			BossAttacksComponent->StartTailShooting(TailArrow, AnimInst, AnimationComponent);
+			CurrentAnimationState = AnimationStates::E_AnimTailShot;
 		}
 	}
 

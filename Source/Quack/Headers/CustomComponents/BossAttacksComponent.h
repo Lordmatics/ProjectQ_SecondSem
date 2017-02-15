@@ -81,7 +81,7 @@ public:
 
 	/** Function to initiate the tail shooting*/
 	UFUNCTION()
-		void StartTailShooting(class UArrowComponent* TailArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent, float OverridenFireRate = 1.0f);
+		void StartTailShooting(class UArrowComponent* TailArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent, float OverridenFireRate = 5.0f);
 
 	/** Function that plays the animation for the attack, with an appropriate delay, for the attack to match the animation*/
 	UFUNCTION()
