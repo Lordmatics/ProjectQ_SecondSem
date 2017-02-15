@@ -38,6 +38,7 @@ void UBossAttacksComponent::TickComponent( float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
+// BILE SPIT 
 void UBossAttacksComponent::StartBileSpitting(UArrowComponent* MouthArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent, float OverridenFireRate)
 {
 	if (bIsBileSpitting) return;
@@ -79,15 +80,11 @@ void UBossAttacksComponent::ShootTheBile(UArrowComponent* MouthArrow, UAnimInsta
 {
 	// PLAY ANIM MONTAGE BEFORE THIS FUNCTION IN BOSS CONTAINER
 
-	//if (MouthArrow != nullptr)
-	//{
-
-
 	// FIRES THE PROJECTILE
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
 	if (BossProjectilesArray.Num() == 0) return;
-	if (BossProjectilesArray[1] != nullptr)
+	if (BossProjectilesArray[1] == nullptr) return;
 
 	//CurrentAnimationState = AnimationStates::E_AnimBileSpit;
 	if (MouthArrow == nullptr) return;
@@ -126,3 +123,69 @@ void UBossAttacksComponent::StopBileSpitting()
 		World->GetTimerManager().ClearTimer(BileTimer);
 	}
 }
+
+// END BILE SPIT
+
+// TAIL SHOT
+void UBossAttacksComponent::StartTailShooting(class UArrowComponent* TailArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent, float OverridenFireRate)
+{
+	if (bIsTailShooting) return;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		float Rate = TailFireRate;
+		if (OverridenFireRate != TailFireRate)
+		{
+			Rate = OverridenFireRate;
+		}
+		//ShootTheBile(MouthArrow, BossAnimInstance, BossAnimComponent);
+		FTimerDelegate TimerDel;
+		TimerDel.BindUFunction(this, FName("BeginTailShoot"), TailArrow, BossAnimInstance, BossAnimComponent);
+		World->GetTimerManager().SetTimer(TailTimer, TimerDel, Rate, true);
+		bIsTailShooting = true;
+		UE_LOG(LogTemp, Warning, TEXT("UBossAttacksComponent: StartTailShooting: Rate: %f"), Rate);
+	}
+}
+
+void UBossAttacksComponent::BeginTailShoot(UArrowComponent* TailArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent)
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	if (BossAnimComponent != nullptr && BossAnimInstance != nullptr)
+	{
+		if (BossAnimComponent->GetTailShootAnim() == nullptr) return;
+		float TailAnimDuration = BossAnimInstance->Montage_Play(BossAnimComponent->GetTailShootAnim(), 1.0f);
+		FTimerHandle AnimDelayHandle;
+		FTimerDelegate AnimDelayDelegate;
+		AnimDelayDelegate.BindUFunction(this, FName("TailShoot"), TailArrow, BossAnimInstance, BossAnimComponent);
+		World->GetTimerManager().SetTimer(AnimDelayHandle, AnimDelayDelegate, TailAnimDuration, false);
+	}
+}
+
+void UBossAttacksComponent::TailShoot(class UArrowComponent* TailArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent)
+{
+	// FIRES THE PROJECTILE
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	if (BossProjectilesArray.Num() == 0) return;
+	if (TailArrow != nullptr)
+	{
+		if (BossProjectilesArray[0] != nullptr)
+		{
+			const FVector Location = TailArrow->GetComponentLocation();
+			const FRotator Rotation = TailArrow->GetComponentRotation();
+			World->SpawnActor<AQuackProjectile>(BossProjectilesArray[0], Location, Rotation);		
+		}
+	}
+}
+
+void UBossAttacksComponent::StopTailShoot()
+{
+	bIsTailShooting = false;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		World->GetTimerManager().ClearTimer(TailTimer);
+	}
+}
+// END TAIL SHOT

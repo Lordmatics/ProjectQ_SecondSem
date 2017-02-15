@@ -202,8 +202,6 @@ public:
 	void StartBileShot(float OverridenFireRate = 1.0f);
 	UFUNCTION()
 		void StopBileShot();
-	UFUNCTION()
-		void ShootBile();
 		//void ShootBile(float DeltaTime);
 
 	FTimerHandle TailTimer;

@@ -624,11 +624,26 @@ void AQuackBoss::ChangeAttack()
 			StopBileShot();
 			StartTailShot();
 		}
-		else
+		else if(BossAttacksComponent->GetIsTailShooting())
 		{
 			StopTailShot();
 			// set bilespitting to true once then repeat the attack function
 			StartBileShot();
+		}
+		else
+		{
+			// This case is coz when he resets his phase, both attacks are false so, in that event, choose one randomly
+			int Rand = FMath::RandRange(0, 3);
+			if (Rand == 0)
+			{
+				StopTailShot();
+				StartBileShot();
+			}
+			else
+			{
+				StartBileShot();
+				StopTailShot();
+			}
 		}
 	}
 
@@ -1001,97 +1016,15 @@ void AQuackBoss::SlamGround()
 }
 void AQuackBoss::StartBileShot(float OverridenFireRate)
 {
-	//if (AnimationComponent != nullptr)
-	//{
-	//	UAnimInstance* AnimInstance = MySkeletalMesh->GetAnimInstance();
-	//	if (AnimInstance != nullptr)
-	//	{
-	//		if (AnimationComponent->GetBileSpitAnim() == nullptr) return;
-	//		float BileAnimDuration = AnimInstance->Montage_Play(AnimationComponent->GetBileSpitAnim(), 1.0f);
-	//		UWorld* const World = GetWorld();
-	//		if (World != nullptr)
-	//		{
-	//			if (BossAttacksComponent != nullptr)
-	//			{
-	//				if (MouthArrow == nullptr) return;
-	//				FTimerHandle BileAnimHandle;
-	//				FTimerDelegate BileAnimDel;
-	//				FVector Location = MouthArrow->GetComponentLocation();
-	//				FRotator Rotation = MouthArrow->GetComponentRotation();
-	//				BileAnimDel.BindUFunction(BossAttacksComponent, FName("StartBileSpitting"), Location, Rotation, BossAttacksComponent->GetBileFireRate());
-	//				World->GetTimerManager().SetTimer(BileAnimHandle, BileAnimDel, 4 * (BileAnimDuration / 5), false);
-	//			}
-	//		}
-	//	}
-	//	
-	//}
 	if (BossAttacksComponent != nullptr)
 	{
 		if (MouthArrow == nullptr) return;
-		//FVector Location = MouthArrow->GetComponentLocation();
-		//FRotator Rotation = MouthArrow->GetComponentRotation();
 		UAnimInstance* AnimInst = MySkeletalMesh->GetAnimInstance();
 		if (AnimInst != nullptr && AnimationComponent != nullptr)
 		{
 			BossAttacksComponent->StartBileSpitting(MouthArrow, AnimInst, AnimationComponent);
 		}
 	}
-
-	//if (bIsBileSpitting) return;
-	//UWorld* const World = GetWorld();
-	//if (World != nullptr)
-	//{
-	//	//ShootBile();
-	//	// NOTE: not sure how to make this fire rate match the animation
-	//	// Kris might know
-	//	// Ideally at the end of each loop of the bile spit animation - wanna shoot a projectile, but yeah just guess work here 
-	//	float Rate = 1.0f / BileFireRate;
-	//	if (OverridenFireRate < 1.0f)
-	//	{
-	//	//	UE_LOG(LogTemp, Warning, TEXT("Msg to self: Overriden fire rate success"));
-	//		Rate = 1.0f / OverridenFireRate;
-
-	//	}
-	//	ShootBile();
-	//	World->GetTimerManager().SetTimer(BileTimer, this, &AQuackBoss::ShootBile, Rate, true);
-	//	bIsBileSpitting = true;
-	//	bWasBileMostRecent = true;
-	//}
-}
-
-void AQuackBoss::ShootBile()
-{
-	// DEPRECATED INTO BOSS ATTACKS COMPONENT
-	//if (MouthArrow != nullptr)
-	//{
-	//	if (Projectile[1] != nullptr)
-	//	{
-	//		UWorld* const World = GetWorld();
-	//		if (World != nullptr)
-	//		{
-	//			CurrentAnimationState = AnimationStates::E_AnimBileSpit;
-	//			const FVector Location = MouthArrow->GetComponentLocation();
-	//			const FRotator Rotation = MouthArrow->GetComponentRotation();
-	//			AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(Projectile[1], Location, Rotation);
-	//			if (Proj != nullptr)
-	//			{
-	//				float NewScale = 0.5f; // 0.5f * BileShotsFired;
-
-	//				BileShotsFired++;
-	//				if (BileShotsFired > 3)
-	//					BileShotsFired = 1;
-	//				// far close med
-	//				if (BileShotsFired == 1)
-	//					NewScale = 0.5f;
-	//				else if (BileShotsFired == 2)
-	//					NewScale = 0.25f;
-	//				else if (BileShotsFired == 3)
-	//					NewScale = 0.875f;
-	//				Proj->AdjustProjectileMovementScale(NewScale);
-	//			}
-	//		}
-	//	}
-	//}
 }
 
 void AQuackBoss::StopBileShot()
@@ -1100,101 +1033,56 @@ void AQuackBoss::StopBileShot()
 	{
 		BossAttacksComponent->StopBileSpitting();
 	}
-	//bIsBileSpitting = false;
-	//bWasBileMostRecent = false;
-	////if (!BileTimer.IsValid()) return;
-	//UWorld* const World = GetWorld();
-	//if (World != nullptr)
-	//{
-	//	World->GetTimerManager().ClearTimer(BileTimer);
-	//}
 }
-
-//void AQuackBoss::ShootBile(float DeltaTime)
-//{
-//	//bleh
-//	//if (ProjectileSpawns.Num() == 0) return;
-//	//if (ProjectileSpawns[1] != nullptr && Projectile[1] != nullptr)
-//	//{
-//	//	CurrentAnimationState = AnimationStates::E_AnimBileSpit;
-//	//	UWorld* const World = GetWorld();
-//	//	if (World != nullptr)
-//	//	{
-//	//		RunningTime += DeltaTime;
-//	//		if (RunningTime >= FireCooldown)
-//	//		{
-//	//			const FVector Location = ProjectileSpawns[1]->GetComponentLocation();
-//	//			const FRotator Rotation = ProjectileSpawns[1]->GetComponentRotation();
-//	//			World->SpawnActor<AQuackProjectile>(Projectile[1], Location, Rotation);
-//	//			FireCooldown += FireRate;
-//	//		}
-//	//	}
-//	//}
-//
-//	if (MouthArrow != nullptr)
-//	{
-//		if (Projectile[1] != nullptr)
-//		{
-//			CurrentAnimationState = AnimationStates::E_AnimBileSpit;
-//			UWorld* const World = GetWorld();
-//			if (World != nullptr)
-//			{
-//				FTimerHandle Timer;
-//				World->GetTimerManager().SetTimer(Timer, this, &AQuackBoss::BileRepeat, 1.0f  / BileFireRate, true);
-//				RunningTime += DeltaTime;
-//				if (RunningTime >= FireCooldown)
-//				{
-//					const FVector Location = MouthArrow->GetComponentLocation();
-//					const FRotator Rotation = MouthArrow->GetComponentRotation();
-//					World->SpawnActor<AQuackProjectile>(Projectile[1], Location, Rotation);
-//					FireCooldown += FireRate;
-//				}
-//			}
-//		}
-//	}
-//}
 
 void AQuackBoss::StartTailShot()
 {
-	if (bIsTailShooting) return;
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
+	if (BossAttacksComponent != nullptr)
 	{
-		//ShootBile();
-		TailShoot();
-		World->GetTimerManager().SetTimer(TailTimer, this, &AQuackBoss::TailShoot, 1.0f / TailFireRate, true);
-		bIsTailShooting = true;
-		bWasTailMostRecent = true;
+		if (TailArrow == nullptr) return;
+		UAnimInstance* AnimInst = MySkeletalMesh->GetAnimInstance();
+		if (AnimInst != nullptr && AnimationComponent != nullptr)
+		{
+			BossAttacksComponent->StartTailShooting(TailArrow, AnimInst, AnimationComponent);
+		}
 	}
+
+	//if (bIsTailShooting) return;
+	//UWorld* const World = GetWorld();
+	//if (World != nullptr)
+	//{
+	//	//ShootBile();
+	//	TailShoot();
+	//	World->GetTimerManager().SetTimer(TailTimer, this, &AQuackBoss::TailShoot, 1.0f / TailFireRate, true);
+	//	bIsTailShooting = true;
+	//	bWasTailMostRecent = true;
+	//}
 }
 
 void AQuackBoss::StopTailShot()
 {
-	bIsTailShooting = false;
-	bWasTailMostRecent = false;
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
+	if (BossAttacksComponent != nullptr)
 	{
-		World->GetTimerManager().ClearTimer(TailTimer);
+		BossAttacksComponent->StopTailShoot();
 	}
 }
 
 void AQuackBoss::TailShoot()
 {
-	if (TailArrow != nullptr)
-	{
-		if (Projectile[0] != nullptr)
-		{
-			UWorld* const World = GetWorld();
-			if (World != nullptr)
-			{
-				CurrentAnimationState = AnimationStates::E_AnimTailShot;
-				const FVector Location = TailArrow->GetComponentLocation();
-				const FRotator Rotation = TailArrow->GetComponentRotation();
-				World->SpawnActor<AQuackProjectile>(Projectile[0], Location, Rotation);
-			}
-		}
-	}
+	//if (TailArrow != nullptr)
+	//{
+	//	if (Projectile[0] != nullptr)
+	//	{
+	//		UWorld* const World = GetWorld();
+	//		if (World != nullptr)
+	//		{
+	//			CurrentAnimationState = AnimationStates::E_AnimTailShot;
+	//			const FVector Location = TailArrow->GetComponentLocation();
+	//			const FRotator Rotation = TailArrow->GetComponentRotation();
+	//			World->SpawnActor<AQuackProjectile>(Projectile[0], Location, Rotation);
+	//		}
+	//	}
+	//}
 }
 
 //void AQuackBoss::ShootFromTail(float DeltaTime)

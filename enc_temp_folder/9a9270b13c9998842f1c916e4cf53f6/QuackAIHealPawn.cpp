@@ -86,11 +86,11 @@ bool AQuackAIHealPawn::GetDeath()
 	return (CurrentHealth <= 0);
 }
 
-void AQuackAIHealPawn::TakeDamages(float _Damage)
+void AQuackAIHealPawn::TakeDamages(float Damage)
 {
 	if (!Invincible) 
 	{
-		Super::TakeDamages(_Damage);
+		Super::TakeDamages(Damage);
 		if (CurrentHealth > 0.0f && CurrentHealth < MaxHealth / 2.0f)
 		{
 			AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
