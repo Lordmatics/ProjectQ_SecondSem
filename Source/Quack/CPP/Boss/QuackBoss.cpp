@@ -12,6 +12,8 @@
 #include "Headers/Audio/AudioManager.h"
 #include "EngineUtils.h"
 #include "Headers/CustomComponents/VerticalMovementComponent.h"
+#include "Headers/CustomComponents/AnimationComponent.h"
+#include "Headers/CustomComponents/BossAttacksComponent.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -89,6 +91,8 @@ AQuackBoss::AQuackBoss()
 
 	MinionFactory = CreateDefaultSubobject<UMinionFactoryComponent>(TEXT("MinionFactory"));
 	ChandelierDropComponent = CreateDefaultSubobject<UVerticalMovementComponent>(TEXT("ChandelierDropComponent"));
+	AnimationComponent = CreateDefaultSubobject<UAnimationComponent>(TEXT("Animation Component"));
+	BossAttacksComponent = CreateDefaultSubobject<UBossAttacksComponent>(TEXT("BossAttacksComponent"));
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)

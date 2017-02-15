@@ -96,6 +96,12 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Boss Movement")
 		class UVerticalMovementComponent* ChandelierDropComponent;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Boss Movement")
+		class UAnimationComponent* AnimationComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Boss Movement")
+		class UBossAttacksComponent* BossAttacksComponent;
+
 	// Return true if should attack
 	bool CheckForMeleeAttack();
 
