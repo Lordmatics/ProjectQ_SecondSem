@@ -15,6 +15,9 @@ private:
 
 	// Armour Logic Version one
 	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* MainBodyRef;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
 		class AQuackBossArmourBaseClass* PinRefLL;
 
 	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")

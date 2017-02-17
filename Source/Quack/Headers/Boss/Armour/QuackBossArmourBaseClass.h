@@ -18,14 +18,37 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Armour")
 		UStaticMeshComponent* ArmourPiece;
 
+	/** Piece that will shatter for visual effect*/
+	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Armour")
+		class UDestructibleComponent* DestructibleArmourPiece;
+
+	/** Radial Force Component to trigger the destruction*/
+	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Armour")
+		class URadialForceComponent* RadialForce;
+
 	/** Certain Pieces of armour will have their own health, so each need their own triggers*/
 	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Armour")
 		UBoxComponent* ArmourHitBox;
 
 	UPROPERTY(EditAnywhere, Category = "C++ Armour")
 		float ArmourValue = 100.0f;
+	
+	UPROPERTY(EditAnywhere, Category = "C++ Armour")
+		float ImpulsePower = 10.0f;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Armour")
+		float ImpulseDamage = 15.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour")
+		uint32 bFractured : 1;
 
 	void Die();
+
+	UFUNCTION()
+		void OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection);
+
+	UFUNCTION()
+		void MyDestroy();
 public:	
 	// Sets default values for this actor's properties
 	AQuackBossArmourBaseClass();
@@ -47,4 +70,6 @@ public:
 	void ToggleHighlight(bool _Highlight);
 
 	void AttachToAComponent(USkeletalMeshComponent* AttachTo, FAttachmentTransformRules TransformRules, FName SocketName);
+
+	void Fracture();
 };

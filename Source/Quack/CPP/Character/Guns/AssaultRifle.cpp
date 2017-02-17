@@ -118,9 +118,9 @@ void AAssaultRifle::Shoot()
 				AActor* HitActor = Hit.GetActor();
 				if (HitActor != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("I Hit Component : %s"), *Hit.Component.Get()->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("I Hit Component : %s"), *Hit.Component.Get()->GetName());
 
-					UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
+				//	UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
 					AQuackArmourPin* ArmourPin = Cast<AQuackArmourPin>(HitActor);
 					if (ArmourPin != nullptr)
 					{
@@ -128,6 +128,10 @@ void AAssaultRifle::Shoot()
 						{
 							UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
 							ArmourPin->DecreaseArmourValue(GunDamage);
+							if (HitEffect != nullptr)
+							{
+								UGameplayStatics::SpawnEmitterAtLocation(World, HitEffect, Hit.Location);
+							}
 						}
 					}
 					//print("Object Hit");

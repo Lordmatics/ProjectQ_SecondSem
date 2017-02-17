@@ -2,7 +2,8 @@
 
 #include "Headers/Quack.h"
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
-
+#include "Classes/Components/DestructibleComponent.h"
+#include "Classes/PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values
 AQuackBossArmourBaseClass::AQuackBossArmourBaseClass()
@@ -15,12 +16,44 @@ AQuackBossArmourBaseClass::AQuackBossArmourBaseClass()
 	ArmourPiece = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Armour"));
 	ArmourPiece->SetupAttachment(MyRoot);
 
+	DestructibleArmourPiece = CreateDefaultSubobject<UDestructibleComponent>(TEXT("DestructibleArmourPiece"));
+	DestructibleArmourPiece->SetHiddenInGame(true);
+	DestructibleArmourPiece->OnComponentFracture.AddDynamic(this, &AQuackBossArmourBaseClass::OnComponentFracture);
+	DestructibleArmourPiece->SetupAttachment(MyRoot);
+
 	ArmourHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ArmourHitZone"));
 	ArmourHitBox->bGenerateOverlapEvents = true;
 	ArmourHitBox->SetupAttachment(ArmourPiece);
 
+	RadialForce = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForce"));
+	RadialForce->SetupAttachment(DestructibleArmourPiece);
+
 	bHasBeenDestroyed = false;
 
+}
+
+void AQuackBossArmourBaseClass::OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnComponentFractured"));
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		FTimerHandle CollisionTimer;
+		World->GetTimerManager().SetTimer(CollisionTimer, this, &AQuackBossArmourBaseClass::MyDestroy, 1.5f, false);
+	}
+	//	FTimerHandle DestroyTimer;
+	//	World->GetTimerManager().SetTimer(DestroyTimer, this, &ADestructibleInnerPipes::DestroyThis, 5.0f, false);
+
+	//}
+
+	//MyDestructibleMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	//MyDestructibleMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AQuackBossArmourBaseClass::MyDestroy()
+{
+	if(DestructibleArmourPiece != nullptr)
+		DestructibleArmourPiece->DestroyComponent();
 }
 
 // Called when the game starts or when spawned
@@ -47,12 +80,33 @@ void AQuackBossArmourBaseClass::Tick( float DeltaTime )
 
 }
 
+void AQuackBossArmourBaseClass::Fracture()
+{
+	if (bFractured) return;
+	if (ArmourPiece != nullptr)
+	{
+		ArmourPiece->DestroyComponent();
+	}
+	if (DestructibleArmourPiece != nullptr && RadialForce != nullptr)
+	{
+		bFractured = true;
+		DestructibleArmourPiece->SetHiddenInGame(false);
+		DestructibleArmourPiece->ApplyRadiusDamage(ImpulseDamage, RadialForce->GetComponentLocation(), 200.0f, ImpulsePower, true);
+		//RadialForce->FireImpulse();
+		UE_LOG(LogTemp, Warning, TEXT("ImpulseFired"));
+	}
+}
+
 void AQuackBossArmourBaseClass::Die()
 {
 	if (ArmourValue <= 0.0f)
 	{
 		bHasBeenDestroyed = true;
 		ToggleHighlight(false);
+		ArmourPiece->SetHiddenInGame(true);
+		ArmourHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ArmourPiece->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		// Perhaps, interpolate it out of the armour
 		// Then "kill it"
 	}

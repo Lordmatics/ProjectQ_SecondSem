@@ -142,6 +142,7 @@ void AQuackBoss::PostInitializeComponents()
 			{
 				MainBody->AttachToAComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), FName("ArmourSocket"));
 				MainBody->ToggleHighlight(false);
+				MainBodyRef = MainBody;
 			}
 			UE_LOG(LogTemp, Warning, TEXT("Spawned Body"));
 			if (BossArmourComponent->PinClassLL != nullptr)
@@ -261,6 +262,11 @@ void AQuackBoss::Tick(float DeltaTime)
 		if (PinRefLL->bHasBeenDestroyed && PinRefLR->bHasBeenDestroyed && PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
 		{
 			bImmortal = false;
+			if (MainBodyRef != nullptr)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Fracture"));
+				MainBodyRef->Fracture();
+			}
 		}
 		else
 		{
