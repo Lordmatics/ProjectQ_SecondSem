@@ -21,13 +21,13 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
 		USceneComponent* MyRoot;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 	//	UShapeComponent* MyTrigger;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
 		UStaticMeshComponent* MyStaticMesh;
 	
 	UFUNCTION()
