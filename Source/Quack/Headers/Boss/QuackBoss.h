@@ -15,7 +15,13 @@ private:
 	// Test
 	// Gonna change tongue material, to show its armoured / shielded once latching
 	UPROPERTY(EditAnywhere, Category = "C++ Tongue Materials")
-		UMaterialInstanceDynamic* TongueMaterial;
+		UMaterial* TongueMaterialNormal;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Tongue Materials")
+		UMaterial* TongueMaterialHealing;
+
+	void SetTongueToNormal();
+	void SetTongueToHealing();
 
 	// Requested code to make melee attacks more feasible
 	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")

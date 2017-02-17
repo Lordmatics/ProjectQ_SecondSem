@@ -223,10 +223,25 @@ void AQuackBoss::BeginPlay()
 	BodyUL->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
 	BodyUR->SetRenderCustomDepth(true);
 	BodyUR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
-
-	TongueMaterial = MySkeletalMesh->CreateDynamicMaterialInstance(0);
 }
 
+void AQuackBoss::SetTongueToNormal()
+{
+	if (MySkeletalMesh != nullptr && TongueMaterialNormal != nullptr)
+	{
+		if (MySkeletalMesh->GetMaterial(0) == TongueMaterialNormal) return;
+		MySkeletalMesh->SetMaterial(0, TongueMaterialNormal);
+	}
+}
+
+void AQuackBoss::SetTongueToHealing()
+{
+	if (MySkeletalMesh != nullptr && TongueMaterialHealing != nullptr)
+	{
+		if (MySkeletalMesh->GetMaterial(0) == TongueMaterialHealing) return;
+			MySkeletalMesh->SetMaterial(0, TongueMaterialHealing);
+	}
+}
 void AQuackBoss::ResumeFighting()
 {
 	UWorld* const World = GetWorld();
@@ -327,6 +342,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 	{
 		case BossStates::E_Idle:
 		{
+			SetTongueToNormal();
 			CurrentAnimationState = AnimationStates::E_AnimIdle;
 			// Below 80% phase one healing
 			if (Pipes.Num() + 1 == 4 && TargettedPipe != nullptr)
@@ -359,6 +375,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_HealingOne:
 		{
+			SetTongueToHealing();
 			RotateTowardsPipe();
 			ToggleShield(true);
 			if (bFacingTargettedPipe)
@@ -377,6 +394,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_HealingTwo:
 		{
+			SetTongueToHealing();
 			RotateTowardsPipe();
 			ToggleShield(true);
 			//if (!bFacingTargettedPipe) return;
@@ -399,6 +417,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_HealingThree:
 		{
+			SetTongueToHealing();
 			RotateTowardsPipe();
 			ToggleShield(true);
 			if (bFacingTargettedPipe)
@@ -417,6 +436,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_HealingFour:
 		{
+			SetTongueToHealing();
 			RotateTowardsPipe();
 			ToggleShield(true);
 			if (bFacingTargettedPipe)
@@ -435,6 +455,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_Poisoned:
 		{
+			SetTongueToNormal();
 			StopFacingPipe();
 			RotateTowardsPipe();
 			CheckForPoisoned(DeltaTime);
@@ -444,6 +465,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_Recoiling:
 		{
+			SetTongueToNormal();
 			if (TargettedPipe->bLowerPipe)
 			{
 				CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
@@ -464,6 +486,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_Fighting:
 		{
+			SetTongueToNormal();
 			// MIGHT NEED THIS, SINCE RESUME FIGHTING, MIGHT NOT CHECK FOR THIS BOOL
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
@@ -481,6 +504,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingTwo:
 		{
+			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 			ToggleShield(false);
 			RotateTowardsPlayer();
@@ -492,6 +516,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingThree:
 		{
+			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
 			RotateTowardsPlayer();
@@ -531,6 +556,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingFour:
 		{
+			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
 			RotateTowardsPlayer();
