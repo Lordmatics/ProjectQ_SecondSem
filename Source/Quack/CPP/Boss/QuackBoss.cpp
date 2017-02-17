@@ -257,6 +257,7 @@ void AQuackBoss::ChangeBackToPrevious()
 void AQuackBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	MapBossMovementToPlayer(DeltaTime);
 	if (PinRefLL != nullptr && PinRefUL != nullptr && PinRefLR != nullptr && PinRefUR != nullptr)
 	{
 		if (PinRefLL->bHasBeenDestroyed && PinRefLR->bHasBeenDestroyed && PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
@@ -548,6 +549,28 @@ void AQuackBoss::ResetMelee()
 	//ResumeFighting();
 }
 
+void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
+{
+	if (MyCharacter != nullptr)
+	{
+		Positions = FMyMap(GetActorLocation(), MyCharacter->GetActorLocation());
+		//if (Positions.PlayerPosition.X > Positions.BossPosition.X)
+		//{
+			float BossLoc = GetActorLocation().X;
+			float TargetLoc = Positions.PlayerPosition.X;
+			TargetLoc = FMath::Clamp(TargetLoc, MinBossX, MaxBossX);
+			BossLoc = FMath::FInterpConstantTo(BossLoc, TargetLoc, DeltaTime, BossStafeSpeed);
+			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+		//}
+		//else if (Positions.PlayerPosition.X <= Positions.BossPosition.X)
+		//{
+		//	float BossLoc = GetActorLocation().X;
+		//	BossLoc = FMath::FInterpConstantTo(BossLoc, Positions.PlayerPosition.X, DeltaTime, BossStafeSpeed);
+		//	SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+		//}
+	}
+}
+
 bool AQuackBoss::CheckForMeleeAttack()
 {
 	// THINK I MAY OF FIGURED IT OUT
@@ -566,7 +589,7 @@ bool AQuackBoss::CheckForMeleeAttack()
 	FVector BossLocation = GetActorLocation();
 	FVector CharLocation = MyCharacter->GetActorLocation();
 	float Distance = FVector::Dist(BossLocation, CharLocation);
-
+	
 	UWorld* const World = GetWorld();
 	if (FMath::Abs(Distance) <= MeleeRangeDistanceThreshold)
 	{

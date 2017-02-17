@@ -128,6 +128,8 @@ void AAssaultRifle::Shoot()
 						{
 							UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
 							ArmourPin->DecreaseArmourValue(GunDamage);
+							ArmourPin->White();
+							//ArmourPin->Setvectorparam
 							if (HitEffect != nullptr)
 							{
 								UGameplayStatics::SpawnEmitterAtLocation(World, HitEffect, Hit.Location);

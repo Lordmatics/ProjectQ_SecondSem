@@ -12,6 +12,32 @@ class QUACK_API AQuackBoss : public AActor
 	GENERATED_BODY()
 
 private:
+	// Requested code to make melee attacks more feasible
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
+		float MaxBossX = 800.0f;
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
+		float MinBossX = -1100.0f;
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
+		float BossStafeSpeed = 600.0f;
+	struct FMyMap
+	{
+		FVector BossPosition;
+		FVector PlayerPosition;
+
+		FMyMap()
+		{
+			BossPosition = FVector(0.0f);
+			PlayerPosition = FVector(0.0f);
+		}
+		FMyMap(FVector BossPos, FVector PlayerPos)
+		{
+			BossPosition = BossPos;
+			PlayerPosition = PlayerPos;
+		}
+	};
+	FMyMap Positions;
+	void MapBossMovementToPlayer(float DeltaTime);
+	// End of horizontal strafe
 
 	// Armour Logic Version one
 	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
