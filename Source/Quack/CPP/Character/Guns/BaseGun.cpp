@@ -98,7 +98,7 @@ USkeletalMeshComponent* ABaseGun::GetGunMesh() const
 // Calculate how much ammo
 // Your reserve can provide
 // Then obtain it
-void ABaseGun::Reload(USkeletalMeshComponent* PlayerHands)
+float ABaseGun::Reload(USkeletalMeshComponent* PlayerHands)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Current Ammo: %f"), Ammo);
 
@@ -118,9 +118,11 @@ void ABaseGun::Reload(USkeletalMeshComponent* PlayerHands)
 				FTimerHandle ReloadHandle;
 				//UE_LOG(LogTemp, Warning, TEXT("Reload Should take : %f"), Duration);
 				World->GetTimerManager().SetTimer(ReloadHandle, this, &ABaseGun::FinishReload, Duration);
+				return Duration;
 			}
 		}
 	}
+	return 0.0f;
 }
 
 void ABaseGun::FinishReload()

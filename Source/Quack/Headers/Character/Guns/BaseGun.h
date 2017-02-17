@@ -53,7 +53,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++ Functions")
 		float GetMaxAmmo() const;
 
-	void Reload(USkeletalMeshComponent* SpecificGun);
+	float Reload(USkeletalMeshComponent* SpecificGun);
 
 	void IncreaseAmmo(float Amount);
 

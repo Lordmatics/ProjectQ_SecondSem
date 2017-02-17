@@ -480,19 +480,48 @@ void AQuackCharacter::DecreaseHealth(float Amount)
 
 void AQuackCharacter::Reload()
 {
-	if (CurrentEquippedGun != nullptr)
+	if (CurrentEquippedGun != nullptr && !MovementConfig.bReloading)
 	{
-		CurrentEquippedGun->Reload(Mesh1P);
+		float ReloadDuration = CurrentEquippedGun->Reload(Mesh1P);
+		UWorld* const World = GetWorld();
+		if (World == nullptr) return;
+		FTimerHandle ReloadBoolHandle;
+		if (ReloadDuration > 0.0f)
+		{
+			MovementConfig.bReloading = true;
+			MovementConfig.bIsSprinting = false;
+			World->GetTimerManager().SetTimer(ReloadBoolHandle, this, &AQuackCharacter::EndReload, ReloadDuration, false);
+		}
 		UE_LOG(LogTemp, Warning, TEXT("Initiaited Reload"));
+	}
+}
+
+void AQuackCharacter::EndReload()
+{
+	MovementConfig.bReloading = false;
+	if (MovementConfig.bSprintingCache)
+	{
+		OnSprintBegin();
 	}
 }
 
 void AQuackCharacter::Raycast()
 {
 	// REMAKE THIS
-	if (CurrentEquippedGun != nullptr)
+	if (CurrentEquippedGun != nullptr && !MovementConfig.bIsSprinting)
 	{
 		CurrentEquippedGun->Shoot();
+	}
+	else
+	{
+		MovementConfig.bIsSprinting = false;
+		// If you are sprinting and trying to shoot, make sure shooting stuff is reset
+		if (CurrentEquippedGun != nullptr)
+		{
+			CurrentEquippedGun->StopMuzzleFlash();
+		}
+		WeaponConfig.RunningTime = 0.0f;
+		WeaponConfig.FireCooldown = WeaponConfig.InitialFireCooldown;
 	}
 }
 
@@ -541,6 +570,10 @@ void AQuackCharacter::MouseUp()
 {
 	WeaponConfig.bMouseDown = false;
 	WeaponConfig.bMouseUp = true;
+	if (MovementConfig.bSprintingCache)
+	{
+		OnSprintBegin();
+	}
 }
 
 // MOVEMENT AND CAMERA TURN
@@ -577,12 +610,19 @@ void AQuackCharacter::LookUpAtRate(float Rate)
 // SPRINTING
 void AQuackCharacter::OnSprintBegin()
 {
-	MovementConfig.bIsSprinting = true;
+	// Very subtle bug, u could technically exploit, sprint bonus if u
+	// jumped and reloaded then remained at sprint speed
+	if (!MovementConfig.bReloading)
+	{
+		MovementConfig.bIsSprinting = true;
+	}
+	MovementConfig.bSprintingCache = true;
 }
 
 void AQuackCharacter::OnSprintEnd()
 {
 	MovementConfig.bIsSprinting = false;
+	MovementConfig.bSprintingCache = false;
 }
 
 void AQuackCharacter::Sprint()

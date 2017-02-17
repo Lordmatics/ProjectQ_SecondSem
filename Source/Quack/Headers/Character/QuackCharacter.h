@@ -103,11 +103,19 @@ struct FMovementData
 	UPROPERTY(EditAnywhere, Category = "Custom", meta = (AllowPrivateAccess = "true"))
 		uint32 bIsSprinting : 1;
 
+	UPROPERTY(EditAnywhere, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+		uint32 bSprintingCache : 1;
+
+	UPROPERTY(EditAnywhere, Category = "Custom", meta = (AllowPrivateAccess = "true"))
+		uint32 bReloading : 1;
+
 	FMovementData()
 	{
 		SprintSpeed = 1500.0f;
 		InitialWalkSpeed = 1000.0f;
 		bIsSprinting = false;
+		bSprintingCache = false;
+		bReloading = false;
 	}
 };
 
@@ -228,6 +236,9 @@ private:
 
 	UFUNCTION()
 		void Reload();
+
+	UFUNCTION()
+		void EndReload();
 
 	UFUNCTION()
 		void OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherbodyIndex, bool bFromSweep, const FHitResult& SweepResult);
