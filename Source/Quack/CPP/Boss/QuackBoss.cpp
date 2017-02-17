@@ -224,7 +224,7 @@ void AQuackBoss::BeginPlay()
 	BodyUR->SetRenderCustomDepth(true);
 	BodyUR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
 
-
+	TongueMaterial = MySkeletalMesh->CreateDynamicMaterialInstance(0);
 }
 
 void AQuackBoss::ResumeFighting()
@@ -361,41 +361,76 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		{
 			RotateTowardsPipe();
 			ToggleShield(true);
-			if (!bFacingTargettedPipe) return;
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
-			BeginPipeDrain();
-			Regenerate(DeltaTime);
+			if (bFacingTargettedPipe)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatch;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
+			else if (bFacingTargettedPipeLower)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatchLower;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
 			break;
 		}
 		case BossStates::E_HealingTwo:
 		{
 			RotateTowardsPipe();
 			ToggleShield(true);
-			if (!bFacingTargettedPipe) return;
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
-			BeginPipeDrain();
-			Regenerate(DeltaTime);
+			//if (!bFacingTargettedPipe) return;
+			//CurrentAnimationState = AnimationStates::E_AnimLatch;
+			//BeginPipeDrain();
+			//Regenerate(DeltaTime);
+			if (bFacingTargettedPipe)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatch;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
+			else if (bFacingTargettedPipeLower)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatchLower;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
 			break;
 		}
 		case BossStates::E_HealingThree:
 		{
 			RotateTowardsPipe();
 			ToggleShield(true);
-			if (!bFacingTargettedPipe) return;
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
-			BeginPipeDrain();
-			Regenerate(DeltaTime);
+			if (bFacingTargettedPipe)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatch;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
+			else if (bFacingTargettedPipeLower)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatchLower;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
 			break;
 		}
 		case BossStates::E_HealingFour:
 		{
 			RotateTowardsPipe();
 			ToggleShield(true);
-			if (!bFacingTargettedPipe) return;
-			CurrentAnimationState = AnimationStates::E_AnimLatch;
-			//CurrentAnimationState = AnimationStates::E_AnimGulp;
-			BeginPipeDrain();
-			Regenerate(DeltaTime);
+			if (bFacingTargettedPipe)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatch;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
+			else if (bFacingTargettedPipeLower)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimLatchLower;
+				BeginPipeDrain();
+				Regenerate(DeltaTime);
+			}
 			break;
 		}
 		case BossStates::E_Poisoned:
@@ -409,18 +444,28 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_Recoiling:
 		{
-			CurrentAnimationState = AnimationStates::E_AnimRecoil;
+			if (TargettedPipe->bLowerPipe)
+			{
+				CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
+			}
+			else
+			{
+				CurrentAnimationState = AnimationStates::E_AnimRecoil;
+			}
 			StopFacingPipe();
-			if (bFacingTargettedPipe) return;
-			RotateTowardsPlayer();
-			ToggleShield(false);
-			EndPipeDrain();
+			// Ors might need to be ands not sure
+			if (!bFacingTargettedPipe && !bFacingTargettedPipeLower)
+			{
+				RotateTowardsPlayer();
+				ToggleShield(false);
+				EndPipeDrain();
+			}
 			break;
 		}
 		case BossStates::E_Fighting:
 		{
 			// MIGHT NEED THIS, SINCE RESUME FIGHTING, MIGHT NOT CHECK FOR THIS BOOL
-			if (bFacingTargettedPipe) return;
+			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
 			//ShootFromTail(DeltaTime);
 			ToggleShield(false);
@@ -436,7 +481,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingTwo:
 		{
-			if (bFacingTargettedPipe) return;
+			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 			ToggleShield(false);
 			RotateTowardsPlayer();
 			if (!CheckForMeleeAttack())
@@ -447,7 +492,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingThree:
 		{
-			if (bFacingTargettedPipe) return;
+			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
 			RotateTowardsPlayer();
 			//UE_LOG(LogTemp, Warning, TEXT("Fighting Three : Check for Melee Attack : %s"), Check ? TEXT("true") : TEXT("false"));
@@ -486,7 +531,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingFour:
 		{
-			if (bFacingTargettedPipe) return;
+			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
 			RotateTowardsPlayer();
 			if (!CheckForMeleeAttack())
@@ -525,7 +570,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 
 void AQuackBoss::StopFacingPipe()
 {
-	if (bFacingTargettedPipe)
+	if (bFacingTargettedPipe || bFacingTargettedPipeLower)
 	{
 		UWorld* const World = GetWorld();
 		if (World == nullptr) return;
@@ -541,6 +586,7 @@ void AQuackBoss::SetFacingPipeOff()
 	bStopChase = false;
 	// Boss is no longer facing pipe, after recoil, so allow rotation
 	bFacingTargettedPipe = false;
+	bFacingTargettedPipeLower = false;
 }
 
 void AQuackBoss::ResetMelee()
@@ -934,7 +980,18 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 	{
 		if (MyCharacter->PoisonConfig.bIsPoisoning)
 		{
-			CurrentAnimationState = AnimationStates::E_AnimRecoil;
+			if (TargettedPipe != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
+				if (TargettedPipe->bLowerPipe)
+				{
+					CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
+				}
+				else
+				{
+					CurrentAnimationState = AnimationStates::E_AnimRecoil;
+				}
+			}
 			SufferDamage(DeltaTime * 5.0f);
 		}
 	}
@@ -1080,7 +1137,7 @@ void AQuackBoss::RotateTowardsPipe()
 	FRotator MyRotation = GetActorRotation();
 	const FVector MyLocation = GetActorLocation();
 	//// Get other transform
-	const FVector OtherLocation = CurrentTargettedPipeTransform.GetLocation();
+	const FVector OtherLocation = CurrentTargettedPipeTransform.TargettedTransform.GetLocation();
 	//// Find vector that connects the transforms
 	FVector Direction = MyLocation - OtherLocation;
 	// Project it to 2D
@@ -1091,11 +1148,19 @@ void AQuackBoss::RotateTowardsPipe()
 	//UE_LOG(LogTemp, Warning, TEXT("MyRotation: %s , Pipe rotation: %s"), *MyRotation.ToString(), *EndRotation.ToString());
 	if (FMath::IsNearlyEqual(MyRotation.Yaw, EndRotation.Yaw, 1.0f))
 	{
-		bFacingTargettedPipe = true;
+		if (CurrentTargettedPipeTransform.bIsLowerPipe)
+		{
+			bFacingTargettedPipeLower = true;
+		}
+		else
+		{
+			bFacingTargettedPipe = true;
+		}
 	}
 	else
 	{
 		bFacingTargettedPipe = false;
+		bFacingTargettedPipeLower = false;
 	}
 }
 
@@ -1144,7 +1209,7 @@ void AQuackBoss::LocateNearbyPipe()
 		{
 			Pipes.Remove(TargettedPipe);
 			TargettedPipe->bTargettedByBoss = true;
-			CurrentTargettedPipeTransform = TargettedPipe->GetActorTransform();
+			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe);
 		}
 		// Search for a pipe in scene
 		// and return the transform of it

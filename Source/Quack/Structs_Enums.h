@@ -33,4 +33,7 @@ UENUM(BlueprintType)        //"BlueprintType" is essential specifier
 	E_AnimMelee         UMETA(DisplayName = "AnimMelee"),
 	E_AnimTailShot        UMETA(DisplayName = "AnimTailShot"),
 	E_AnimBileSpit		UMETA(DisplayName = "AnimBileSpit"),
+	E_AnimLatchLower        UMETA(DisplayName = "AnimLatchLower"),
+	E_AnimGulpLower		UMETA(DisplayName = "AnimGulpLower"),
+	E_AnimRecoilLower		UMETA(DisplayName = "AnimRecoilLower"),
 };

@@ -12,6 +12,11 @@ class QUACK_API AQuackBoss : public AActor
 	GENERATED_BODY()
 
 private:
+	// Test
+	// Gonna change tongue material, to show its armoured / shielded once latching
+	UPROPERTY(EditAnywhere, Category = "C++ Tongue Materials")
+		UMaterialInstanceDynamic* TongueMaterial;
+
 	// Requested code to make melee attacks more feasible
 	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
 		float MaxBossX = 800.0f;
@@ -38,6 +43,23 @@ private:
 	FMyMap Positions;
 	void MapBossMovementToPlayer(float DeltaTime);
 
+
+	struct FPipeTransform
+	{
+		FTransform TargettedTransform;
+		uint32 bIsLowerPipe : 1;
+
+		FPipeTransform()
+		{
+			TargettedTransform = FTransform();
+			bIsLowerPipe = false;
+		}
+		FPipeTransform(FTransform Transform, bool IsLower)
+		{
+			TargettedTransform = Transform;
+			bIsLowerPipe = IsLower;
+		}
+	};
 	// Constraints for animation
 	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
 		uint32 bStopChase : 1;
@@ -71,6 +93,7 @@ private:
 
 	/** Bool to determine if hes ready to latch and gulp when healing*/
 	uint32 bFacingTargettedPipe : 1;
+	uint32 bFacingTargettedPipeLower : 1;
 
 	FTimerHandle MeleeCheckTimerHandle;
 	FTimerHandle CharHitMeleeTimerHandle;
@@ -304,8 +327,9 @@ public:
 		class APipe* TargettedPipe;
 	UPROPERTY(EditAnywhere, Category = "Custom Niall")
 		class APipe* PreviousPipe;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Niall")
-		FTransform CurrentTargettedPipeTransform;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Niall")
+		FPipeTransform CurrentTargettedPipeTransform;
+		//FTransform CurrentTargettedPipeTransform;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 		float BossRegenRate = 5.0f;

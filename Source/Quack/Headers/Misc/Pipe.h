@@ -94,6 +94,9 @@ public:
 		bool bTargettedByBoss;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+		bool bLowerPipe;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 		bool bPoisonedPipe;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
