@@ -37,6 +37,13 @@ private:
 	};
 	FMyMap Positions;
 	void MapBossMovementToPlayer(float DeltaTime);
+
+	// Constraints for animation
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
+		uint32 bStopChase : 1;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
+		float CentrePosition = 0.0f;
 	// End of horizontal strafe
 
 	// Armour Logic Version one

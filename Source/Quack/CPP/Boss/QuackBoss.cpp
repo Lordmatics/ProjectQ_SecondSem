@@ -530,12 +530,16 @@ void AQuackBoss::StopFacingPipe()
 		UWorld* const World = GetWorld();
 		if (World == nullptr) return;
 		FTimerHandle PipeHandle;
+		// This is the duration of recoil animation
 		World->GetTimerManager().SetTimer(PipeHandle, this, &AQuackBoss::SetFacingPipeOff, 2.0f, false);
 	}
 }
 
 void AQuackBoss::SetFacingPipeOff()
 {
+	// Allow boss to horizontally strafe again after recoiling
+	bStopChase = false;
+	// Boss is no longer facing pipe, after recoil, so allow rotation
 	bFacingTargettedPipe = false;
 }
 
@@ -556,11 +560,21 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 		Positions = FMyMap(GetActorLocation(), MyCharacter->GetActorLocation());
 		//if (Positions.PlayerPosition.X > Positions.BossPosition.X)
 		//{
+		if (bStopChase)
+		{
+			float BossLoc = GetActorLocation().X;
+			BossLoc = FMath::FInterpConstantTo(BossLoc, CentrePosition, DeltaTime, BossStafeSpeed);
+			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+		}
+		else
+		{
 			float BossLoc = GetActorLocation().X;
 			float TargetLoc = Positions.PlayerPosition.X;
 			TargetLoc = FMath::Clamp(TargetLoc, MinBossX, MaxBossX);
 			BossLoc = FMath::FInterpConstantTo(BossLoc, TargetLoc, DeltaTime, BossStafeSpeed);
 			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+		}
+
 		//}
 		//else if (Positions.PlayerPosition.X <= Positions.BossPosition.X)
 		//{
@@ -1052,11 +1066,17 @@ void AQuackBoss::RotateTowardsPlayer()
 		FRotator EndRotation = Direction.Rotation();
 		MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 2);
 		SetActorRotation(MyRotation);
+
+		// Allow Horizontal strafe when rotation towards player
+		bStopChase = false;
 	}
 }
 
 void AQuackBoss::RotateTowardsPipe()
 {
+	// Go to Centre if not already - ready for pipe
+	bStopChase = true;
+
 	FRotator MyRotation = GetActorRotation();
 	const FVector MyLocation = GetActorLocation();
 	//// Get other transform
