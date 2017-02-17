@@ -2,7 +2,7 @@
 
 #include "Headers/Quack.h"
 #include "Headers/CustomComponents/BossArmourComponent.h"
-
+#include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 
 // Sets default values for this component's properties
 UBossArmourComponent::UBossArmourComponent()

@@ -37,11 +37,14 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	FORCEINLINE void DecreaseArmourValue(float _Damage) { ArmourValue -= _Damage; 
-	ArmourValue = FMath::Clamp(ArmourValue, 0.0f, 100.0f); }
+	ArmourValue = FMath::Clamp(ArmourValue, 0.0f, 100.0f); if (ArmourValue <= 0.0f) Die();
+	}
 	FORCEINLINE float GetArmourValue() const { return ArmourValue; }
 	
 	UPROPERTY(VisibleAnywhere, Category = "C++ Armour")
 		uint32 bHasBeenDestroyed : 1;
 
 	void ToggleHighlight(bool _Highlight);
+
+	void AttachToAComponent(USkeletalMeshComponent* AttachTo, FAttachmentTransformRules TransformRules, FName SocketName);
 };

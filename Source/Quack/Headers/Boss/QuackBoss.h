@@ -13,6 +13,21 @@ class QUACK_API AQuackBoss : public AActor
 
 private:
 
+	// Armour Logic Version one
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* PinRefLL;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* PinRefLR;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* PinRefUL;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* PinRefUR;
+
+	uint32 bImmortal : 1;
+
 	// POtential hotfix to the swinging with tongue out
 	void StopFacingPipe();
 	UFUNCTION()

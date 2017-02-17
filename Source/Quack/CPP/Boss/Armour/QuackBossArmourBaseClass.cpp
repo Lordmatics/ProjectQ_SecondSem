@@ -12,14 +12,15 @@ AQuackBossArmourBaseClass::AQuackBossArmourBaseClass()
 	MyRoot = CreateDefaultSubobject<USceneComponent>(TEXT("MyRoot"));
 	RootComponent = MyRoot;
 
+	ArmourPiece = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Armour"));
+	ArmourPiece->SetupAttachment(MyRoot);
+
 	ArmourHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ArmourHitZone"));
 	ArmourHitBox->bGenerateOverlapEvents = true;
-	ArmourHitBox->SetupAttachment(MyRoot);
-
-	ArmourPiece = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Armour"));
-	ArmourPiece->SetupAttachment(ArmourHitBox);
+	ArmourHitBox->SetupAttachment(ArmourPiece);
 
 	bHasBeenDestroyed = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -29,8 +30,14 @@ void AQuackBossArmourBaseClass::BeginPlay()
 	if (ArmourPiece != nullptr)
 	{
 		ArmourPiece->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
-		ToggleHighlight(true);
+		//ToggleHighlight(true);
 	}
+}
+
+void AQuackBossArmourBaseClass::AttachToAComponent(USkeletalMeshComponent* AttachTo, FAttachmentTransformRules TransformRules, FName SocketName)
+{
+	if(AttachTo != nullptr)
+		AttachToComponent(AttachTo, TransformRules, SocketName);
 }
 
 // Called every frame

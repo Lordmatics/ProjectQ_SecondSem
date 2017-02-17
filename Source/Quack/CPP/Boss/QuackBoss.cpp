@@ -16,6 +16,9 @@
 #include "Headers/CustomComponents/BossAttacksComponent.h"
 #include "Classes/Animation/AnimInstance.h"
 #include "Headers/CustomComponents/BossArmourComponent.h"
+#include "Headers/Boss/Armour/QuackArmourBody.h"
+#include "Headers/Boss/Armour/QuackArmourPin.h"
+#include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -49,22 +52,27 @@ AQuackBoss::AQuackBoss()
 	BodyPlate->SetWorldScale3D(FVector(200.0f));
 	BodyPlate->SetRelativeLocation(FVector(-0.002449f, 56.249912f, 827.373047f));
 	BodyPlate->SetRelativeRotation(FRotator(40.0f, 0.0f, 0.0f));
+	//BodyPlate->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::OnlyTickPoseWhenRendered;
 	BodyPlate->SetupAttachment(MySkeletalMesh);
 
 	BodyUL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyUL"));
 	BodyUL->SetWorldScale3D(FVector(1.0f));
+	BodyUL->SetVisibility(false);
 	BodyUL->SetupAttachment(BodyPlate);
 
 	BodyUR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyUR"));
 	BodyUR->SetWorldScale3D(FVector(1.0f));
+	BodyUR->SetVisibility(false);
 	BodyUR->SetupAttachment(BodyPlate);
 
 	BodyLL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyLL"));
 	BodyLL->SetWorldScale3D(FVector(1.0f));
+	BodyLL->SetVisibility(false);
 	BodyLL->SetupAttachment(BodyPlate);
 
 	BodyLR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyLR"));
 	BodyLR->SetWorldScale3D(FVector(1.0f));
+	BodyLR->SetVisibility(false);
 	BodyLR->SetupAttachment(BodyPlate);
 
 	LaserCannon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LaserCannon"));
@@ -117,14 +125,77 @@ void AQuackBoss::PostInitializeComponents()
 	{
 		FAttachmentTransformRules TransformRules = FAttachmentTransformRules::KeepWorldTransform;
 		//TransformRules.ScaleRule = EAttachmentRule::KeepWorld;
-		BodyPlate->AttachToComponent(MySkeletalMesh, TransformRules, TEXT("ArmourSocket"));
+		BodyPlate->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), FName("ArmourSocket"));
+		BodyPlate->SetVisibility(false, true);
 	}
+
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (BossArmourComponent != nullptr)
+	{
+		if (BossArmourComponent->MainBodyArmourClass != nullptr)
+		{
+			AQuackBossArmourBaseClass* MainBody = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->MainBodyArmourClass, BodyPlate->GetComponentTransform().GetLocation(), BodyPlate->GetComponentRotation(), SpawnParams);
+			if (MainBody != nullptr)
+			{
+				MainBody->AttachToAComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), FName("ArmourSocket"));
+				MainBody->ToggleHighlight(false);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Spawned Body"));
+			if (BossArmourComponent->PinClassLL != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("LL Pin Class Not Null"));
+				AQuackBossArmourBaseClass* PinLL = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->PinClassLL, BodyLL->GetComponentTransform().GetLocation(), BodyLL->GetComponentRotation(), SpawnParams);
+				if (PinLL != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Pin LL Spawned"));
+					PinLL->AttachToActor(MainBody, FAttachmentTransformRules::KeepWorldTransform);
+					PinLL->SetActorRelativeScale3D(FVector(2.0f));
+					PinRefLL = PinLL;
+				}
+			}
+			if (BossArmourComponent->PinClassLR != nullptr)
+			{
+				AQuackBossArmourBaseClass* PinLR = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->PinClassLR, BodyLR->GetComponentTransform().GetLocation(), BodyLR->GetComponentRotation(), SpawnParams);			
+				if (PinLR != nullptr)
+				{
+					PinLR->AttachToActor(MainBody, FAttachmentTransformRules::KeepWorldTransform);
+					PinLR->SetActorRelativeScale3D(FVector(2.0f));
+					PinRefLR = PinLR;
+				}
+			}
+			if (BossArmourComponent->PinClassUL != nullptr)
+			{
+				AQuackBossArmourBaseClass* PinUL = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->PinClassUL, BodyUL->GetComponentTransform().GetLocation(), BodyUL->GetComponentRotation(), SpawnParams);	
+				if (PinUL != nullptr)
+				{
+					PinUL->AttachToActor(MainBody, FAttachmentTransformRules::KeepWorldTransform);
+					PinUL->SetActorRelativeScale3D(FVector(2.0f));
+					PinRefUL = PinUL;
+				}
+			}
+			if (BossArmourComponent->PinClassUR != nullptr)
+			{
+				AQuackBossArmourBaseClass* PinUR = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->PinClassUR, BodyUR->GetComponentTransform().GetLocation(), BodyUR->GetComponentRotation(), SpawnParams);
+				if (PinUR != nullptr)
+				{
+					PinUR->AttachToActor(MainBody, FAttachmentTransformRules::KeepWorldTransform);
+					PinUR->SetActorRelativeScale3D(FVector(2.0f));
+					PinRefUR = PinUR;
+				}
+			}
+		}
+	}
+
 }
 
 // Called when the game starts or when spawned
 void AQuackBoss::BeginPlay()
 {
 	Super::BeginPlay();
+	bImmortal = true;
 	MaxBossHealth = BossHealth;
 	InitialFireCooldown = FireCooldown;
 	CurrentBossState = BossStates::E_Idle;
@@ -185,6 +256,17 @@ void AQuackBoss::ChangeBackToPrevious()
 void AQuackBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (PinRefLL != nullptr && PinRefUL != nullptr && PinRefLR != nullptr && PinRefUR != nullptr)
+	{
+		if (PinRefLL->bHasBeenDestroyed && PinRefLR->bHasBeenDestroyed && PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
+		{
+			bImmortal = false;
+		}
+		else
+		{
+			bImmortal = true;
+		}
+	}
 	if (BossHealth >= MaxBossHealth)
 	{
 		if (TargettedPipe != nullptr)
@@ -764,6 +846,9 @@ void AQuackBoss::InitialisePlayerCharacterReference()
 
 void AQuackBoss::SufferDamage(float Amount)
 {
+	// IMMORTAL IS FOR ARMOUR ONLY
+	if (bImmortal) return;
+
 	if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour) return;
 	if (bShieldUp) return;
 	// Utility Function to Deduct Damage from Health then clamp for safety

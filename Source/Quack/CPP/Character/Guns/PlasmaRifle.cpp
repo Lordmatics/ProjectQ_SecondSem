@@ -7,6 +7,7 @@
 #include "Headers/CustomComponents/RaycastComponent.h"
 #include "Headers/AIEnemies/QuackAIPawn.h"
 #include "Headers/Boss/QuackBoss.h"
+#include "Headers/Boss/Armour/QuackArmourPin.h"
 
 APlasmaRifle::APlasmaRifle()
 {
@@ -68,6 +69,16 @@ void APlasmaRifle::Tick(float DeltaTime)
 				SetLaserSource();
 				SetLaserEnd();
 				//print("Object Hit");
+				AQuackArmourPin* ArmourPin = Cast<AQuackArmourPin>(HitActor);
+				if (ArmourPin != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *ArmourPin->GetName());
+					if (ArmourPin->GetArmourValue() >= 0.0f)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
+						ArmourPin->DecreaseArmourValue(GunDamage);
+					}
+				}
 				AQuackBoss* Boss = Cast<AQuackBoss>(HitActor);
 				AQuackAIPawn* Enemy = Cast<AQuackAIPawn>(HitActor);
 				if (Boss != nullptr)

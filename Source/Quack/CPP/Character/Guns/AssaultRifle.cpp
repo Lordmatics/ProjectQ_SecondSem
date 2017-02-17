@@ -6,6 +6,7 @@
 #include "Headers/Character/QuackCharacter.h"
 #include "Headers/AIEnemies/QuackAIPawn.h"
 #include "Headers/Boss/QuackBoss.h"
+#include "Headers/Boss/Armour/QuackArmourPin.h"
 
 AAssaultRifle::AAssaultRifle()
 {
@@ -117,6 +118,18 @@ void AAssaultRifle::Shoot()
 				AActor* HitActor = Hit.GetActor();
 				if (HitActor != nullptr)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("I Hit Component : %s"), *Hit.Component.Get()->GetName());
+
+					UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
+					AQuackArmourPin* ArmourPin = Cast<AQuackArmourPin>(HitActor);
+					if (ArmourPin != nullptr)
+					{
+						if (ArmourPin->GetArmourValue() >= 0.0f)
+						{
+							UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
+							ArmourPin->DecreaseArmourValue(GunDamage);
+						}
+					}
 					//print("Object Hit");
 					AQuackBoss* Boss = Cast<AQuackBoss>(HitActor);
 					AQuackAIPawn* Enemy = Cast<AQuackAIPawn>(HitActor);
