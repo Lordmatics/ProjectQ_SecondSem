@@ -612,7 +612,7 @@ void AQuackCharacter::OnSprintBegin()
 {
 	// Very subtle bug, u could technically exploit, sprint bonus if u
 	// jumped and reloaded then remained at sprint speed
-	if (!MovementConfig.bReloading)
+	if (!MovementConfig.bReloading && !WeaponConfig.bMouseDown)
 	{
 		MovementConfig.bIsSprinting = true;
 	}
