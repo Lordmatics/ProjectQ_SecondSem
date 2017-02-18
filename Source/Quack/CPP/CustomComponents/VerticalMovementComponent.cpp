@@ -31,11 +31,42 @@ void UVerticalMovementComponent::TickComponent( float DeltaTime, ELevelTick Tick
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 	ActivateMovement(DeltaTime);
+
 	// ...
 }
 
 void UVerticalMovementComponent::ActivateMovement(float DeltaTime)
 {
+	// okay, so basically, in the boss code, when he goes to heal, you will call the
+	// respective adjust height function according to targettedpipe.blowerpipe
+	// and here it will raise / lower him just enough for the animation
+	// once that is finished, call finish adjust, so the latter logic can resume
+	if (VerticalHeight.bOverriden)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("VerticalHeightOverriden"));
+		if (VerticalHeight.bIsLower)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("VerticalHeightOverriden - Change to Lower Pipe"));
+			FVector OwnerLocation = GetOwner()->GetActorLocation();
+			float Start = OwnerLocation.Z;
+			// Lower to -110.0f Z
+			Start = FMath::FInterpConstantTo(Start, LowerPipeHealHeight, DeltaTime, InterpRate);
+			FVector EndLocation = FVector(OwnerLocation.X, OwnerLocation.Y, Start);
+			GetOwner()->SetActorRelativeLocation(EndLocation);
+			return;
+		}
+		else
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("VerticalHeightOverriden - Change to Upper Pipe"));
+			FVector OwnerLocation = GetOwner()->GetActorLocation();
+			float Start = OwnerLocation.Z;
+			// Lower to -110.0f Z
+			Start = FMath::FInterpConstantTo(Start, UpperPipeHealHeight, DeltaTime, InterpRate);
+			FVector EndLocation = FVector(OwnerLocation.X, OwnerLocation.Y, Start);
+			GetOwner()->SetActorRelativeLocation(EndLocation);
+			return;
+		}
+	}
 	if (bActivate)
 	{
 		FVector OwnerLocation = GetOwner()->GetActorLocation();
@@ -64,4 +95,20 @@ void UVerticalMovementComponent::Lower()
 void UVerticalMovementComponent::Raise()
 {
 	bActivate = false;
+}
+
+void UVerticalMovementComponent::AdjustToLowerPipeHeight()
+{
+	VerticalHeight = FHeightStructure(true, true);
+}
+
+void UVerticalMovementComponent::AdjustToUpperPipeHeight()
+{
+	VerticalHeight = FHeightStructure(true, false);
+}
+
+void UVerticalMovementComponent::FinishAdjust()
+{
+	VerticalHeight = FHeightStructure();
+	//UE_LOG(LogTemp, Warning, TEXT("Finished Adjusting Height"));
 }

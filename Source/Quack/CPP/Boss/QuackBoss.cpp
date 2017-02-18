@@ -144,14 +144,14 @@ void AQuackBoss::PostInitializeComponents()
 				MainBody->ToggleHighlight(false);
 				MainBodyRef = MainBody;
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Spawned Body"));
+			//UE_LOG(LogTemp, Warning, TEXT("Spawned Body"));
 			if (BossArmourComponent->PinClassLL != nullptr)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("LL Pin Class Not Null"));
+				///UE_LOG(LogTemp, Warning, TEXT("LL Pin Class Not Null"));
 				AQuackBossArmourBaseClass* PinLL = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->PinClassLL, BodyLL->GetComponentTransform().GetLocation(), BodyLL->GetComponentRotation(), SpawnParams);
 				if (PinLL != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Pin LL Spawned"));
+					//UE_LOG(LogTemp, Warning, TEXT("Pin LL Spawned"));
 					PinLL->AttachToActor(MainBody, FAttachmentTransformRules::KeepWorldTransform);
 					PinLL->SetActorRelativeScale3D(FVector(2.0f));
 					PinRefLL = PinLL;
@@ -536,6 +536,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 					{
 						if (ChandelierDropComponent != nullptr)
 						{
+							ChandelierDropComponent->FinishAdjust();
 							ChandelierDropComponent->Lower();
 						}
 						ToggleShield(true);
@@ -545,6 +546,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 					{
 						if (ChandelierDropComponent != nullptr)
 						{
+							ChandelierDropComponent->FinishAdjust();
 							ChandelierDropComponent->Raise();
 						}
 						ToggleShield(false);
@@ -613,6 +615,9 @@ void AQuackBoss::SetFacingPipeOff()
 	// Boss is no longer facing pipe, after recoil, so allow rotation
 	bFacingTargettedPipe = false;
 	bFacingTargettedPipeLower = false;
+	//// Turn off overriden height controls
+	//if(ChandelierDropComponent != nullptr)
+	//	ChandelierDropComponent->FinishAdjust();
 }
 
 void AQuackBoss::ResetMelee()
@@ -634,12 +639,36 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 		//{
 		if (bStopChase)
 		{
+			if (ChandelierDropComponent != nullptr)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("chandelierDropComp not null"));
+				switch (CurrentTargettedPipeTransform.bIsLowerPipe)
+				{
+					case true:
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("StopChase True - Adjust to Lower"));
+						ChandelierDropComponent->AdjustToLowerPipeHeight();
+						break;
+					}
+					case false:
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("StopChase True - Adjust to upper"));
+						ChandelierDropComponent->AdjustToUpperPipeHeight();
+						break;
+					}
+				}
+			}
+			//UE_LOG(LogTemp, Warning, TEXT("StopChase True - Moving to centre"));
+			//UE_LOG(LogTemp, Warning, TEXT("IsLower : %s"), CurrentTargettedPipeTransform.bIsLowerPipe ? TEXT("True its lower") : TEXT("false its upper"));
 			float BossLoc = GetActorLocation().X;
 			BossLoc = FMath::FInterpConstantTo(BossLoc, CentrePosition, DeltaTime, BossStafeSpeed);
 			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+
 		}
 		else
 		{
+			if (ChandelierDropComponent != nullptr)
+				ChandelierDropComponent->FinishAdjust();
 			float BossLoc = GetActorLocation().X;
 			float TargetLoc = Positions.PlayerPosition.X;
 			TargetLoc = FMath::Clamp(TargetLoc, MinBossX, MaxBossX);
@@ -1008,7 +1037,7 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 		{
 			if (TargettedPipe != nullptr)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
+				//UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
 				if (TargettedPipe->bLowerPipe)
 				{
 					CurrentAnimationState = AnimationStates::E_AnimRecoilLower;

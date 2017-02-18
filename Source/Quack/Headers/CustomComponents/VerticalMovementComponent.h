@@ -14,7 +14,7 @@ class QUACK_API UVerticalMovementComponent : public UActorComponent
 private:
 	// Highest Position
 	UPROPERTY(EditAnywhere, Category = "C++ Variables")
-		float StartingHeight = 1630.0f;
+		float StartingHeight = 4400.0f;
 
 	// Lowest position
 	UPROPERTY(EditAnywhere, Category = "C++ Variables")
@@ -27,6 +27,33 @@ private:
 	// Bool to control movement
 	UPROPERTY(EditAnywhere, Category = "C++ Variables")
 		uint32 bActivate : 1;
+
+	// Height to match pipe heal animation - upper
+	UPROPERTY(EditAnywhere, Category = "C++ Variables")
+		float UpperPipeHealHeight = 4850.0f;
+
+	// Height to match pipe heal animation - lower
+	UPROPERTY(EditAnywhere, Category = "C++ Variables")
+		float LowerPipeHealHeight = 3800.0f;
+
+	struct FHeightStructure
+	{
+		uint32 bOverriden : 1;
+		uint32 bIsLower : 1;
+		FHeightStructure()
+		{
+			bOverriden = false;
+			bIsLower = false;
+		}
+		FHeightStructure(bool Override, bool IsLower)
+		{
+			bOverriden = Override;
+			bIsLower = IsLower;
+		}
+
+	};
+
+	FHeightStructure VerticalHeight = FHeightStructure();
 
 private:
 
@@ -47,5 +74,14 @@ public:
 
 	/** Make Owner Ascend into Starting Height*/
 	void Raise();
+
+	/** Make Owner Change Z Pos to match animation*/
+	void AdjustToLowerPipeHeight();
+
+	/** Make Owner Change Z Pos to match animation*/
+	void AdjustToUpperPipeHeight();
+
+	/** Function to revert back to former height logic*/
+	void FinishAdjust();
 	
 };
