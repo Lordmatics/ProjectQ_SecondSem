@@ -2,7 +2,7 @@
 
 #include "Headers/Quack.h"
 #include "Headers/CustomComponents/RaycastComponent.h"
-
+#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 URaycastComponent::URaycastComponent()
@@ -34,7 +34,7 @@ void URaycastComponent::TickComponent( float DeltaTime, ELevelTick TickType, FAc
 	// ...
 }
 
-FHitResult URaycastComponent::Raycast(UCameraComponent* FirstPersonCamera)
+FHitResult URaycastComponent::Raycast(UCameraComponent* FirstPersonCamera, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors)
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return FHitResult();
@@ -43,6 +43,7 @@ FHitResult URaycastComponent::Raycast(UCameraComponent* FirstPersonCamera)
 	FVector Forward = FirstPersonCamera->GetForwardVector();
 	FVector End = Start + (Forward * Raylength);
 	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActors(IgnoredActors);
 	if (World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, CQP))
 	{
 		CreateBulletHole(Hit);
@@ -52,7 +53,7 @@ FHitResult URaycastComponent::Raycast(UCameraComponent* FirstPersonCamera)
 }
 
 // ForLaser
-FHitResult URaycastComponent::RaycastLaser(UParticleSystemComponent* ParticleSystem)
+FHitResult URaycastComponent::RaycastLaser(UParticleSystemComponent* ParticleSystem, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors)
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return FHitResult();
@@ -61,7 +62,27 @@ FHitResult URaycastComponent::RaycastLaser(UParticleSystemComponent* ParticleSys
 	FVector Forward = ParticleSystem->GetForwardVector();
 	FVector End = Start + (Forward * Raylength);
 	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActors(IgnoredActors);
 	if (World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, CQP))
+	{
+		return Hit;
+	}
+	else return FHitResult();
+}
+
+FHitResult URaycastComponent::RaycastBossLaser(UParticleSystemComponent* ParticleSystem,const FVector& EndLocation, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors)
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return FHitResult();
+	FHitResult Hit;
+	FVector Start = ParticleSystem->GetComponentLocation();
+	//FVector Forward = ParticleSystem->GetForwardVector();
+	//FVector End = Start + (Forward * Raylength);
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActors(IgnoredActors);
+	//DrawDebugLine(World, Start, EndLocation, FColor::Red, true);
+
+	if (World->LineTraceSingleByChannel(Hit, Start, EndLocation, ECC_Visibility, CQP))
 	{
 		return Hit;
 	}

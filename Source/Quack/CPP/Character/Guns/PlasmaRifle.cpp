@@ -60,7 +60,7 @@ void APlasmaRifle::Tick(float DeltaTime)
 			// Delegate / Callback or ???
 
 			//UE_LOG(LogTemp, Warning, TEXT("Assault Rifle Fired"));
-			FHitResult Hit = RaycastComponent->RaycastLaser(LaserParticleSystemComp);
+			FHitResult Hit = RaycastComponent->RaycastLaser(LaserParticleSystemComp, IgnoredActors);
 			AActor* HitActor = Hit.GetActor();
 			if (HitActor != nullptr)
 			{
@@ -102,7 +102,8 @@ void APlasmaRifle::Tick(float DeltaTime)
 			}
 			else
 			{
-				LaserTargetLocation = LaserParticleSystemComp->GetComponentLocation() * (LaserParticleSystemComp->GetForwardVector() * RaycastComponent->GetRayLength());
+				//				LaserTargetLocation = LaserParticleSystemComp->GetComponentLocation() * (LaserParticleSystemComp->GetForwardVector() * RaycastComponent->GetRayLength());
+				LaserTargetLocation = LaserParticleSystemComp->GetComponentLocation() * ((GetActorForwardVector() + FVector(0.0f,-90.0f,0.0f)) * RaycastComponent->GetRayLength());
 				SetLaserSource();
 				SetLaserEnd();
 			}
@@ -218,7 +219,6 @@ void APlasmaRifle::DisableBeam()
 		LaserParticleSystemComp->SetTemplate(EmptyPS);
 		LaserParticleSystemComp->SetVisibility(false);
 		//UE_LOG(LogTemp, Warning, TEXT("Disable Beam --- Set to false"));
-		
 	}
 }
 /** Set as main weapon, and make it visible */
@@ -253,6 +253,8 @@ void APlasmaRifle::AttachMeshToPawn()
 	Super::AttachMeshToPawn();
 	if (MyPawn)
 	{
+		IgnoredActors.Add(MyPawn);
+
 		UE_LOG(LogTemp, Warning, TEXT("PlasmaAttachedToPawn"));
 		FName AttachPoint = MyPawn->GetWeaponAttachPoint();
 		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();

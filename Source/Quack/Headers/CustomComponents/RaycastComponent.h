@@ -35,9 +35,11 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	FHitResult Raycast(UCameraComponent* FirstPersonCamera);
+	FHitResult Raycast(UCameraComponent* FirstPersonCamera, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors = TArray<TWeakObjectPtr<AActor>>());
 	
-	FHitResult RaycastLaser(UParticleSystemComponent* FirstPersonCamera);
+	FHitResult RaycastLaser(UParticleSystemComponent* FirstPersonCamera, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors = TArray<TWeakObjectPtr<AActor>>());
+
+	FHitResult RaycastBossLaser(UParticleSystemComponent* FirstPersonCamera, const FVector& EndLocation, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors = TArray<TWeakObjectPtr<AActor>>());
 
 	FORCEINLINE float GetRayLength() const { return Raylength; }
 

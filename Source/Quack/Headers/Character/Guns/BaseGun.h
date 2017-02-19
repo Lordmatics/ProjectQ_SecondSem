@@ -71,6 +71,8 @@ protected:
 	void PlayFeedbackAudio(USkeletalMeshComponent* SpecificGun);
 protected:
 
+	TArray<TWeakObjectPtr<AActor>> IgnoredActors;
+
 	UFUNCTION()
 		void FinishReload();
 

@@ -13,6 +13,8 @@ class QUACK_API AQuackBoss : public AActor
 
 private:
 	// Test
+	UPROPERTY(EditAnywhere, Category = "Ignored Laser Actors")
+		AActor* RockyFloorRef;
 	// Gonna change tongue material, to show its armoured / shielded once latching
 	UPROPERTY(EditAnywhere, Category = "C++ Tongue Materials")
 		UMaterial* TongueMaterialNormal;
@@ -132,6 +134,37 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Armour Plate", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* LaserCannon;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Armour Plate")
+		UParticleSystemComponent* LaserParticleSystemComp;
+
+	// If you want an effect at hit location
+	UPROPERTY(VisibleDefaultsOnly, Category = "Armour Plate")
+		UParticleSystemComponent* MuzzleFlashParticleSystem;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Gun")
+		UParticleSystem* LaserPS;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Gun")
+		UParticleSystem* EmptyPS;
+
+	UPROPERTY(EditDefaultsOnly, Category = "C++ Gun")
+		class URaycastComponent* RaycastComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
+		FVector LaserTargetLocation;
+
+	void SetLaserSource();
+
+	void SetLaserEnd();
+
+	void StopFiring();
+
+	void DisableBeam();
+
+	void EnableBeam();
+
+	void BeamLogic();
 
 	// THIS CLASS NEEDS REFACTORING PROPERLY
 	UPROPERTY(VisibleAnywhere, Category = "Shield")

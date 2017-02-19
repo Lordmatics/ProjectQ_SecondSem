@@ -19,6 +19,7 @@
 #include "Headers/Boss/Armour/QuackArmourBody.h"
 #include "Headers/Boss/Armour/QuackArmourPin.h"
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
+#include "Headers/CustomComponents/RaycastComponent.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -80,6 +81,9 @@ AQuackBoss::AQuackBoss()
 	LaserCannon->SetRelativeLocation(FVector(-0.002477f, 54.748207f, 832.158630f));
 	LaserCannon->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
 	LaserCannon->SetupAttachment(MySkeletalMesh);
+	LaserParticleSystemComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LaserPS"));
+	LaserParticleSystemComp->SetupAttachment(LaserCannon);
+	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
 
 
 	//BodyPlate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT(""))
@@ -104,6 +108,7 @@ AQuackBoss::AQuackBoss()
 	AnimationComponent = CreateDefaultSubobject<UAnimationComponent>(TEXT("Animation Component"));
 	BossAttacksComponent = CreateDefaultSubobject<UBossAttacksComponent>(TEXT("BossAttacksComponent"));
 	BossArmourComponent = CreateDefaultSubobject<UBossArmourComponent>(TEXT("BossArmourComponent"));
+	RaycastComponent = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComponent"));
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -128,6 +133,10 @@ void AQuackBoss::PostInitializeComponents()
 		BodyPlate->AttachToComponent(MySkeletalMesh, FAttachmentTransformRules(EAttachmentRule::KeepWorld, true), FName("ArmourSocket"));
 		BodyPlate->SetVisibility(false, true);
 	}
+
+	// TODO: MAKE CANNON SKELETAL MESH WITH SOCKETS
+	//if (LaserParticleSystemComp != nullptr && LaserCannon != nullptr)
+	//	LaserParticleSystemComp->AttachToComponent(LaserCannon, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("LaserSocket"));
 
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
@@ -223,6 +232,116 @@ void AQuackBoss::BeginPlay()
 	BodyUL->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
 	BodyUR->SetRenderCustomDepth(true);
 	BodyUR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
+
+	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
+}
+
+void AQuackBoss::SetLaserSource()
+{
+	if (LaserParticleSystemComp != nullptr)
+	{
+		LaserParticleSystemComp->SetBeamSourcePoint(0, LaserParticleSystemComp->GetComponentLocation(), 0);
+	}
+}
+
+void AQuackBoss::SetLaserEnd()
+{
+	if (LaserParticleSystemComp != nullptr)
+	{
+		LaserParticleSystemComp->SetBeamEndPoint(0, LaserTargetLocation);
+
+		////// find out which way is forward
+		////const FRotator Rotation = Chandelier->GetComponentRotation();
+		////const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		////// get forward vector
+		////const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		////FVector EndOffset = Chandelier->GetForwardVector() + FVector(0.0f, 90.0f, 0.0f);
+		////const FVector EndLocation = LaserParticleSystemComp->GetComponentLocation() + (-Direction * RaycastComponent->GetRayLength());
+		////LaserParticleSystemComp->SetBeamEndPoint(0, EndLocation);
+
+		///
+		//if (MuzzleFlashParticleSystem == nullptr && FireEffect != nullptr)
+		//{
+		//	//UE_LOG(LogTemp, Warning, TEXT("MF Activated"));
+		//	MuzzleFlashParticleSystem = UGameplayStatics::SpawnEmitterAttached(FireEffect, HarryPlasmaGun, SocketName);
+		//	MuzzleFlashParticleSystem->SetWorldScale3D(FVector(0.75f));
+		//}
+		//if (MuzzleFlashParticleSystem != nullptr)
+		//{
+		//	//UE_LOG(LogTemp, Warning, TEXT("MF Location updated: %s"), *LaserTargetLocation.ToString());
+		//	MuzzleFlashParticleSystem->SetWorldLocation(LaserTargetLocation);
+		//}
+	}
+}
+
+void AQuackBoss::EnableBeam()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Enable Beam"));
+
+	if (LaserParticleSystemComp != nullptr)
+	{
+		if (LaserPS != nullptr)
+		{
+			LaserParticleSystemComp->SetTemplate(LaserPS);
+			LaserParticleSystemComp->SetVisibility(true);
+		}
+	}
+}
+
+void AQuackBoss::DisableBeam()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("Disable Beam"));
+	if (LaserParticleSystemComp != nullptr)
+	{
+		LaserParticleSystemComp->SetTemplate(EmptyPS);
+		LaserParticleSystemComp->SetVisibility(false);
+		//UE_LOG(LogTemp, Warning, TEXT("Disable Beam --- Set to false"));
+	}
+}
+
+void AQuackBoss::BeamLogic()
+{
+	if (RaycastComponent != nullptr && LaserParticleSystemComp != nullptr)
+	{
+		EnableBeam();
+		TArray<TWeakObjectPtr<AActor>> IgnoredActors;
+		IgnoredActors.Add(this);
+		if(RockyFloorRef != nullptr)
+			IgnoredActors.Add(RockyFloorRef);
+		const FRotator Rotation = Chandelier->GetComponentRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		FVector EndOffset = Chandelier->GetForwardVector() + FVector(0.0f, 90.0f, 0.0f);
+		const FVector EndLocation = LaserParticleSystemComp->GetComponentLocation() + (-Direction * RaycastComponent->GetRayLength());
+		FHitResult Hit = RaycastComponent->RaycastBossLaser(LaserParticleSystemComp, EndLocation, IgnoredActors);
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor != nullptr)
+		{
+			// Anything thats not an ignored actor, will make the laser stop
+			LaserTargetLocation = Hit.Location;
+			UE_LOG(LogTemp, Warning, TEXT("ActorHit: %s"), *HitActor->GetName());
+		}
+		else
+		{
+			LaserTargetLocation = EndLocation;
+		}
+		AQuackCharacter* Char = Cast<AQuackCharacter>(Hit.GetActor());
+		if (Char != nullptr)
+		{
+			Char->DecreaseHealth(5.0f * GetWorld()->GetDeltaSeconds());
+		}
+		SetLaserSource();
+		SetLaserEnd();
+	}
+	else
+	{
+		DisableBeam();
+	}
 }
 
 void AQuackBoss::SetTongueToNormal()
@@ -504,6 +623,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		}
 		case BossStates::E_FightingTwo:
 		{
+			BeamLogic();
 			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 			ToggleShield(false);
@@ -1275,6 +1395,7 @@ void AQuackBoss::LocateNearbyPipe()
 
 void AQuackBoss::ChangeState(BossStates DesiredState)
 {
+	DisableBeam();
 	// MIGHT WANNA CHANGE THIS TO ONLY STORE PREV STATE, IF STATE CHANGE CAME FROM A FIGHTING STATE, 
 	// SINCE THATS WHAT IT IS RETURNING TOO. 
 	// NEED TO TEST - LET BOSS FULLY HEAL IN EACH PHASE

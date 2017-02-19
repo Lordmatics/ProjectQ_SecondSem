@@ -31,8 +31,6 @@ void AAssaultRifle::BeginPlay()
 	Super::BeginPlay();
 
 
-
-
 }
 
 void AAssaultRifle::Tick(float DeltaTime)
@@ -114,13 +112,14 @@ void AAssaultRifle::Shoot()
 			if (OwningCamera != nullptr)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Assault Rifle Fired"));
-				FHitResult Hit = RaycastComponent->Raycast(OwningCamera);
+				FHitResult Hit = RaycastComponent->Raycast(OwningCamera, IgnoredActors);
+				
 				AActor* HitActor = Hit.GetActor();
 				if (HitActor != nullptr)
 				{
 					//UE_LOG(LogTemp, Warning, TEXT("I Hit Component : %s"), *Hit.Component.Get()->GetName());
 
-				//	UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
+					UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
 					AQuackArmourPin* ArmourPin = Cast<AQuackArmourPin>(HitActor);
 					if (ArmourPin != nullptr)
 					{
@@ -195,6 +194,7 @@ void AAssaultRifle::AttachMeshToPawn()
 	Super::AttachMeshToPawn();
 	if (MyPawn)
 	{
+		IgnoredActors.Add(MyPawn);
 		FName AttachPoint = MyPawn->GetWeaponAttachPoint();
 		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();
 		if (PawnMesh1p != nullptr)
