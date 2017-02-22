@@ -503,7 +503,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 				BeginPipeDrain();
 				Regenerate(DeltaTime);
 			}
-			else if (bFacingTargettedPipeLower)
+ 			else if (bFacingTargettedPipeLower)
 			{
 				CurrentAnimationState = AnimationStates::E_AnimLatchLower;
 				BeginPipeDrain();
