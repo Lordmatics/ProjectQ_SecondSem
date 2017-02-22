@@ -4,11 +4,69 @@
 #include "Headers/AIEnemies/QuackAIChargePawn.h"
 #include "Headers/AIEnemies/QuackAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Headers/Character/QuackCharacter.h"
 #include "Headers/CustomComponents/AnimationComponent.h"
+#include "Headers/AIEnemies/QuackAIController.h"
 
 //HE THINKS HE CAN FACE ME IN SOLO QUEUE?????? ME?????
 
 // LUL
+AQuackAIChargePawn::AQuackAIChargePawn()
+{
+	BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &AQuackAIChargePawn::DealDamage);
+}
+
+void AQuackAIChargePawn::DealDamage(UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult)
+{
+	AQuackCharacter* TempCharacter = Cast<AQuackCharacter>(OtherActor);
+	{
+		if (TempCharacter != nullptr)
+		{
+			TempCharacter->DecreaseHealth(Damage);
+		}
+		AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
+		if (TempController != nullptr)
+		{
+			TempController->Blackboard->SetValueAsBool("Stunned", true);
+			TempController->Blackboard->SetValueAsBool("Charging", false);
+			FTimerHandle TempHandle;
+			UWorld* TempWorld = GetWorld();
+			if (TempWorld != nullptr)
+			{
+				TempWorld->GetTimerManager().SetTimer(TempHandle, this, &AQuackAIChargePawn::EndStun, 3.0f, false);
+				GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+			}
+		}
+		Attacking = false;
+		Stunned = true;
+	}
+}
+
+void AQuackAIChargePawn::Attack()
+{
+	AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
+	if (TempController != nullptr)
+	{
+		AQuackCharacter* PlayerCharacter = Cast<AQuackCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		if (PlayerCharacter != nullptr)
+		{
+			TempController->Blackboard->SetValueAsVector("Target", PlayerCharacter->GetActorTransform().GetLocation());
+			TempController->Blackboard->SetValueAsBool("Charging", true);
+		}
+	}
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	Attacking = true;
+}
+
+void AQuackAIChargePawn::EndStun()
+{
+	AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
+	if (TempController != nullptr)
+	{
+		TempController->Blackboard->SetValueAsBool("Stunned", false);
+	}
+	Stunned = false;
+}
 
 void AQuackAIChargePawn::Die()
 {
@@ -38,7 +96,7 @@ bool AQuackAIChargePawn::GetDeath()
 	return (CurrentHealth <= 0);
 }
 
-void AQuackAIChargePawn::Attack()
+/*void AQuackAIChargePawn::Attack()
 {
 	// Example of how to anim in code for Ed
 
@@ -88,9 +146,14 @@ void AQuackAIChargePawn::Attack()
 
 	//}
 	Attacking = true;
-}
+}*/
 
 bool AQuackAIChargePawn::GetAttacking()
 {
 	return Attacking;
+}
+
+bool AQuackAIChargePawn::GetStunned()
+{
+	return Stunned;
 }

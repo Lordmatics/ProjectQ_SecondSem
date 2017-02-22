@@ -18,14 +18,32 @@ class QUACK_API AQuackAIChargePawn : public AQuackAIPawn
 	virtual void Attack() override;
 
 	bool Attacking;
+
+	UFUNCTION()
+		void EndStun();
+
+	AQuackAIChargePawn();
+
+	UFUNCTION()
+	void DealDamage(UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
 	
 	UFUNCTION()
 		void DestroyThis();
+
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		int WalkSpeed;
+	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		int RunSpeed;
+
+	bool Stunned;
 
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "Anim")
 		bool GetDeath();
+
+	UFUNCTION(BlueprintCallable, Category = "Anim")
+		bool GetStunned();
 
 	UFUNCTION(BlueprintCallable, Category = "Anim")
 		bool GetAttacking();
