@@ -15,10 +15,15 @@
 		}
 	],
 	"Plugins": [
-        {
-            "Name": "DEUS VULT",
-            "Enabled": true,
-            "MarketplaceURL": "http://i.imgur.com/A1qWKY9.gif"
-        }
+		{
+			"Name": "Crippling Depression",
+			"Enabled": true,
+			"MarketplaceURL": "https://i.reddituploads.com/053bcf0b4cbe4240806fb0c688818237?fit=max&h=1536&w=1536&s=18f24da267fad31c01a62a4904010d95"
+		},
+		{
+			"Name": "LAMB SAUCE",
+			"Enabled": true,
+			"MarketplaceURL": "http://i3.kym-cdn.com/photos/images/newsfeed/001/207/513/67a.jpg"
+		}
 	]
 }
