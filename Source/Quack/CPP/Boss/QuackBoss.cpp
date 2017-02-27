@@ -848,8 +848,6 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 						//BossLocZ = FMath::FInterpConstantTo(BossLocZ, ChandelierDropComponent->GetStartingLaserHeight(), DeltaTime, BossStafeSpeed);
 						//UE_LOG(LogTemp, Warning, TEXT("BossLocZ Up: %f"), BossLocZ);
 						ChandelierDropComponent->AdjustToUpperPipeHeight(true);
-
-
 					}
 				}
 			}
