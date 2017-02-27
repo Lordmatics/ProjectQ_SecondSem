@@ -50,4 +50,5 @@ public:
 
 	void Fracture();
 	
+	FORCEINLINE bool IsFenceWall() const { return bKillStaticMesh; }
 };

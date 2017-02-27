@@ -268,6 +268,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
 	bool bEnteredBossRoom;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
+		bool bShowBossBar = false;
 
 	/** get weapon attach point */
 	FName GetWeaponAttachPoint() const;

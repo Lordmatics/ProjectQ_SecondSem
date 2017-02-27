@@ -13,6 +13,14 @@ class QUACK_API AQuackBoss : public AActor
 
 private:
 
+	uint32 bDontDoAnything : 1;
+
+	UPROPERTY(EditAnywhere, Category = "C++ BOSS MUST WAIT")
+		float DontDoAnythingTime = 4.0f;
+	
+	UFUNCTION()
+		void StartBoss();
+
 	UPROPERTY(VisibleAnywhere, Category = "C++ BossMinions")
 		uint32 bFightingThreeDrop : 1;
 
@@ -38,6 +46,15 @@ private:
 
 	void SetTongueToNormal();
 	void SetTongueToHealing();
+
+	FTimerHandle MeleeTimerHandle;
+	void InitiateMeleeAttacks();
+	void ClearStabRoutine();
+	UFUNCTION()
+		void Stab();
+	int MeleeCounter = 1;
+	int MaxMeleeVariations = 3;
+	uint32 bMeleeStabbing : 1;
 
 	// Requested code to make melee attacks more feasible
 	UPROPERTY(EditAnywhere, Category = "C++ Boss Strafe")
@@ -319,8 +336,10 @@ public:
 	TArray<UArrowComponent*> ProjectileSpawns;
 
 	void SufferDamage(float Amount);
-	void Regenerate(float DeltaTime);
+	void Regenerate(float DeltaTime, bool Override = false);
 	void CheckForDead();
+
+	uint32 bFirstTimeHealing : 1;
 
 	UFUNCTION(BlueprintCallable, Category = "Custom")
 	FRotator RotateHeadToPlayer();

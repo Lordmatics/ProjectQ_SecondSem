@@ -20,6 +20,7 @@
 #include "Headers/Boss/Armour/QuackArmourPin.h"
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 #include "Headers/CustomComponents/RaycastComponent.h"
+#include "Classes/Animation/AnimMontage.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -84,7 +85,7 @@ AQuackBoss::AQuackBoss()
 	LaserParticleSystemComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LaserPS"));
 	LaserParticleSystemComp->SetupAttachment(LaserCannon);
 	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
-
+	LaserCannon->SetHiddenInGame(true);
 
 	//BodyPlate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT(""))
 
@@ -201,18 +202,39 @@ void AQuackBoss::PostInitializeComponents()
 
 }
 
+void AQuackBoss::StartBoss()
+{
+	bDontDoAnything = false;
+}
+
 // Called when the game starts or when spawned
 void AQuackBoss::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bFirstTimeHealing = true;
+	bDontDoAnything = true;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		FTimerHandle TempHandle;
+		World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::StartBoss, DontDoAnythingTime, false);
+	}
 	bImmortal = true;
 	MaxBossHealth = BossHealth;
 	InitialFireCooldown = FireCooldown;
 	CurrentBossState = BossStates::E_Idle;
+	//if (MyCharacter != nullptr)
+	//{
+	//	MyCharacter->BossHP = MaxBossHealth / 100.0f;
+	//}
+	BossHealth = 10.0f;
 	if (MyCharacter != nullptr)
 	{
-		MyCharacter->BossHP = MaxBossHealth / 100.0f;
+		MyCharacter->BossHP = BossHealth / MaxBossHealth;
+		MyCharacter->bShowBossBar = false;
 	}
+	BossHealth = FMath::Clamp(BossHealth, 0.0f, MaxBossHealth);
 	LocateNearbyPipe();
 	ToggleShield(false);
 
@@ -391,6 +413,7 @@ void AQuackBoss::ChangeBackToPrevious()
 void AQuackBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (bDontDoAnything) return;
 	MapBossMovementToPlayer(DeltaTime);
 	if (PinRefLL != nullptr && PinRefUL != nullptr && PinRefLR != nullptr && PinRefUR != nullptr)
 	{
@@ -400,7 +423,15 @@ void AQuackBoss::Tick(float DeltaTime)
 			if (MainBodyRef != nullptr)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Fracture"));
+				// TEMP FIX
+				// Hide Cannon, whilst armour is on, so it doesnt peak through
+				// Due to wierd socket not following bug
+				LaserCannon->SetHiddenInGame(false);
 				MainBodyRef->Fracture();
+				if (MyCharacter != nullptr)
+				{
+					MyCharacter->bShowBossBar = true;
+				}
 			}
 		}
 		else
@@ -410,6 +441,7 @@ void AQuackBoss::Tick(float DeltaTime)
 	}
 	if (BossHealth >= MaxBossHealth)
 	{
+		bFirstTimeHealing = false;
 		if (TargettedPipe != nullptr)
 		{
 			TargettedPipe->SetDescend(false);
@@ -497,17 +529,17 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			SetTongueToHealing();
 			RotateTowardsPipe();
 			ToggleShield(true);
-			if (bFacingTargettedPipe)
+			if (bFacingTargettedPipe )//&& !bMeleeStabbing)
 			{
 				CurrentAnimationState = AnimationStates::E_AnimLatch;
 				BeginPipeDrain();
-				Regenerate(DeltaTime);
+				Regenerate(DeltaTime, bFirstTimeHealing);
 			}
- 			else if (bFacingTargettedPipeLower)
+ 			else if (bFacingTargettedPipeLower)// && !bMeleeStabbing)
 			{
 				CurrentAnimationState = AnimationStates::E_AnimLatchLower;
 				BeginPipeDrain();
-				Regenerate(DeltaTime);
+				Regenerate(DeltaTime, bFirstTimeHealing);
 			}
 			break;
 		}
@@ -612,9 +644,10 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			//ShootFromTail(DeltaTime);
 			ToggleShield(false);
 			RotateTowardsPlayer();
+			InitiateMeleeAttacks();
 			if (!CheckForMeleeAttack())
 			{
-				StartTailShot();
+				//StartTailShot();
 			}
 			//StartTailShot();
 			//ShootFromTail(DeltaTime);
@@ -748,6 +781,90 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			break;
 		}
 	}
+}
+
+void AQuackBoss::InitiateMeleeAttacks()
+{
+	if (bMeleeStabbing) return;
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+
+	if (AnimationComponent != nullptr)
+	{
+		UAnimMontage* AnimMeleeLeft = AnimationComponent->GetMeleeAnimLeft();
+		UAnimMontage* AnimMeleeRight = AnimationComponent->GetMeleeAnimRight();
+		UAnimMontage* AnimMeleeBoth = AnimationComponent->GetMeleeAnimBoth();
+
+		if (AnimMeleeLeft != nullptr && AnimMeleeRight != nullptr && AnimMeleeBoth != nullptr)
+		{
+			float MeleeLeft = AnimMeleeLeft->GetPlayLength();
+			float MeleeRight = AnimMeleeRight->GetPlayLength();
+			float MeleeBoth = AnimMeleeBoth->GetPlayLength();
+			float StabRate = FMath::Max3(MeleeLeft, MeleeRight, MeleeBoth);
+			//float StabRate = AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimLeft());
+			World->GetTimerManager().SetTimer(MeleeTimerHandle, this, &AQuackBoss::Stab, StabRate, true);
+			World->GetTimerManager().SetTimer(CharHitMeleeTimerHandle, this, &AQuackBoss::EnableMelee, StabRate, true);
+			bMeleeStabbing = true;
+		}
+	}
+}
+
+void AQuackBoss::EnableMelee()
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	// OKAY, SO THIS BOOL IS PURELY FOR PREVENTING INSTA KILLS
+	bMeleeAttacking = false;
+	// Keep turning it off at the end of each attack swing, 
+	// but it gets reset at the start of the next one
+}
+
+void AQuackBoss::Stab()
+{
+	// This bool allows damage to be dealt in moderation
+	// See trigger enter
+	// Adjusted
+	//bMeleeAttacking = true;
+	UAnimInstance* AnimInst = MySkeletalMesh->GetAnimInstance();
+	if (AnimInst == nullptr || AnimationComponent == nullptr) return;
+	// Switch statement is extensible, in case we wanted more variations on the attack
+	// Just increase MaxMeleeVariations, And add appropriately
+	switch (MeleeCounter)
+	{
+		case 1:
+		{
+			if (AnimationComponent->GetMeleeAnimLeft() != nullptr)
+				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimLeft(), 1.0f);
+			break;
+		}
+		case 2:
+		{
+			if (AnimationComponent->GetMeleeAnimBoth() != nullptr)
+				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimBoth(), 1.0f);
+			break;
+		}
+		case 3:
+		{
+			if(AnimationComponent->GetMeleeAnimRight() != nullptr)
+				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimRight(), 1.0f);
+			break;
+		}
+	}
+	MeleeCounter++;
+	if (MeleeCounter > MaxMeleeVariations)
+	{
+		MeleeCounter = 1;
+	}
+}
+
+void AQuackBoss::ClearStabRoutine()
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	World->GetTimerManager().ClearTimer(MeleeTimerHandle);
+	World->GetTimerManager().ClearTimer(CharHitMeleeTimerHandle);
+	bMeleeAttacking = false;
+	bMeleeStabbing = false;
 }
 
 void AQuackBoss::StopFacingPipe()
@@ -1151,8 +1268,10 @@ void AQuackBoss::ShouldEnterHealingPhase()
 	{
 		// Below 80% phase one healing
 		// + 1 is since, when a pipe is selected it is removed from the array
-		if (BossHealth <= ((4 * MaxBossHealth) / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
-		{
+		//if (BossHealth <= ((4 * MaxBossHealth) / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
+		//{
+		if (!bImmortal && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
+		{	
 			ChangeState(BossStates::E_HealingOne);
 		}
 		// Below 60% Phase two healing
@@ -1201,14 +1320,25 @@ void AQuackBoss::SufferDamage(float Amount)
 	CheckForDead();
 }
 
-void AQuackBoss::Regenerate(float DeltaTime)
+void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 {
 	// Used when boss enters regen phase ---- Poison Mechanic
 	//if (!bIsRegenerating) return;
 	//if (bPoisonned) return;
-	BossHealth += BossRegenRate * DeltaTime;
-	if (MyCharacter != nullptr)
-		MyCharacter->BossHP = BossHealth / MaxBossHealth;
+	// 15hp/s / 640hp
+	if (bOverride)
+	{
+		// Want a 5s matinee now as well
+		BossHealth += DeltaTime * BossRegenRate * 4.0f;
+		if (MyCharacter != nullptr)
+			MyCharacter->BossHP = BossHealth / MaxBossHealth;
+	}
+	else
+	{
+		BossHealth += BossRegenRate * DeltaTime;
+		if (MyCharacter != nullptr)
+			MyCharacter->BossHP = BossHealth / MaxBossHealth;
+	}
 }
 
 void AQuackBoss::CheckForDead()
@@ -1253,45 +1383,51 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 void AQuackBoss::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Method for logic when boss initiates attack
+	// Using same class for walls, since it wants identical logic
+	// So added one utility function to it, to make a distinction
 	ADestructibleInnerPipes* Pipe = Cast<ADestructibleInnerPipes>(OtherActor);
 	if (Pipe != nullptr)
 	{
-		Pipe->Fracture();
+		if (!Pipe->IsFenceWall() || CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo
+			|| CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour)
+		{
+			Pipe->Fracture();
+		}
 	}
 
 	AQuackCharacter* _Character = Cast<AQuackCharacter>(OtherActor);
 	if (_Character != nullptr)
 	{
+		// DONE
 		// Somehow base cooldown on arm swing anim ???
 		// Add a check to !Recoiling so tongue doesnt hurt u when u poison it
-		if (!bMeleeAttacking)
+		if (CurrentBossState == BossStates::E_Recoiling || CurrentBossState == BossStates::E_Poisoned || CurrentBossState == BossStates::E_HealingOne
+			|| CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour)
 		{
-			bMeleeAttacking = true;
-			_Character->DecreaseHealth(ArmDamage);
-			UWorld* const World = GetWorld();
-			if (World != nullptr)
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("MeleeAttacking: %s"), bMeleeAttacking ? TEXT("TRUE") : TEXT("FALSE"));
+			if (!bMeleeAttacking)
 			{
-				if (!World->GetTimerManager().IsTimerActive(CharHitMeleeTimerHandle))
+				bMeleeAttacking = true;
+				_Character->DecreaseHealth(ArmDamage);
+				UWorld* const World = GetWorld();
+				if (World != nullptr)
 				{
-					World->GetTimerManager().SetTimer(CharHitMeleeTimerHandle, this, &AQuackBoss::EnableMelee, 1.75f, false);
+					if (!World->GetTimerManager().IsTimerActive(CharHitMeleeTimerHandle))
+					{
+						World->GetTimerManager().SetTimer(CharHitMeleeTimerHandle, this, &AQuackBoss::EnableMelee, 2.2f, false);
+					}
 				}
 			}
 		}
+
+		
 		// Maybe add knockback here - once the whole is in the ground.
 		// Since currently, you can go through the boss
 		// on the ground, and trigger this
 	}
-}
-
-void AQuackBoss::EnableMelee()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Melee Reset"));
-	UWorld* const World = GetWorld();
-	if (World == nullptr) return;
-	World->GetTimerManager().ClearTimer(CharHitMeleeTimerHandle);
-	bMeleeAttacking = false;
-	//bMeleeStarted = false;
-	//bMeleeTimerTicking = false;
 }
 
 FRotator AQuackBoss::RotateHeadToPlayer()
@@ -1375,7 +1511,7 @@ void AQuackBoss::RotateTowardsPlayer()
 		// Project it to 2D
 		Direction = FVector(Direction.X, Direction.Y, 0.0f);
 		FRotator EndRotation = Direction.Rotation();
-		MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 2);
+		MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
 		SetActorRotation(MyRotation);
 
 		// Allow Horizontal strafe when rotation towards player
@@ -1397,7 +1533,7 @@ void AQuackBoss::RotateTowardsPipe()
 	// Project it to 2D
 	Direction = FVector(Direction.X, Direction.Y, 0.0f);
 	FRotator EndRotation = Direction.Rotation();
-	MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 2);
+	MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 1.75f);
 	SetActorRotation(MyRotation);
 	//UE_LOG(LogTemp, Warning, TEXT("MyRotation: %s , Pipe rotation: %s"), *MyRotation.ToString(), *EndRotation.ToString());
 	if (FMath::IsNearlyEqual(MyRotation.Yaw, EndRotation.Yaw, 1.0f))
@@ -1500,6 +1636,8 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 	StopTailShot();
 	if(bUsingPrimaryAttack)
 		ResetMultipleAttacksPattern();
+	if (bMeleeStabbing)
+		ClearStabRoutine();
 	//if(bIsSpawning)
 	//	ClearWaveSpawningTimer();
 	if (CurrentBossState != DesiredState)
