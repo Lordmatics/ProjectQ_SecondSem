@@ -154,6 +154,15 @@ class AQuackCharacter : public ACharacter
 
 private:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "HUD UI")
+		bool bGotHit = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "HUD UI")
+		bool bInBile = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "HUD UI")
+		float FlashDelay = 0.4f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PostProcess", meta = (AllowPrivateAccess = "true"))
 		class UPostProcessComponent* PostProcessComponent;
 
@@ -277,6 +286,13 @@ public:
 	void IncreaseHealth(float Amount, float DeltaTime);
 
 	void DecreaseHealth(float Amount);
+
+	void SetInBile();
+	UFUNCTION()
+		void OutOfBileEffect();
+
+	UFUNCTION()
+		void Flash();
 
 	FORCEINLINE float GetCurrentHealth() const { return PlayerConfig.Health; }
 

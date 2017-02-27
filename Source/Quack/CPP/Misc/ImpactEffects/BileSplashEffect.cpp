@@ -42,6 +42,7 @@ void ABileSplashEffect::OnTriggerExit(UPrimitiveComponent* OverlappedComp, AActo
 	{
 		CharRef = nullptr;
 		ClearDOT();
+		MyCharacter->OutOfBileEffect();
 	}
 }
 
@@ -55,6 +56,7 @@ void ABileSplashEffect::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AAct
 		// Reset timer to activate upon re-enterring
 		ClearDOT();
 		StartDOT();
+		MyCharacter->SetInBile();
 	}
 }
 

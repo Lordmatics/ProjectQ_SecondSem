@@ -466,10 +466,34 @@ void AQuackCharacter::IncreaseHealth(float Amount, float DeltaTime)
 	PlayerConfig.Health += Amount * DeltaTime;
 	PlayerConfig.Health = FMath::Clamp(PlayerConfig.Health, 0.0f, PlayerConfig.MaxHealth);
 }
+void AQuackCharacter::SetInBile()
+{
+	bInBile = true;
+}
+
+void AQuackCharacter::OutOfBileEffect()
+{
+	bInBile = false;
+}
+
+void AQuackCharacter::Flash()
+{
+	bGotHit = false;
+}
 
 void AQuackCharacter::DecreaseHealth(float Amount)
 {
 	PlayerConfig.Health -= Amount;
+	if (!bGotHit && !bInBile)
+	{
+		bGotHit = true;
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			FTimerHandle ResetHandle;
+			World->GetTimerManager().SetTimer(ResetHandle, this, &AQuackCharacter::Flash, FlashDelay, false);
+		}
+	}
 	if (PlayerConfig.Health <= 0.0f)
 	{
 		// You Dead
