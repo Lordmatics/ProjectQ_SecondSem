@@ -791,6 +791,7 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 		Positions = FMyMap(GetActorLocation(), MyCharacter->GetActorLocation());
 		//if (Positions.PlayerPosition.X > Positions.BossPosition.X)
 		//{
+		// When healing stop chase is true
 		if (bStopChase)
 		{
 			if (ChandelierDropComponent != nullptr)
@@ -816,18 +817,54 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 			//UE_LOG(LogTemp, Warning, TEXT("IsLower : %s"), CurrentTargettedPipeTransform.bIsLowerPipe ? TEXT("True its lower") : TEXT("false its upper"));
 			float BossLoc = GetActorLocation().X;
 			BossLoc = FMath::FInterpConstantTo(BossLoc, CentrePosition, DeltaTime, BossStafeSpeed);
-			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+			// Should manipulate height of boss during all stages to match player
+			// See what this is like, if not good enough, make separate version only for lasering
+			float BossLocZ = GetActorLocation().Z;
 
+			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, BossLocZ));
 		}
 		else
 		{
-			if (ChandelierDropComponent != nullptr)
-				ChandelierDropComponent->FinishAdjust();
+
 			float BossLoc = GetActorLocation().X;
 			float TargetLoc = Positions.PlayerPosition.X;
+			float BossLocZ = GetActorLocation().Z;
 			TargetLoc = FMath::Clamp(TargetLoc, MinBossX, MaxBossX);
+			if (CurrentBossState == BossStates::E_FightingTwo)
+			{
+				if (ChandelierDropComponent != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("PlayerPos: %f"), Positions.PlayerPosition.Z);
+
+					if (Positions.PlayerPosition.Z < 0.0f)
+					{
+						//BossLocZ = FMath::FInterpConstantTo(BossLocZ, ChandelierDropComponent->GetGroundLaserHeight(), DeltaTime, BossStafeSpeed);
+						//UE_LOG(LogTemp, Warning, TEXT("BossLocZ Down: %f"), BossLocZ);
+						ChandelierDropComponent->AdjustToLowerPipeHeight();
+
+					}
+					else
+					{
+						//BossLocZ = FMath::FInterpConstantTo(BossLocZ, ChandelierDropComponent->GetStartingLaserHeight(), DeltaTime, BossStafeSpeed);
+						//UE_LOG(LogTemp, Warning, TEXT("BossLocZ Up: %f"), BossLocZ);
+						ChandelierDropComponent->AdjustToUpperPipeHeight(true);
+
+
+					}
+				}
+			}
+			else
+			{
+				if (ChandelierDropComponent != nullptr)
+				{
+					ChandelierDropComponent->FinishAdjust();
+					//UE_LOG(LogTemp, Warning, TEXT("FinishAdjust Trolling me: %f"), BossLocZ);
+
+				}
+			}
 			BossLoc = FMath::FInterpConstantTo(BossLoc, TargetLoc, DeltaTime, BossStafeSpeed);
-			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, GetActorLocation().Z));
+			//UE_LOG(LogTemp, Warning, TEXT("SetActorLocation: %f"), BossLocZ);
+			SetActorLocation(FVector(BossLoc, GetActorLocation().Y, BossLocZ));
 		}
 
 		//}

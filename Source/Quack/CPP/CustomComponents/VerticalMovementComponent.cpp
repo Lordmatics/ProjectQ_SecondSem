@@ -44,6 +44,7 @@ void UVerticalMovementComponent::ActivateMovement(float DeltaTime)
 	if (VerticalHeight.bOverriden)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("VerticalHeightOverriden"));
+		// Sink to lower pipe
 		if (VerticalHeight.bIsLower)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("VerticalHeightOverriden - Change to Lower Pipe"));
@@ -55,18 +56,27 @@ void UVerticalMovementComponent::ActivateMovement(float DeltaTime)
 			GetOwner()->SetActorRelativeLocation(EndLocation);
 			return;
 		}
+		// Raise to upper pipe
 		else
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("VerticalHeightOverriden - Change to Upper Pipe"));
 			FVector OwnerLocation = GetOwner()->GetActorLocation();
 			float Start = OwnerLocation.Z;
 			// Lower to -110.0f Z
-			Start = FMath::FInterpConstantTo(Start, UpperPipeHealHeight, DeltaTime, InterpRate);
+			if (VerticalHeight.bLaserOverride)
+			{
+				Start = FMath::FInterpConstantTo(Start, StartingHeight, DeltaTime, InterpRate);
+			}
+			else
+			{
+				Start = FMath::FInterpConstantTo(Start, UpperPipeHealHeight, DeltaTime, InterpRate);
+			}
 			FVector EndLocation = FVector(OwnerLocation.X, OwnerLocation.Y, Start);
 			GetOwner()->SetActorRelativeLocation(EndLocation);
 			return;
 		}
 	}
+	// Lower To fog
 	if (bActivate)
 	{
 		FVector OwnerLocation = GetOwner()->GetActorLocation();
@@ -76,6 +86,7 @@ void UVerticalMovementComponent::ActivateMovement(float DeltaTime)
 		FVector EndLocation = FVector(OwnerLocation.X, OwnerLocation.Y, Start);
 		GetOwner()->SetActorRelativeLocation(EndLocation);
 	}
+	// Raise to initial
 	else
 	{
 		FVector OwnerLocation = GetOwner()->GetActorLocation();
@@ -102,9 +113,16 @@ void UVerticalMovementComponent::AdjustToLowerPipeHeight()
 	VerticalHeight = FHeightStructure(true, true);
 }
 
-void UVerticalMovementComponent::AdjustToUpperPipeHeight()
+void UVerticalMovementComponent::AdjustToUpperPipeHeight(bool ALaserOverride)
 {
-	VerticalHeight = FHeightStructure(true, false);
+	if (ALaserOverride)
+	{
+		VerticalHeight = FHeightStructure(true, false, true);
+	}
+	else
+	{
+		VerticalHeight = FHeightStructure(true, false);
+	}
 }
 
 void UVerticalMovementComponent::FinishAdjust()
