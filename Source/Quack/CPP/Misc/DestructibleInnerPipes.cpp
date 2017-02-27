@@ -63,6 +63,10 @@ void ADestructibleInnerPipes::OnComponentFracture(const FVector& HitPoint, const
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
+		if (MyStaticMesh != nullptr && bKillStaticMesh)
+		{
+			MyStaticMesh->DestroyComponent();
+		}
 		FTimerHandle CollisionTimer;
 		World->GetTimerManager().SetTimer(CollisionTimer, this, &ADestructibleInnerPipes::DisableCollision, 1.5f, false);
 

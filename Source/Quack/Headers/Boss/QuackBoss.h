@@ -12,6 +12,20 @@ class QUACK_API AQuackBoss : public AActor
 	GENERATED_BODY()
 
 private:
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ BossMinions")
+		uint32 bFightingThreeDrop : 1;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ BossMinions")
+		uint32 bFightingFourDrop : 1;
+
+	UPROPERTY(EditAnywhere, Category = "C++ BossMinions")
+		float MinionExpiringDelay = 30.0f;
+
+	/** Function that toggles bIsSpawning off, for raising*/
+	UFUNCTION()
+		void MinionExpiredRaise();
+
 	// Test
 	UPROPERTY(EditAnywhere, Category = "Ignored Laser Actors")
 		AActor* RockyFloorRef;
@@ -359,7 +373,11 @@ public:
 		uint32 bPoisonned : 1;
 
 	UPROPERTY(EditAnywhere, Category = "Custom Niall")
-		TArray<class APipe*> Pipes;
+		TArray<class APipe*> LowerPipes;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Niall")
+		TArray<class APipe*> UpperPipes;
+
 	UPROPERTY(EditAnywhere, Category = "Custom Niall")
 		TArray <TSubclassOf<class AQuackProjectile>> Projectile;
 	UPROPERTY(EditAnywhere, Category = "Custom Niall")

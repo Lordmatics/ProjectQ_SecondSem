@@ -25,6 +25,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Niall", meta = (AllowPrivateAccess = "true"))
 		class URadialForceComponent* RadialForce;
+
+	UPROPERTY(EditAnywhere, Category = "DestructibleFenceExtension")
+		uint32 bKillStaticMesh : 1;
 private:
 
 	UFUNCTION()

@@ -464,22 +464,22 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			SetTongueToNormal();
 			CurrentAnimationState = AnimationStates::E_AnimIdle;
 			// Below 80% phase one healing
-			if (Pipes.Num() + 1 == 4 && TargettedPipe != nullptr)
+			if (LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
 			{
 				ChangeState(BossStates::E_Fighting);
 			}
 			// Below 60% Phase two healing
-			else if (Pipes.Num() + 1 == 3 && TargettedPipe != nullptr)
+			else if (LowerPipes.Num() + UpperPipes.Num() + 1 == 3 && TargettedPipe != nullptr)
 			{
 				ChangeState(BossStates::E_FightingTwo);
 			}
 			// Below 40% Phase three healing
-			else if (Pipes.Num() + 1 == 2 && TargettedPipe != nullptr)
+			else if (LowerPipes.Num() + UpperPipes.Num() + 1 == 2 && TargettedPipe != nullptr)
 			{
 				ChangeState(BossStates::E_FightingThree);
 			}
 			// Below 20% Phase four healing
-			else if (Pipes.Num() + 1 == 1 && TargettedPipe != nullptr)
+			else if (LowerPipes.Num() + UpperPipes.Num() + 1 == 1 && TargettedPipe != nullptr)
 			{
 				ChangeState(BossStates::E_FightingFour);
 			}
@@ -639,7 +639,6 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
-			RotateTowardsPlayer();
 			//UE_LOG(LogTemp, Warning, TEXT("Fighting Three : Check for Melee Attack : %s"), Check ? TEXT("true") : TEXT("false"));
 			if (!CheckForMeleeAttack() && BossAttacksComponent != nullptr)
 			{
@@ -647,19 +646,36 @@ void AQuackBoss::HandleStates(float DeltaTime)
 				float NewFireRate = BossAttacksComponent->GetBileFireRate() / 2;
 				StartBileShot(NewFireRate);
 			}
-			BeginWaveSpawningCycle();
+			// Turns bIsSpawning to true // 30s it turns off
+			if(!bFightingThreeDrop)
+				BeginWaveSpawningCycle();
+			// Make sure chandelier logic is only active
+			// When minions are afoot
 			if (MinionFactory != nullptr)
 			{
 				switch (MinionFactory->AreMinionsAlive())
 				{
 					case true:
 					{
-						if (ChandelierDropComponent != nullptr)
+						if (bIsSpawning)
 						{
-							ChandelierDropComponent->FinishAdjust();
-							ChandelierDropComponent->Lower();
+							if (ChandelierDropComponent != nullptr)
+							{
+								ChandelierDropComponent->FinishAdjust();
+								ChandelierDropComponent->Lower();
+							}
+							ToggleShield(true);
 						}
-						ToggleShield(true);
+						else
+						{
+							if (ChandelierDropComponent != nullptr)
+							{
+								ChandelierDropComponent->FinishAdjust();
+								ChandelierDropComponent->Raise();
+							}
+							RotateTowardsPlayer();
+							ToggleShield(false);
+						}
 						break;
 					}
 					case false:
@@ -669,6 +685,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 							ChandelierDropComponent->FinishAdjust();
 							ChandelierDropComponent->Raise();
 						}
+						RotateTowardsPlayer();
 						ToggleShield(false);
 						break;
 					}
@@ -681,34 +698,51 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
-			RotateTowardsPlayer();
 			if (!CheckForMeleeAttack())
 			{
 				BeginMultipleAttacksPattern();
 			}
-			BeginWaveSpawningCycle();
+			// Only Drop Once during the phases - and get back up regardless after 30s
+			if(!bFightingFourDrop)
+				BeginWaveSpawningCycle();
 			if (MinionFactory != nullptr)
 			{
 				switch (MinionFactory->AreMinionsAlive())
 				{
-				case true:
-				{
-					if (ChandelierDropComponent != nullptr)
+					case true:
 					{
-						ChandelierDropComponent->Lower();
+						if (bIsSpawning)
+						{
+							if (ChandelierDropComponent != nullptr)
+							{
+								ChandelierDropComponent->FinishAdjust();
+								ChandelierDropComponent->Lower();
+							}
+							ToggleShield(true);
+						}
+						else
+						{
+							if (ChandelierDropComponent != nullptr)
+							{
+								ChandelierDropComponent->FinishAdjust();
+								ChandelierDropComponent->Raise();
+							}
+							RotateTowardsPlayer();
+							ToggleShield(false);
+						}
+						break;
 					}
-					ToggleShield(true);
-					break;
-				}
-				case false:
-				{
-					if (ChandelierDropComponent != nullptr)
+					case false:
 					{
-						ChandelierDropComponent->Raise();
+						if (ChandelierDropComponent != nullptr)
+						{
+							ChandelierDropComponent->FinishAdjust();
+							ChandelierDropComponent->Raise();
+						}
+						RotateTowardsPlayer();
+						ToggleShield(false);
+						break;
 					}
-					ToggleShield(false);
-					break;
-				}
 				}
 			}
 			break;
@@ -892,16 +926,24 @@ bool AQuackBoss::CheckForMeleeAttack()
 void AQuackBoss::BeginWaveSpawningCycle()
 {
 	if (bIsSpawning) return;
+	bFightingThreeDrop = true;
+	bFightingFourDrop = true;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BeginWaveSpawning : Phase Fighting Three"));
+		//UE_LOG(LogTemp, Warning, TEXT("BeginWaveSpawning : Phase Fighting Three"));
 	//	UE_LOG(LogTemp, Warning, TEXT("BeginSpawningCycle"));
 		//ChangeAttack();
 		SpawnMinions();
-		World->GetTimerManager().SetTimer(WaveSpawnerTimer, this, &AQuackBoss::SpawnMinions, WaveSpawnDelay, true);
+		FTimerHandle EndOfWaveHandle; // WaveSpawnerHandle Deprecated
+		World->GetTimerManager().SetTimer(EndOfWaveHandle, this, &AQuackBoss::MinionExpiredRaise, MinionExpiringDelay, false);
 		bIsSpawning = true;
 	}
+}
+
+void AQuackBoss::MinionExpiredRaise()
+{
+	bIsSpawning = false;
 }
 
 void AQuackBoss::SpawnMinions()
@@ -932,7 +974,7 @@ void AQuackBoss::SpawnMinions()
 void AQuackBoss::ClearWaveSpawningTimer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Wave Spawn Timer RESET : Boss"));
-	bIsSpawning = false;
+	//bIsSpawning = false;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -1065,7 +1107,7 @@ void AQuackBoss::ResetMultipleAttacksPattern()
 void AQuackBoss::ShouldEnterHealingPhase()
 {
 	if (CurrentBossState == BossStates::E_Poisoned) return;
-	if (Pipes.Num() == 0 && TargettedPipe == nullptr)
+	if (LowerPipes.Num() == 0 && UpperPipes.Num() == 0 && TargettedPipe == nullptr)
 	{
 		//ChangeState(BossStates::E_Idle);
 		return;
@@ -1073,22 +1115,23 @@ void AQuackBoss::ShouldEnterHealingPhase()
 	else
 	{
 		// Below 80% phase one healing
-		if (BossHealth <= ((4 * MaxBossHealth) / 5) && Pipes.Num() + 1 == 4 && TargettedPipe != nullptr)
+		// + 1 is since, when a pipe is selected it is removed from the array
+		if (BossHealth <= ((4 * MaxBossHealth) / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingOne);
 		}
 		// Below 60% Phase two healing
-		else if (BossHealth <= ((3 * MaxBossHealth) / 5) && Pipes.Num() + 1 == 3 && TargettedPipe != nullptr)
+		else if (BossHealth <= ((3 * MaxBossHealth) / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 3 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingTwo);
 		}
 		// Below 40% Phase three healing
-		else if (BossHealth <= (2 * MaxBossHealth / 5) && Pipes.Num() + 1 == 2 && TargettedPipe != nullptr)
+		else if (BossHealth <= (2 * MaxBossHealth / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 2 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingThree);
 		}
 		// Below 20% Phase four healing
-		else if (BossHealth <= (MaxBossHealth / 5) && Pipes.Num() + 1 == 1 && TargettedPipe != nullptr)
+		else if (BossHealth <= (MaxBossHealth / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 1 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingFour);
 		}
@@ -1185,6 +1228,7 @@ void AQuackBoss::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* Oth
 	if (_Character != nullptr)
 	{
 		// Somehow base cooldown on arm swing anim ???
+		// Add a check to !Recoiling so tongue doesnt hurt u when u poison it
 		if (!bMeleeAttacking)
 		{
 			bMeleeAttacking = true;
@@ -1375,20 +1419,32 @@ void AQuackBoss::LocateNearbyPipe()
 	//if (!bPipeSelected)
 	//{
 	//bPipeSelected = true;
-	if (Pipes.Num() != 0)
+	if (LowerPipes.Num() != 0)
 	{
-		int Random = FMath::RandRange(0, Pipes.Num() - 1);
-		TargettedPipe = Pipes[Random];
+		int Random = FMath::RandRange(0, LowerPipes.Num() - 1);
+		TargettedPipe = LowerPipes[Random];
 		SetPreviousPipe();
 		if (TargettedPipe != nullptr)
 		{
-			Pipes.Remove(TargettedPipe);
+			LowerPipes.Remove(TargettedPipe);
 			TargettedPipe->bTargettedByBoss = true;
 			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe);
 		}
 		// Search for a pipe in scene
 		// and return the transform of it
 		//CurrentTargettedPipeTransform = PipeTransform;
+	}
+	else if (UpperPipes.Num() != 0)
+	{
+		int Random = FMath::RandRange(0, UpperPipes.Num() - 1);
+		TargettedPipe = UpperPipes[Random];
+		SetPreviousPipe();
+		if (TargettedPipe != nullptr)
+		{
+			UpperPipes.Remove(TargettedPipe);
+			TargettedPipe->bTargettedByBoss = true;
+			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe);
+		}
 	}
 	//}
 }
@@ -1409,8 +1465,8 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 	StopTailShot();
 	if(bUsingPrimaryAttack)
 		ResetMultipleAttacksPattern();
-	if(bIsSpawning)
-		ClearWaveSpawningTimer();
+	//if(bIsSpawning)
+	//	ClearWaveSpawningTimer();
 	if (CurrentBossState != DesiredState)
 	{
 		if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour)

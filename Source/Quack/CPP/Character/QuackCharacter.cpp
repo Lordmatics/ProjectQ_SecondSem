@@ -420,7 +420,7 @@ void AQuackCharacter::UsePoison()
 					PlayerConfig.CurrentPipe->SimulateDestroy();
 					PlayerConfig.CurrentPipe->ToggleHighlight(false);
 					PlayerConfig.Boss->ChangeState(BossStates::E_Poisoned);
-					if (PlayerConfig.Boss->Pipes.Num() == 0)
+					if (PlayerConfig.Boss->LowerPipes.Num() == 0 && PlayerConfig.Boss->UpperPipes.Num() == 0)
 					{
 						PlayerConfig.Boss->TargettedPipe = nullptr;
 					}
