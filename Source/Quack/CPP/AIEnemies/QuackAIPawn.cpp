@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Headers/Managers/TutorialManager.h"
 #include "Headers/CustomComponents/AnimationComponent.h"
+#include "Headers/AIEnemies/QuackAIController.h"
 
 // Sets default values
 AQuackAIPawn::AQuackAIPawn()
@@ -31,7 +32,6 @@ void AQuackAIPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentHealth = MaxHealth;
-
 }
 
 // Called every frame
@@ -70,4 +70,21 @@ void AQuackAIPawn::Die()
 
 	}
 	Destroy();
+}
+
+void AQuackAIPawn::SetBossMinion()
+{
+	AQuackAIController* TempController = Cast<AQuackAIController>(GetController());
+	if (TempController != nullptr)
+	{
+		APlayerController* TempPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+		if (TempPlayerController != nullptr)
+		{
+			APawn* TempCharacter = TempPlayerController->GetControlledPawn();
+			if (TempCharacter != nullptr)
+			{
+				TempController->Blackboard->SetValueAsObject("AttackTarget", TempCharacter);
+			}
+		}
+	}
 }

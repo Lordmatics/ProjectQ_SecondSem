@@ -39,6 +39,11 @@ void AHealthPickUp::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* 
 	{
 		// Add to Inventory or something
 		MyCharacter->IncreaseHealth(HealthCrateValue);
+		UWorld* TempWorld = GetWorld();
+		if (TempWorld != nullptr && HealParticle!=nullptr)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(TempWorld, HealParticle, GetActorLocation());
+		}
 		// Destroy Pick Up
 		Destroy();
 	}

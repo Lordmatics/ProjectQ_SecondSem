@@ -62,6 +62,8 @@ public:
 
 	virtual void Die();
 
+	void SetBossMinion();
+
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 

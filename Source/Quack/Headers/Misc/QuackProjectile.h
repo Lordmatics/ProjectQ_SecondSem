@@ -43,6 +43,9 @@ public:
 		float MaxVel = 15000.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 		bool bCanBounce = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+		class UParticleSystemComponent* Particle;
 	/** called when projectile hits something */
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

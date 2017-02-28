@@ -18,6 +18,9 @@ ABileSplashEffect::ABileSplashEffect()
 	TEMPBile->OnComponentBeginOverlap.AddDynamic(this, &ABileSplashEffect::OnTriggerEnter);
 	TEMPBile->OnComponentEndOverlap.AddDynamic(this, &ABileSplashEffect::OnTriggerExit);
 	TEMPBile->SetupAttachment(MyRoot);
+
+	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleComp"));
+	Particle->SetupAttachment(MyRoot);
 }
 
 // Called when the game starts or when spawned

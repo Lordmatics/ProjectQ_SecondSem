@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 		int	HealthCrateValue = 25;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+		UParticleSystem* HealParticle;
 	
 	
 };

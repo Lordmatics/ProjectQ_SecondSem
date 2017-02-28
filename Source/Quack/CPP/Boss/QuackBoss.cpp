@@ -82,6 +82,8 @@ AQuackBoss::AQuackBoss()
 	LaserCannon->SetRelativeLocation(FVector(-0.002477f, 54.748207f, 832.158630f));
 	LaserCannon->SetRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
 	LaserCannon->SetupAttachment(MySkeletalMesh);
+	LaserBuildup = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LaserBuildUp"));
+	LaserBuildup->SetupAttachment(LaserCannon);
 	LaserParticleSystemComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LaserPS"));
 	LaserParticleSystemComp->SetupAttachment(LaserCannon);
 	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
@@ -1270,7 +1272,7 @@ void AQuackBoss::ShouldEnterHealingPhase()
 		// + 1 is since, when a pipe is selected it is removed from the array
 		//if (BossHealth <= ((4 * MaxBossHealth) / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
 		//{
-		if (!bImmortal && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr)
+		if (!bImmortal && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr && BossHealth<=(4*MaxBossHealth/5))
 		{	
 			ChangeState(BossStates::E_HealingOne);
 		}
@@ -1329,7 +1331,7 @@ void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 	if (bOverride)
 	{
 		// Want a 5s matinee now as well
-		BossHealth += DeltaTime * BossRegenRate * 4.0f;
+		BossHealth += DeltaTime * BossRegenRate * 20.0f;
 		if (MyCharacter != nullptr)
 			MyCharacter->BossHP = BossHealth / MaxBossHealth;
 	}

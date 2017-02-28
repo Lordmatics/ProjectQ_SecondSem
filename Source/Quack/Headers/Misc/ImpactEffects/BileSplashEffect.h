@@ -16,6 +16,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Bile")
 		UStaticMeshComponent* TEMPBile;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Bile")
+		UParticleSystemComponent* Particle;
+
 	UPROPERTY(EditAnywhere, Category = "Bile")
 		float DOTFrequency = 0.5f;
 

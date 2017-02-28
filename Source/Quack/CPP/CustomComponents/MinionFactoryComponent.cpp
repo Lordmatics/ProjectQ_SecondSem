@@ -47,6 +47,7 @@ void UMinionFactoryComponent::SpawnMinionWaveA()
 		AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactoryA[EnemyIndex], SpawnPointsA[i]->GetActorLocation(), FRotator::ZeroRotator);
 		if (Minion != nullptr)
 		{
+			Minion->SetBossMinion();
 			Minion->OnEnemyDestroyed.AddDynamic(this, &UMinionFactoryComponent::RemoveFromListA);
 			MinionArrayA.Add(Minion);
 		}
@@ -66,6 +67,7 @@ void UMinionFactoryComponent::SpawnMinionWaveB()
 		AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactoryB[EnemyIndex], SpawnPointsB[i]->GetActorLocation(), FRotator::ZeroRotator);
 		if (Minion != nullptr)
 		{
+			Minion->SetBossMinion();
 			Minion->OnEnemyDestroyed.AddDynamic(this, &UMinionFactoryComponent::RemoveFromListB);
 			MinionArrayB.Add(Minion);
 		}

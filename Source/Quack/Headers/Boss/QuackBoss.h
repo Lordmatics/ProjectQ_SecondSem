@@ -166,6 +166,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Armour Plate", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* LaserCannon;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Laser Particle", meta = (AllowPrivateAccess = "true"))
+		UParticleSystemComponent* LaserBuildup;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "Armour Plate")
 		UParticleSystemComponent* LaserParticleSystemComp;
 
