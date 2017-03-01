@@ -413,7 +413,8 @@ void AQuackCharacter::UsePoison()
 		{
 			if (PlayerConfig.CurrentPipe->GetName() == PlayerConfig.Boss->TargettedPipe->GetName())
 			{
-				if (PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingOne || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingTwo || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingThree || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingFour)
+				if (PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingOne || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingTwo 
+					|| PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingThree || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingFour)
 				{
 					PlayerConfig.CurrentPipe->bPoisonedPipe = true;
 					PlayerConfig.CurrentPipe->ChangeMeshColour();
@@ -516,7 +517,7 @@ void AQuackCharacter::Reload()
 			MovementConfig.bIsSprinting = false;
 			World->GetTimerManager().SetTimer(ReloadBoolHandle, this, &AQuackCharacter::EndReload, ReloadDuration, false);
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Initiaited Reload"));
+		//UE_LOG(LogTemp, Warning, TEXT("Initiaited Reload"));
 	}
 }
 

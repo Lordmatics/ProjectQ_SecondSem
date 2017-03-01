@@ -221,6 +221,8 @@ void AQuackBoss::BeginPlay()
 	{
 		FTimerHandle TempHandle;
 		World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::StartBoss, DontDoAnythingTime, false);
+		// add variable to character to prevent movement for cutscene
+		// this will change to a trigger, when we get an entrance
 	}
 	bImmortal = true;
 	MaxBossHealth = BossHealth;
@@ -348,7 +350,7 @@ void AQuackBoss::BeamLogic()
 		{
 			// Anything thats not an ignored actor, will make the laser stop
 			LaserTargetLocation = Hit.Location;
-			UE_LOG(LogTemp, Warning, TEXT("ActorHit: %s"), *HitActor->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("ActorHit: %s"), *HitActor->GetName());
 		}
 		else
 		{
@@ -390,7 +392,7 @@ void AQuackBoss::ResumeFighting()
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Resume fighting"));
+		//UE_LOG(LogTemp, Warning, TEXT("Resume fighting"));
 		FTimerHandle TempTimer;
 		World->GetTimerManager().SetTimer(TempTimer, this, &AQuackBoss::ChangeBackToPrevious, RecoilDuration, false);
 	}
@@ -398,7 +400,7 @@ void AQuackBoss::ResumeFighting()
 
 void AQuackBoss::ChangeBackToPrevious()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Resume fighting 2"));
+	//UE_LOG(LogTemp, Warning, TEXT("Resume fighting 2"));
 
 	if (PreviousBossState != BossStates::E_Fighting || PreviousBossState != BossStates::E_FightingTwo || PreviousBossState != BossStates::E_FightingThree || PreviousBossState != BossStates::E_FightingFour)
 	{
@@ -612,6 +614,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			StopFacingPipe();
 			RotateTowardsPipe();
 			CheckForPoisoned(DeltaTime);
+			UE_LOG(LogTemp, Warning, TEXT("Poisonned"));
 			ToggleShield(false);
 			EndPipeDrain();
 			break;
@@ -619,13 +622,20 @@ void AQuackBoss::HandleStates(float DeltaTime)
 		case BossStates::E_Recoiling:
 		{
 			SetTongueToNormal();
-			if (TargettedPipe->bLowerPipe)
+			if (TargettedPipe != nullptr)
 			{
-				CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
+				if (TargettedPipe->bLowerPipe)
+				{
+					CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
+				}
+				else
+				{
+					CurrentAnimationState = AnimationStates::E_AnimRecoil;
+				}
 			}
 			else
 			{
-				CurrentAnimationState = AnimationStates::E_AnimRecoil;
+				UE_LOG(LogTemp, Warning, TEXT("TargettedPipe is nullptr in E_Recoiling"));
 			}
 			StopFacingPipe();
 			// Ors might need to be ands not sure
@@ -650,6 +660,8 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			if (!CheckForMeleeAttack())
 			{
 				//StartTailShot();
+				//float NewFireRate = BossAttacksComponent->GetBileFireRate() / 4;
+				//StartBileShot(NewFireRate);
 			}
 			//StartTailShot();
 			//ShootFromTail(DeltaTime);
@@ -665,7 +677,9 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			RotateTowardsPlayer();
 			if (!CheckForMeleeAttack())
 			{
-				BeginMultipleAttacksPattern();
+				//BeginMultipleAttacksPattern();
+				//float NewFireRate = BossAttacksComponent->GetBileFireRate() / 4;
+				//StartBileShot(NewFireRate);
 			}
 			break;
 		}
@@ -953,7 +967,7 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 			{
 				if (ChandelierDropComponent != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("PlayerPos: %f"), Positions.PlayerPosition.Z);
+					//UE_LOG(LogTemp, Warning, TEXT("PlayerPos: %f"), Positions.PlayerPosition.Z);
 
 					if (Positions.PlayerPosition.Z < 0.0f)
 					{
@@ -1127,7 +1141,7 @@ void AQuackBoss::SpawnMinions()
 
 void AQuackBoss::ClearWaveSpawningTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Wave Spawn Timer RESET : Boss"));
+	//UE_LOG(LogTemp, Warning, TEXT("Wave Spawn Timer RESET : Boss"));
 	//bIsSpawning = false;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -1218,33 +1232,6 @@ void AQuackBoss::ChangeAttack()
 			}
 		}
 	}
-
-	//if (bIsBileSpitting)
-	//{
-	//	StopBileShot();
-	//	StartTailShot();
-	//}
-	//else if(bIsTailShooting)
-	//{
-	//	StopTailShot();
-	//	// set bilespitting to true once then repeat the attack function
-	//	StartBileShot();
-	//}
-	//else
-	//{
-	//	// This case is coz when he resets his phase, both attacks are false so, in that event, choose one randomly
-	//	int Rand = FMath::RandRange(0, 3);
-	//	if (Rand == 0)
-	//	{
-	//		StopTailShot();
-	//		StartBileShot();
-	//	}
-	//	else
-	//	{
-	//		StartBileShot();
-	//		StopTailShot();
-	//	}
-	//}
 }
 
 void AQuackBoss::ResetMultipleAttacksPattern()
@@ -1365,9 +1352,10 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 	{
 		if (MyCharacter->PoisonConfig.bIsPoisoning)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Character->PoisonConfig->bIsPoisonning"));
 			if (TargettedPipe != nullptr)
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
+				UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
 				if (TargettedPipe->bLowerPipe)
 				{
 					CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
@@ -1376,6 +1364,12 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 				{
 					CurrentAnimationState = AnimationStates::E_AnimRecoil;
 				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: TargettedPipe null"));
+				// Bad - but might work
+				CurrentAnimationState = AnimationStates::E_AnimRecoil;
 			}
 			SufferDamage(DeltaTime * 5.0f);
 		}
