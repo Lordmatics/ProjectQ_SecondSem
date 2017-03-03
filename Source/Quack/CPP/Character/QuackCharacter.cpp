@@ -500,7 +500,7 @@ void AQuackCharacter::DecreaseHealth(float Amount)
 					PC->ClientPlayCameraShake(HitCameraShake);
 			}
 			FTimerHandle ResetHandle;
-			World->GetTimerManager().SetTimer(ResetHandle, this, &AQuackCharacter::Flash, FlashDelay, false);
+			World->GetTimerManager().SetTimer(ResetHandle, this, &AQuackCharacter::Flash, FlashDelay * 2, false);
 		}
 	}
 	if (PlayerConfig.Health <= 0.0f)
