@@ -22,13 +22,28 @@ class QUACK_API APipe : public AActor
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-	USceneComponent* MyRoot;
+		USceneComponent* MyRoot;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-	UShapeComponent* MyTrigger;
+		UShapeComponent* MyTrigger;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-	UStaticMeshComponent* MyStaticMesh;
+		UStaticMeshComponent* MyStaticMesh;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		UStaticMeshComponent* PipeDecorationL;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		UStaticMeshComponent* PipeDecorationInnerL;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		UStaticMeshComponent* PipeDecorationR;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		UStaticMeshComponent* PipeDecorationInnerR;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		UStaticMeshComponent* PipePlug;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
 		UStaticMeshComponent* DrainMesh;

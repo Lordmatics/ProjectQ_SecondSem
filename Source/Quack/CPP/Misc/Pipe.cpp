@@ -19,6 +19,21 @@ APipe::APipe()
 	MyStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeMesh"));
 	MyStaticMesh->SetupAttachment(MyTrigger);
 
+	PipeDecorationL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationL"));
+	PipeDecorationL->SetupAttachment(MyTrigger);
+
+	PipeDecorationInnerL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationInnerL"));
+	PipeDecorationInnerL->SetupAttachment(MyTrigger);
+
+	PipeDecorationR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationR"));
+	PipeDecorationR->SetupAttachment(MyTrigger);
+
+	PipeDecorationInnerR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationInnerR"));
+	PipeDecorationInnerR->SetupAttachment(MyTrigger);
+
+	PipePlug = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipePlug"));
+	PipePlug->SetupAttachment(MyTrigger);
+
 	PipeOuterBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OuterPipe"));
 	PipeOuterBase->SetupAttachment(MyTrigger);
 

@@ -405,6 +405,7 @@ void AQuackBoss::ChangeBackToPrevious()
 	if (PreviousBossState != BossStates::E_Fighting || PreviousBossState != BossStates::E_FightingTwo || PreviousBossState != BossStates::E_FightingThree || PreviousBossState != BossStates::E_FightingFour)
 	{
 		ChangeState(BossStates::E_FightingTwo);
+		//ChangeState(PreviousBossState);
 	}
 	else
 	{
@@ -453,14 +454,19 @@ void AQuackBoss::Tick(float DeltaTime)
 		}
 		// THIS IS SOMEWHAT OF AN EXPERIEMENT ... PLIS WORK -- RECOILD WHEN FULLY HEALED
 		//CurrentAnimationState = AnimationStates::E_AnimRecoil;		
-		if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour || CurrentBossState == BossStates::E_Poisoned)
+		if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo 
+			|| CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour || CurrentBossState == BossStates::E_Poisoned || CurrentBossState == BossStates::E_Paused)
 		{
 			ChangeState(BossStates::E_Recoiling);
 			ResumeFighting();
 		}
 		else
 		{
-			ChangeState(BossStates::E_Idle);
+			ChangeState(BossStates::E_Recoiling);
+			ResumeFighting();
+
+			//ChangeState(BossStates::E_Idle);
+			//UE_LOG(LogTemp, Warning, TEXT("FullyHealed: Else ran"));
 		}
 		BossHealth -= 1.0f;
 	}
@@ -796,6 +802,10 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			}
 			break;
 		}
+		case BossStates::E_Paused:
+		{
+			break;
+		}
 	}
 }
 
@@ -818,8 +828,8 @@ void AQuackBoss::InitiateMeleeAttacks()
 			float MeleeBoth = AnimMeleeBoth->GetPlayLength();
 			float StabRate = FMath::Max3(MeleeLeft, MeleeRight, MeleeBoth);
 			//float StabRate = AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimLeft());
-			World->GetTimerManager().SetTimer(MeleeTimerHandle, this, &AQuackBoss::Stab, StabRate, true);
-			World->GetTimerManager().SetTimer(CharHitMeleeTimerHandle, this, &AQuackBoss::EnableMelee, StabRate, true);
+			World->GetTimerManager().SetTimer(MeleeTimerHandle, this, &AQuackBoss::Stab, StabRate * 2, true);
+			World->GetTimerManager().SetTimer(CharHitMeleeTimerHandle, this, &AQuackBoss::EnableMelee, StabRate * 2, true);
 			bMeleeStabbing = true;
 		}
 	}
@@ -866,11 +876,23 @@ void AQuackBoss::Stab()
 			break;
 		}
 	}
+	bIsStabbingAnimation = true;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		FTimerHandle StabOffHandle;
+		World->GetTimerManager().SetTimer(StabOffHandle, this, &AQuackBoss::StabPause, 2.3f, false);
+	}
 	MeleeCounter++;
 	if (MeleeCounter > MaxMeleeVariations)
 	{
 		MeleeCounter = 1;
 	}
+}
+
+void AQuackBoss::StabPause()
+{
+	bIsStabbingAnimation = false;
 }
 
 void AQuackBoss::ClearStabRoutine()
@@ -1318,7 +1340,7 @@ void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 	if (bOverride)
 	{
 		// Want a 5s matinee now as well
-		BossHealth += DeltaTime * BossRegenRate * 20.0f;
+		BossHealth += DeltaTime * BossRegenRate * 15.0f;
 		if (MyCharacter != nullptr)
 			MyCharacter->BossHP = BossHealth / MaxBossHealth;
 	}
@@ -1480,6 +1502,8 @@ FRotator AQuackBoss::RotateHeadToPlayer()
 
 void AQuackBoss::RotateTowardsPlayer()
 {
+	if (bIsStabbingAnimation) return;
+	//UE_LOG(LogTemp, Warning, TEXT("bMeleeStabbing: %s, bMeleeAttacking: %s"), bMeleeStabbing ? TEXT("MeleeStabTrue") : TEXT("MeleeStabFalse"), bMeleeAttacking ? TEXT("MelATKTrue") : TEXT("MelATKFalse"));
 	if (MyCharacter != nullptr /*&& !bHealingOnPipe && !bPoisonned*/)
 	{
 		/*

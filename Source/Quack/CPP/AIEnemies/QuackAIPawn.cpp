@@ -80,7 +80,7 @@ void AQuackAIPawn::SetBossMinion()
 		APlayerController* TempPlayerController = UGameplayStatics::GetPlayerController(this, 0);
 		if (TempPlayerController != nullptr)
 		{
-			APawn* TempCharacter = TempPlayerController->GetControlledPawn();
+			APawn* TempCharacter = TempPlayerController->GetPawn();
 			if (TempCharacter != nullptr)
 			{
 				TempController->Blackboard->SetValueAsObject("AttackTarget", TempCharacter);

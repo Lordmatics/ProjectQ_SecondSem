@@ -68,7 +68,7 @@ void ADestructibleInnerPipes::OnComponentFracture(const FVector& HitPoint, const
 			MyStaticMesh->DestroyComponent();
 		}
 		FTimerHandle CollisionTimer;
-		World->GetTimerManager().SetTimer(CollisionTimer, this, &ADestructibleInnerPipes::DisableCollision, 1.5f, false);
+		World->GetTimerManager().SetTimer(CollisionTimer, this, &ADestructibleInnerPipes::DisableCollision, 0.1f, false);
 
 		FTimerHandle DestroyTimer;
 		World->GetTimerManager().SetTimer(DestroyTimer, this, &ADestructibleInnerPipes::DestroyThis, 5.0f, false);

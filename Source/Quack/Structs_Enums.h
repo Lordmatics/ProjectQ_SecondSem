@@ -20,6 +20,7 @@ UENUM(BlueprintType)        //"BlueprintType" is essential specifier
 	E_FightingTwo		UMETA(DisplayName = "FightingTwo"),
 	E_FightingThree		UMETA(DisplayName = "FightingThree"),
 	E_FightingFour		UMETA(DisplayName = "FightingFour"),
+	E_Paused			UMETA(DisplayName = "BossPause"),
 };
 
 UENUM(BlueprintType)        //"BlueprintType" is essential specifier

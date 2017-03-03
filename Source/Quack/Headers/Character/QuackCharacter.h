@@ -201,6 +201,20 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FirstPersonCameraComponent;
 
+	UPROPERTY(EditAnywhere, Category = "Hit Shake")
+		TSubclassOf<UCameraShake> HitCameraShake;
+	//UPROPERTY(EditAnywhere, Category = "Hit Shake")
+	//	FVector HitEpicentre;
+	//UPROPERTY(EditAnywhere, Category = "Hit Shake")
+	//	float InnerRadius = 0.0f;
+	//UPROPERTY(EditAnywhere, Category = "Hit Shake")
+	//	float OuterRadius = 0.0f;
+	//UPROPERTY(EditAnywhere, Category = "Hit Shake")
+	//	float Falloff = 1.0f;
+	//UPROPERTY(EditAnywhere, Category = "Hit Shake")
+	//	uint32 bOrientShakeTowardsEpicentre : 1;
+
+
 	UPROPERTY()
 		class UPhysicsHandleComponent* PhysicsHandle;
 

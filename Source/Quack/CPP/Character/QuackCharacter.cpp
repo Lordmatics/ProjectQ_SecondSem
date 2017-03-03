@@ -491,6 +491,14 @@ void AQuackCharacter::DecreaseHealth(float Amount)
 		UWorld* const World = GetWorld();
 		if (World != nullptr)
 		{
+			//if(HitCameraShake != nullptr)
+			//	UGameplayStatics::PlayWorldCameraShake(World, HitCameraShake, HitEpicentre, InnerRadius, OuterRadius, Falloff, bOrientShakeTowardsEpicentre);
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if (PC != nullptr)
+			{
+				if (HitCameraShake != nullptr)
+					PC->ClientPlayCameraShake(HitCameraShake);
+			}
 			FTimerHandle ResetHandle;
 			World->GetTimerManager().SetTimer(ResetHandle, this, &AQuackCharacter::Flash, FlashDelay, false);
 		}

@@ -15,6 +15,11 @@ private:
 
 	uint32 bDontDoAnything : 1;
 
+	uint32 bIsStabbingAnimation : 1;
+
+	UFUNCTION()
+		void StabPause();
+
 	UPROPERTY(EditAnywhere, Category = "C++ BOSS MUST WAIT")
 		float DontDoAnythingTime = 4.0f;
 	
