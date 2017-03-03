@@ -3,6 +3,7 @@
 #include "Headers/Quack.h"
 #include "Headers/Misc/Pipe.h"
 #include "Headers/Character/QuackCharacter.h"
+#include "Components/DestructibleComponent.h"
 
 
 // Sets default values
@@ -42,6 +43,11 @@ APipe::APipe()
 	DrainMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	DrainMesh->SetupAttachment(MyTrigger);
 
+	DrainMeshDM = CreateDefaultSubobject<UDestructibleComponent>(TEXT("DrainMeshDM"));
+	DrainMeshDM->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DrainMeshDM->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	DrainMeshDM->SetupAttachment(MyTrigger);
+
 	LeakParticleSys = CreateAbstractDefaultSubobject<UParticleSystemComponent>(TEXT("Leak"));
 	LeakParticleSys->SetupAttachment(MyTrigger);
 	LeakParticleSys->SetRelativeLocation(PipeOuterBase->RelativeLocation);
@@ -60,7 +66,8 @@ void APipe::BeginPlay()
 		MyTrigger->OnComponentEndOverlap.AddDynamic(this, &APipe::OnTriggerExit);
 	}
 	LeakParticleSys->Deactivate();
-	DrainMesh->SetVisibility(false);
+	DrainMesh->SetVisibility(true);
+	DrainMeshDM->SetVisibility(false);
 	SpawnLocation = MyStaticMesh->GetComponentLocation();
 }
 
@@ -148,7 +155,15 @@ void APipe::SimulateDestroy()
 {
 	bDescend = true;
 	bDestroyed = true;
-	DrainMesh->SetVisibility(true);
+	DrainMesh->SetVisibility(false);
+	if (DrainMeshDM != nullptr)
+	{
+		DrainMeshDM->SetVisibility(true);
+
+		DrainMeshDM->AddImpulseAtLocation(FVector::ForwardVector, DrainMeshDM->GetComponentLocation());
+		DrainMeshDM->ApplyRadiusDamage(10.0f, DrainMeshDM->GetComponentLocation(), 100.0f, 1000.0f, true);
+		UE_LOG(LogTemp, Warning, TEXT("DrainMeshDM Applied Damage"));
+	}
 	LeakParticleSys->ActivateSystem();
 	
 

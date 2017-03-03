@@ -119,13 +119,13 @@ void AAssaultRifle::Shoot()
 				{
 					//UE_LOG(LogTemp, Warning, TEXT("I Hit Component : %s"), *Hit.Component.Get()->GetName());
 
-					UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *HitActor->GetName());
 					AQuackArmourPin* ArmourPin = Cast<AQuackArmourPin>(HitActor);
 					if (ArmourPin != nullptr)
 					{
 						if (ArmourPin->GetArmourValue() >= 0.0f)
 						{
-							UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
+							//UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
 							ArmourPin->DecreaseArmourValue(GunDamage);
 							ArmourPin->White();
 							//ArmourPin->Setvectorparam

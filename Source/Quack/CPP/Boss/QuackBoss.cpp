@@ -620,7 +620,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			StopFacingPipe();
 			RotateTowardsPipe();
 			CheckForPoisoned(DeltaTime);
-			UE_LOG(LogTemp, Warning, TEXT("Poisonned"));
+			//UE_LOG(LogTemp, Warning, TEXT("Poisonned"));
 			ToggleShield(false);
 			EndPipeDrain();
 			break;
@@ -641,7 +641,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("TargettedPipe is nullptr in E_Recoiling"));
+				//UE_LOG(LogTemp, Warning, TEXT("TargettedPipe is nullptr in E_Recoiling"));
 			}
 			StopFacingPipe();
 			// Ors might need to be ands not sure
@@ -1375,10 +1375,10 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 	{
 		if (MyCharacter->PoisonConfig.bIsPoisoning)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Character->PoisonConfig->bIsPoisonning"));
+			//UE_LOG(LogTemp, Warning, TEXT("Character->PoisonConfig->bIsPoisonning"));
 			if (TargettedPipe != nullptr)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
+				//UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: LowerPipe? %s"), TargettedPipe->bLowerPipe ? TEXT("true") : TEXT("False"));
 				if (TargettedPipe->bLowerPipe)
 				{
 					CurrentAnimationState = AnimationStates::E_AnimRecoilLower;
@@ -1390,7 +1390,7 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: TargettedPipe null"));
+				//UE_LOG(LogTemp, Warning, TEXT("CheckForPoisonned: TargettedPipe null"));
 				// Bad - but might work
 				CurrentAnimationState = AnimationStates::E_AnimRecoil;
 			}
@@ -1426,7 +1426,7 @@ void AQuackBoss::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("MeleeAttacking: %s"), bMeleeAttacking ? TEXT("TRUE") : TEXT("FALSE"));
+			//UE_LOG(LogTemp, Warning, TEXT("MeleeAttacking: %s"), bMeleeAttacking ? TEXT("TRUE") : TEXT("FALSE"));
 			if (!bMeleeAttacking)
 			{
 				bMeleeAttacking = true;

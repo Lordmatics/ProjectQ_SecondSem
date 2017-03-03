@@ -49,6 +49,9 @@ class QUACK_API APipe : public AActor
 		UStaticMeshComponent* DrainMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		class UDestructibleComponent* DrainMeshDM;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
 		UStaticMeshComponent* PipeOuterBase;
 
 	UPROPERTY(EditAnywhere, Category = "Custom Niall")

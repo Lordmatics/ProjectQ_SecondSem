@@ -72,10 +72,10 @@ void APlasmaRifle::Tick(float DeltaTime)
 				AQuackArmourPin* ArmourPin = Cast<AQuackArmourPin>(HitActor);
 				if (ArmourPin != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *ArmourPin->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("I Hit a : %s"), *ArmourPin->GetName());
 					if (ArmourPin->GetArmourValue() >= 0.0f)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
+						//UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
 						ArmourPin->DecreaseArmourValue(GunDamage);
 					}
 				}

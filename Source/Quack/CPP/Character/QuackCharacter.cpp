@@ -137,15 +137,15 @@ void AQuackCharacter::HandleChangeToNewGun()
 	int GunToEquipIndex = 0;
 	for (int i = 0; i < GunInventory.Num(); i++)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GunInventory Num: %d"), GunInventory.Num());
+		//UE_LOG(LogTemp, Warning, TEXT("GunInventory Num: %d"), GunInventory.Num());
 
 		if (GunInventory[i] == nullptr) continue;
 		bool bIsActive = GunInventory[i]->GetIsActive();
-		UE_LOG(LogTemp, Warning, TEXT("bIsActive: %s , Index: %d"), bIsActive ? TEXT("true") : TEXT("false"), i);
+		//UE_LOG(LogTemp, Warning, TEXT("bIsActive: %s , Index: %d"), bIsActive ? TEXT("true") : TEXT("false"), i);
 
 		if (bIsActive)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Index Gun to Deactivate: %d"), i);
+		//	UE_LOG(LogTemp, Warning, TEXT("Index Gun to Deactivate: %d"), i);
 			GunInventory[i]->SheathAndDeactivate();
 		}
 		else if(!bIsActive && PreviousEquipIndex <= i)
@@ -153,7 +153,7 @@ void AQuackCharacter::HandleChangeToNewGun()
 			PreviousEquipIndex = CurrentEquipIndex;
 			GunToEquipIndex = i;
 			CurrentEquipIndex = i;
-			UE_LOG(LogTemp, Warning, TEXT("Index Changed Successfully : %d"), i);
+		//	UE_LOG(LogTemp, Warning, TEXT("Index Changed Successfully : %d"), i);
 
 			if (PreviousEquipIndex >= GunInventory.Num() - 1)
 			{
@@ -163,7 +163,7 @@ void AQuackCharacter::HandleChangeToNewGun()
 			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Index Gun to Activate: %d"), GunToEquipIndex);
+	//UE_LOG(LogTemp, Warning, TEXT("Index Gun to Activate: %d"), GunToEquipIndex);
 
 	GunInventory[GunToEquipIndex]->WieldAndActivate();
 	CurrentEquippedGun = GunInventory[GunToEquipIndex];

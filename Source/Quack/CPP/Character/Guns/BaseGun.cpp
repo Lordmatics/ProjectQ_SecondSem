@@ -51,7 +51,7 @@ void ABaseGun::SetOwningPawn(AQuackCharacter* NewOwner)
 	{
 		if (MyPawn != NewOwner)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("GunBase OwningPawn Set"));
+			//UE_LOG(LogTemp, Warning, TEXT("GunBase OwningPawn Set"));
 
 			Instigator = NewOwner;
 			MyPawn = NewOwner;
@@ -100,7 +100,7 @@ USkeletalMeshComponent* ABaseGun::GetGunMesh() const
 // Then obtain it
 float ABaseGun::Reload(USkeletalMeshComponent* PlayerHands)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Current Ammo: %f"), Ammo);
+	//UE_LOG(LogTemp, Warning, TEXT("Current Ammo: %f"), Ammo);
 
 	if (FMath::FloorToInt(Ammo) < MaxClipSize && !bIsReloading)
 	{
@@ -129,8 +129,8 @@ void ABaseGun::FinishReload()
 {
 	bIsReloading = false;
 	int RequiredAmmo = MaxClipSize - FMath::FloorToInt(Ammo);
-	UE_LOG(LogTemp, Warning, TEXT("Required Ammo: %d"), RequiredAmmo);
-	UE_LOG(LogTemp, Warning, TEXT("Reserved Ammo: %f"), ReservedAmmo);
+	//UE_LOG(LogTemp, Warning, TEXT("Required Ammo: %d"), RequiredAmmo);
+	//UE_LOG(LogTemp, Warning, TEXT("Reserved Ammo: %f"), ReservedAmmo);
 	if (ReservedAmmo >= RequiredAmmo)
 	{
 		Ammo += RequiredAmmo;

@@ -83,7 +83,7 @@ void UMinionFactoryComponent::SpawnMinionWave(int MinionsToSpawn)
 		MinionsToSpawn = SpawnPoints.Num();
 	}
 	for (int32 i = SpawnPoints.Num() - 1; i > 0; i--) {
-		int32 j = FMath::Floor(FMath::FRand() * (i + 1));
+		int32 j = FMath::FloorToInt(FMath::FRand() * (i + 1));
 		AActor* Temp = SpawnPoints[i];
 		SpawnPoints[i] = SpawnPoints[j];
 		SpawnPoints[j] = Temp;
