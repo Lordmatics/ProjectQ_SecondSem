@@ -704,6 +704,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			// Turns bIsSpawning to true // 30s it turns off
 			if(!bFightingThreeDrop)
 				BeginWaveSpawningCycle();
+			bFightingThreeDrop = true;
 			// Make sure chandelier logic is only active
 			// When minions are afoot
 			if (MinionFactory != nullptr)
@@ -760,6 +761,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			// Only Drop Once during the phases - and get back up regardless after 30s
 			if(!bFightingFourDrop)
 				BeginWaveSpawningCycle();
+			bFightingFourDrop = true;
 			if (MinionFactory != nullptr)
 			{
 				switch (MinionFactory->AreMinionsAlive())
@@ -1116,8 +1118,6 @@ bool AQuackBoss::CheckForMeleeAttack()
 void AQuackBoss::BeginWaveSpawningCycle()
 {
 	if (bIsSpawning) return;
-	bFightingThreeDrop = true;
-	bFightingFourDrop = true;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -1145,19 +1145,20 @@ void AQuackBoss::SpawnMinions()
 		// A short period of time, due to the recoil patch
 		// This was inadvertedly, making the boss spawn, TONS
 		// of minions, so this check should prevent you getting swarmed
-		if (MinionFactory->AreMinionsAlive())
+		/*if (MinionFactory->AreMinionsAlive())
 		{
 			return;
-		}
+		}*/
+		MinionFactory->SpawnMinionWave(MinionWaves[WaveSpawnCounter]);
 		WaveSpawnCounter++;
-		if (WaveSpawnCounter % 2 == 0)
+		/*if (WaveSpawnCounter % 2 == 0)
 		{
 			MinionFactory->SpawnMinionWaveA();
 		}
 		else
 		{
 			MinionFactory->SpawnMinionWaveB();
-		}
+		}*/
 	}
 }
 

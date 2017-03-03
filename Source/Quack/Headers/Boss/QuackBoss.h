@@ -215,6 +215,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Shield")
 		int BileShotsFired = 1;
 
+	UPROPERTY(EditAnywhere, Category = "C++ BossMinions")
+		TArray<int> MinionWaves;
+
 	UPROPERTY(EditAnywhere, Category = "Arm")
 		float ArmDamage = 15.0f;
 

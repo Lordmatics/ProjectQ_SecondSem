@@ -34,7 +34,7 @@ void UMinionFactoryComponent::TickComponent( float DeltaTime, ELevelTick TickTyp
 	// ...
 }
 
-void UMinionFactoryComponent::SpawnMinionWaveA()
+/*void UMinionFactoryComponent::SpawnMinionWaveA()
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
@@ -72,9 +72,37 @@ void UMinionFactoryComponent::SpawnMinionWaveB()
 			MinionArrayB.Add(Minion);
 		}
 	}
+}*/
+
+void UMinionFactoryComponent::SpawnMinionWave(int MinionsToSpawn)
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr || SpawnPoints.Num() == 0 || EnemyFactory.Num() == 0) return;
+	if (MinionsToSpawn > SpawnPoints.Num())
+	{
+		MinionsToSpawn = SpawnPoints.Num();
+	}
+	for (int32 i = SpawnPoints.Num() - 1; i > 0; i--) {
+		int32 j = FMath::Floor(FMath::FRand() * (i + 1));
+		AActor* Temp = SpawnPoints[i];
+		SpawnPoints[i] = SpawnPoints[j];
+		SpawnPoints[j] = Temp;
+	}
+	for (size_t i = 0; i < MinionsToSpawn; i++)
+	{
+		int EnemyIndex = i > EnemyFactory.Num() - 1 ? 0 : FMath::RandRange(0, EnemyFactory.Num() - 1);
+		if (SpawnPoints[i] == nullptr) return;
+		AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactory[EnemyIndex], SpawnPoints[i]->GetActorLocation(), FRotator::ZeroRotator);
+		if (Minion != nullptr)
+		{
+			Minion->SetBossMinion();
+			Minion->OnEnemyDestroyed.AddDynamic(this, &UMinionFactoryComponent::RemoveFromList);
+			MinionArray.Add(Minion);
+		}
+	}
 }
 
-void UMinionFactoryComponent::RemoveFromListA(AQuackAIPawn* _Enemy)
+/*void UMinionFactoryComponent::RemoveFromListA(AQuackAIPawn* _Enemy)
 {
 	MinionArrayA.Remove(_Enemy);
 	//if (MinionArrayA.Num() == 0 && MinionArrayB.Num() == 0)
@@ -88,15 +116,22 @@ void UMinionFactoryComponent::RemoveFromListB(AQuackAIPawn* _Enemy)
 	//if (MinionArrayA.Num() == 0 && MinionArrayB.Num() == 0)
 	//{
 	//}
+}*/
+
+void UMinionFactoryComponent::RemoveFromList(AQuackAIPawn* _Enemy)
+{
+	MinionArray.Remove(_Enemy);
 }
 
 bool UMinionFactoryComponent::AreMinionsAlive()
 {
-	int A = MinionArrayA.Num();
+	/*int A = MinionArrayA.Num();
 	//UE_LOG(LogTemp, Warning, TEXT("Array A Length: %d"), A);
 	int B = MinionArrayB.Num();
+	*/
+	int C = MinionArray.Num();
 	//UE_LOG(LogTemp, Warning, TEXT("Array B Length: %d"), B);
-	bool ShouldShieldBeUp = A + B > 0 ? true : false;
+	bool ShouldShieldBeUp = C > 0 ? true : false;
 	//UE_LOG(LogTemp, Warning, TEXT("Array B Length: %s"), ShouldShieldBeUp ? TEXT("True") : TEXT("False"));
 
 	return ShouldShieldBeUp;

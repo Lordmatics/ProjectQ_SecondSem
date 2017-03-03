@@ -10,29 +10,41 @@ class QUACK_API UMinionFactoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(EditAnywhere, Category = "Spawning")
+	/*UPROPERTY(EditAnywhere, Category = "Spawning")
 		TArray<TSubclassOf<class AQuackAIPawn>> EnemyFactoryA;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
-		TArray<TSubclassOf<class AQuackAIPawn>> EnemyFactoryB;
+		TArray<TSubclassOf<class AQuackAIPawn>> EnemyFactoryB;*/
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
+		TArray<TSubclassOf<class AQuackAIPawn>> EnemyFactory;
+
+	/*UPROPERTY(EditAnywhere, Category = "Spawning")
 		TArray<AActor*> SpawnPointsA;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
-		TArray<AActor*> SpawnPointsB;
+		TArray<AActor*> SpawnPointsB;*/
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
+		TArray<AActor*> SpawnPoints;
+
+	/*UPROPERTY(EditAnywhere, Category = "Spawning")
 		TArray<class AQuackAIPawn*> MinionArrayA;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
-		TArray<class AQuackAIPawn*> MinionArrayB;
+		TArray<class AQuackAIPawn*> MinionArrayB;*/
 
-	UFUNCTION()
+	UPROPERTY(EditAnywhere, Category = "Spawning")
+		TArray<class AQuackAIPawn*> MinionArray;
+
+	/*UFUNCTION()
 		void RemoveFromListA(class AQuackAIPawn* _Enemy);
 
 	UFUNCTION()
-		void RemoveFromListB(class AQuackAIPawn* _Enemy);
+		void RemoveFromListB(class AQuackAIPawn* _Enemy);*/
+
+	UFUNCTION()
+		void RemoveFromList(class AQuackAIPawn* _Enemy);
 public:	
 	// Sets default values for this component's properties
 	UMinionFactoryComponent();
@@ -43,9 +55,11 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	void SpawnMinionWaveA();
+	/*void SpawnMinionWaveA();
 
-	void SpawnMinionWaveB();
+	void SpawnMinionWaveB();*/
+
+	void SpawnMinionWave(int MinionsToSpawn);
 	
 	bool AreMinionsAlive();
 };
