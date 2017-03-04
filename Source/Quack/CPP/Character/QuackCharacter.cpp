@@ -19,6 +19,7 @@
 #include "Headers/Character/Guns/BaseGun.h"
 #include "Headers/Character/Guns/AssaultRifle.h"
 #include "Headers/Character/Guns/PlasmaRifle.h"
+#include "Headers/Character/Guns/BurstRifle.h"
 #include "Classes/Components/PostProcessComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -80,22 +81,29 @@ void AQuackCharacter::SpawnGunInventory()
 	// Early exits - should never want this to occur
 	if (World == nullptr) return;
 	if (GunInventoryClasses.Num() == 0) return;
-	if (GunInventoryClasses[0] == nullptr || GunInventoryClasses[1] == nullptr) return;
+	for (size_t i = 0; i < GunInventoryClasses.Num(); i++)
+	{
+		if (GunInventoryClasses[i] == nullptr) return;
+	}
+	//if (GunInventoryClasses[0] == nullptr || GunInventoryClasses[1] == nullptr) return;
 
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (GunInventoryClasses.Num() < 1) return;
 	AAssaultRifle* AR = World->SpawnActor<AAssaultRifle>(GunInventoryClasses[0], SpawnInfo);
 	if (AR != nullptr)
 	{
 		AssaultRifleRef = AR;
 		AssaultRifleRef->SetOwningPawn(this);
 		AssaultRifleRef->WieldAndActivate();
+		CurrentEquipIndex = 0;
 		CurrentEquippedGun = AssaultRifleRef;
 		// Required for Raycast
 		if(FirstPersonCameraComponent != nullptr)
 			AssaultRifleRef->SetOwningCamera(FirstPersonCameraComponent);
 		GunInventory.Add(AssaultRifleRef);
 	}
+	if (GunInventoryClasses.Num() < 2) return;
 	APlasmaRifle* PR = World->SpawnActor<APlasmaRifle>(GunInventoryClasses[1], SpawnInfo);
 	if (PR != nullptr)
 	{
@@ -103,6 +111,15 @@ void AQuackCharacter::SpawnGunInventory()
 		PlasmaRifleRef->SetOwningPawn(this);
 		PlasmaRifleRef->SheathAndDeactivate();
 		GunInventory.Add(PlasmaRifleRef);
+	}
+	if (GunInventoryClasses.Num() < 3) return;
+	ABurstRifle* BR = World->SpawnActor<ABurstRifle>(GunInventoryClasses[2], SpawnInfo);
+	if (BR != nullptr)
+	{
+		BurstRifleRef = BR;
+		BurstRifleRef->SetOwningPawn(this);
+		BurstRifleRef->SheathAndDeactivate();
+		GunInventory.Add(BurstRifleRef);
 	}
 }
 
@@ -112,8 +129,10 @@ void AQuackCharacter::HandleChangeToNewGun()
 	{
 		// Alternatively, can cancel reload and force swap
 		// Discuss what we want
-		if (CurrentEquippedGun->GetIsReloading())
+		if (CurrentEquippedGun->GetIsReloading() || CurrentEquippedGun->InUseUnableToSwap())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Tried to Swap Gun but was shut down"));
+
 			return;
 		}
 	}
@@ -134,39 +153,73 @@ void AQuackCharacter::HandleChangeToNewGun()
 
 	// This should be auto maintainable 
 	// Auto cycling, until last gun - for reset
-	int GunToEquipIndex = 0;
-	for (int i = 0; i < GunInventory.Num(); i++)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("GunInventory Num: %d"), GunInventory.Num());
 
+	int GunIndexToEquip = 0;
+	for (size_t i = 0; i < GunInventory.Num(); i++)
+	{
 		if (GunInventory[i] == nullptr) continue;
 		bool bIsActive = GunInventory[i]->GetIsActive();
-		//UE_LOG(LogTemp, Warning, TEXT("bIsActive: %s , Index: %d"), bIsActive ? TEXT("true") : TEXT("false"), i);
-
 		if (bIsActive)
 		{
-		//	UE_LOG(LogTemp, Warning, TEXT("Index Gun to Deactivate: %d"), i);
+			if (i == GunInventory.Num() - 1)
+			{
+				GunIndexToEquip = 0;
+				CurrentEquipIndex = 0;
+			}
+			else
+			{
+				GunIndexToEquip = i + 1;
+				CurrentEquipIndex = i + 1;
+			}
+			GunInventory[i]->SheathAndDeactivate();
+			GunInventory[GunIndexToEquip]->WieldAndActivate();
+			CurrentEquippedGun = GunInventory[GunIndexToEquip];
+			break;
+		}
+		else
+		{
 			GunInventory[i]->SheathAndDeactivate();
 		}
-		else if(!bIsActive && PreviousEquipIndex <= i)
-		{
-			PreviousEquipIndex = CurrentEquipIndex;
-			GunToEquipIndex = i;
-			CurrentEquipIndex = i;
-		//	UE_LOG(LogTemp, Warning, TEXT("Index Changed Successfully : %d"), i);
-
-			if (PreviousEquipIndex >= GunInventory.Num() - 1)
-			{
-				// Need to essentially re-route it to
-				// invalid, so it can pick first gun
-				PreviousEquipIndex = -1;
-			}
-		}
 	}
+
+
+
+
+
+	//int GunToEquipIndex = 0;
+	//for (int i = 0; i < GunInventory.Num(); i++)
+	//{
+	//	//UE_LOG(LogTemp, Warning, TEXT("GunInventory Num: %d"), GunInventory.Num());
+
+	//	if (GunInventory[i] == nullptr) continue;
+	//	bool bIsActive = GunInventory[i]->GetIsActive();
+	//	UE_LOG(LogTemp, Warning, TEXT("bIsActive: %s , Index: %d"), bIsActive ? TEXT("true") : TEXT("false"), i);
+
+	//	if (bIsActive)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Index Gun to Deactivate: %d"), i);
+	//		GunInventory[i]->SheathAndDeactivate();
+	//	}
+	//	else if(!bIsActive && PreviousEquipIndex <= i)
+	//	{
+	//		PreviousEquipIndex = CurrentEquipIndex;
+	//		GunToEquipIndex = i;
+	//		CurrentEquipIndex = i;
+	//		UE_LOG(LogTemp, Warning, TEXT("Index Changed Successfully : %d"), i);
+
+	//		if (PreviousEquipIndex >= GunInventory.Num() - 1)
+	//		{
+	//			// Need to essentially re-route it to
+	//			// invalid, so it can pick first gun
+	//			PreviousEquipIndex = -1;
+	//		}
+	//		break;
+	//	}
+	//}
 	//UE_LOG(LogTemp, Warning, TEXT("Index Gun to Activate: %d"), GunToEquipIndex);
 
-	GunInventory[GunToEquipIndex]->WieldAndActivate();
-	CurrentEquippedGun = GunInventory[GunToEquipIndex];
+	//GunInventory[GunToEquipIndex]->WieldAndActivate();
+	//CurrentEquippedGun = GunInventory[GunToEquipIndex];
 }
 
 int AQuackCharacter::GetCurrentEquippedGunIndex() const
@@ -513,7 +566,7 @@ void AQuackCharacter::DecreaseHealth(float Amount)
 
 void AQuackCharacter::Reload()
 {
-	if (CurrentEquippedGun != nullptr && !MovementConfig.bReloading)
+	if (CurrentEquippedGun != nullptr && !MovementConfig.bReloading && Mesh1P != nullptr)
 	{
 		float ReloadDuration = CurrentEquippedGun->Reload(Mesh1P);
 		UWorld* const World = GetWorld();
@@ -568,6 +621,8 @@ void AQuackCharacter::SemiAutomaticShooting(float DeltaTime)
 		if (WeaponConfig.bMouseDown && !WeaponConfig.bMouseUp)
 		{
 			WeaponConfig.RunningTime += DeltaTime;
+			// weapon config, needs to change to currentequippedgun->rate etc
+			// To allow new guns
 			if (WeaponConfig.RunningTime >= WeaponConfig.FireCooldown)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Shooting Active"));
@@ -578,10 +633,12 @@ void AQuackCharacter::SemiAutomaticShooting(float DeltaTime)
 		}
 		else
 		{
-
 			if (CurrentEquippedGun != nullptr)
 			{
-				CurrentEquippedGun->StopMuzzleFlash();
+				if (CurrentEquippedGun->IsFullyAutomatic())
+				{
+					CurrentEquippedGun->StopMuzzleFlash();
+				}
 				//UE_LOG(LogTemp, Warning, TEXT("Shooting InActive"));
 			}
 			//StopMuzzleFlash();

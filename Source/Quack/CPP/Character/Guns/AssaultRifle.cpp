@@ -23,6 +23,9 @@ AAssaultRifle::AAssaultRifle()
 	Magazine->SetupAttachment(HarryAssaultRifle);
 
 	RaycastComponent = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComp"));
+
+	bIsFullyAutomatic = true;
+	bIsInUseUnableToSwap = false;
 }
 
 

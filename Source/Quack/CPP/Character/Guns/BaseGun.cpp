@@ -101,7 +101,7 @@ USkeletalMeshComponent* ABaseGun::GetGunMesh() const
 float ABaseGun::Reload(USkeletalMeshComponent* PlayerHands)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Current Ammo: %f"), Ammo);
-
+	if (PlayerHands == nullptr) return 0.0f;
 	if (FMath::FloorToInt(Ammo) < MaxClipSize && !bIsReloading)
 	{
 		// try and play a firing animation if specified

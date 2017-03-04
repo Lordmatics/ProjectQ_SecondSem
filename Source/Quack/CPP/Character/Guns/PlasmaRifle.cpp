@@ -30,6 +30,9 @@ APlasmaRifle::APlasmaRifle()
 	GunDamage = 2;
 	FireRate = 0.1f;
 	bIsFiring = false;
+	bIsFullyAutomatic = true;
+	bIsInUseUnableToSwap = false;
+
 }
 
 void APlasmaRifle::BeginPlay()

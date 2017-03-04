@@ -38,6 +38,9 @@ public:
 
 	FORCEINLINE bool GetIsReloading() const { return bIsReloading; }
 
+	FORCEINLINE bool IsFullyAutomatic() const { return bIsFullyAutomatic; }
+
+	FORCEINLINE bool InUseUnableToSwap() const { return bIsInUseUnableToSwap; }
 	/** set the weapon's owning pawn */
 	void SetOwningPawn(class AQuackCharacter* MyPlayerRef);
 
@@ -58,6 +61,13 @@ public:
 	void IncreaseAmmo(float Amount);
 
 protected:
+
+	UPROPERTY(EditAnywhere, Category = "C++ Gun")
+		uint32 bIsFullyAutomatic : 1;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Gun")
+		uint32 bIsInUseUnableToSwap : 1;
+	
 
 	void DecreaseAmmo(float Amount, USkeletalMeshComponent* SpecificGun);
 

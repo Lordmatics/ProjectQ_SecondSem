@@ -180,6 +180,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Guns")
 		class APlasmaRifle* PlasmaRifleRef;
+	
+	UPROPERTY(EditAnywhere, Category = "Guns")
+		class ABurstRifle* BurstRifleRef;
 
 	UPROPERTY(EditAnywhere, Category = "Guns")
 		class ABaseGun* CurrentEquippedGun;

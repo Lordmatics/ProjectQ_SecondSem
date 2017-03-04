@@ -1149,6 +1149,8 @@ void AQuackBoss::SpawnMinions()
 		{
 			return;
 		}*/
+		if (MinionWaves.Num() == 0) return;
+		if (WaveSpawnCounter > MinionWaves.Num() - 1) return;
 		MinionFactory->SpawnMinionWave(MinionWaves[WaveSpawnCounter]);
 		WaveSpawnCounter++;
 		/*if (WaveSpawnCounter % 2 == 0)
