@@ -145,8 +145,11 @@ void ABurstRifle::FireRay()
 
 void ABurstRifle::SubtractAmmo()
 {
-	if(MyPawn->GetSpecifcPawnMesh() != nullptr)
+	if (MyPawn->GetSpecifcPawnMesh() != nullptr)
+	{
 		DecreaseAmmo(1, MyPawn->GetSpecifcPawnMesh());
+		EndLaserDuration();
+	}
 }
 
 void ABurstRifle::EndLaserDuration()
