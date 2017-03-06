@@ -259,12 +259,13 @@ void APlasmaRifle::AttachMeshToPawn()
 		IgnoredActors.Add(MyPawn);
 
 		UE_LOG(LogTemp, Warning, TEXT("PlasmaAttachedToPawn"));
-		FName AttachPoint = MyPawn->GetWeaponAttachPoint();
+		FName AttachPoint = MyPawn->GetWeaponAttachPointLaser();
 		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();
 		if (PawnMesh1p != nullptr)
 		{
 			HarryPlasmaGun->SetHiddenInGame(false);
-			HarryPlasmaGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+			//HarryPlasmaGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+			HarryPlasmaGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachPoint);
 		}
 	}
 }

@@ -237,6 +237,11 @@ FName AQuackCharacter::GetWeaponAttachPoint() const
 	return WeaponAttachPoint;
 }
 
+FName AQuackCharacter::GetWeaponAttachPointLaser() const
+{
+	return WeaponAttachPointLaser;
+}
+
 void AQuackCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();

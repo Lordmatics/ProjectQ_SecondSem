@@ -192,12 +192,13 @@ void ABurstRifle::AttachMeshToPawn()
 	if (MyPawn)
 	{
 		IgnoredActors.Add(MyPawn);
-		FName AttachPoint = MyPawn->GetWeaponAttachPoint();
+		FName AttachPoint = MyPawn->GetWeaponAttachPointLaser();
 		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();
 		if (PawnMesh1p != nullptr)
 		{
 			HarryLaserGun->SetHiddenInGame(false);
-			HarryLaserGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+			//HarryLaserGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+			HarryLaserGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachPoint);
 			UE_LOG(LogTemp, Warning, TEXT("BurstRifle, should go to attachpoint"));
 		}
 	}
