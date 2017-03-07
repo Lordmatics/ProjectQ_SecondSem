@@ -3,6 +3,7 @@
 #include "Headers/Quack.h"
 #include "Headers/CustomComponents/MinionFactoryComponent.h"
 #include "Headers/AIEnemies/QuackAIPawn.h"
+#include "Headers/Misc/MinionSpawnPoint.h"
 
 // Sets default values for this component's properties
 UMinionFactoryComponent::UMinionFactoryComponent()
@@ -21,6 +22,8 @@ void UMinionFactoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMinionSpawnPoint::StaticClass(), SpawnPoints);
 	// ...
 	
 }
