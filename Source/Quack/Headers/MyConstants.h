@@ -13,6 +13,7 @@ enum class AudioStates : uint8
 	E_EnemiesNearLoop = 3         UMETA(DisplayName = "EnemiesNear"),
 	E_ExplorationLoop = 4         UMETA(DisplayName = "Exploring"),
 	E_Victory = 5        UMETA(DisplayName = "Victory"),
+	E_ElevatorMusic = 6 UMETA(DisplayName = "ElevatorMusic")
 };
 
 // This class does not need to be modified.

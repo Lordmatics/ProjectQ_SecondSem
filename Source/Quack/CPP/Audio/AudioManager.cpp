@@ -74,6 +74,11 @@ void AAudioManager::ChangeStateTo(AudioStates _NewState, float Fade, float Volu)
 	// vice versa
 	switch (_NewState)
 	{
+		case AudioStates::E_ElevatorMusic:
+		{
+			HandleFadesToNewTrack(ElevatorMusic, Fade, Volu);
+			break;
+		}
 		case AudioStates::E_BossIntro:
 		{
 			HandleFadesToNewTrack(BossIntro, Fade, Volu);

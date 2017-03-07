@@ -40,6 +40,9 @@ private:
 		AudioStates CurrentAudioState;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+		USoundWave* ElevatorMusic;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
 		USoundWave* BossIntro;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
