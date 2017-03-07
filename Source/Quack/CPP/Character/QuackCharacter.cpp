@@ -22,6 +22,7 @@
 #include "Headers/Character/Guns/BurstRifle.h"
 #include "Headers/Character/Guns/Needle.h"
 #include "Classes/Components/PostProcessComponent.h"
+#include "Animation/AnimMontage.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -74,6 +75,72 @@ AQuackCharacter::AQuackCharacter()
 			PlayerConfig.Boss = *ActorItr;
 		}
 	}
+	bCanFire = true;
+}
+
+float AQuackCharacter::ChangeGunAnimation(int GunIndex)
+{
+	// Swapping to needle
+	if (GunIndex == 3)
+	{
+		bSwapToNeedle = true;
+		bSwapToGun = false;
+	}
+	// Swapping to normal gun
+	else
+	{
+		bSwapToNeedle = false;
+		bSwapToGun = true;
+	}
+	bCanFire = false;
+	UWorld* const World = GetWorld();
+	if (World == nullptr || RaiseGunAnimation == nullptr || LowerGunAnimation == nullptr) return 0.0f;
+	float Duration = /*RaiseGunAnimation->GetPlayLength()*/ LowerGunAnimation->GetPlayLength();
+	FTimerHandle TempHandle;
+	World->GetTimerManager().SetTimer(TempHandle, this, &AQuackCharacter::ResetGunSwapBools, Duration - 0.5f, false);
+	return Duration;
+	//if (LowerGunAnimation != nullptr)
+	//{
+	//	UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
+	//	if (AnimInstance != nullptr)
+	//	{
+	//		float LowerDuration = AnimInstance->Montage_Play(LowerGunAnimation, 1.0f);
+	//		FTimerHandle TempHandle;
+	//		World->GetTimerManager().SetTimer(TempHandle, this, &AQuackCharacter::EquipNewGunAnim, LowerDuration, false);
+	//		bCanFire = false;
+	//	}
+	//}
+}
+
+void AQuackCharacter::ResetGunSwapBools()
+{
+	bSwapToNeedle = false;
+	bSwapToGun = false;
+	//bCanFire = true;
+}
+
+void AQuackCharacter::EquipNewGunAnim()
+{
+	AllowFiring();
+	//UWorld* const World = GetWorld();
+	//if (World == nullptr) return;
+	//if (RaiseGunAnimation != nullptr)
+	//{
+	//	UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
+	//	if (AnimInstance != nullptr)
+	//	{
+	//		float RaiseDuration = RaiseGunAnimation->GetPlayLength();
+	//		//AnimInstance->Montage_Play(RaiseGunAnimation, 1.0f);
+
+	//		FTimerHandle TempHandle;
+	//		World->GetTimerManager().SetTimer(TempHandle, this, &AQuackCharacter::AllowFiring, RaiseDuration, false);
+	//	}
+	//}
+}
+
+void AQuackCharacter::AllowFiring()
+{
+	bCanFire = true;
 }
 
 void AQuackCharacter::SpawnGunInventory()
@@ -126,6 +193,7 @@ void AQuackCharacter::SpawnGunInventory()
 	ANeedle* Needle = World->SpawnActor<ANeedle>(GunInventoryClasses[3], SpawnInfo);
 	if (Needle != nullptr)
 	{
+		bHasNeedleEquipped = false;
 		NeedleRef = Needle;
 		NeedleRef->SetOwningPawn(this);
 		NeedleRef->SheathAndDeactivate();
@@ -133,8 +201,65 @@ void AQuackCharacter::SpawnGunInventory()
 	}
 }
 
+void AQuackCharacter::ForceNeedleGun()
+{
+	//for (size_t i = 0; i < GunInventory.Num(); i++)
+	//{
+	//	if (GunInventory[i] == nullptr) continue;
+	//	//UE_LOG(LogTemp, Warning, TEXT("Gun should be inactive: %s"), GunInventory[i]->GetIsActive() ? TEXT("GunACtive") : TEXT("GunInactive"));
+	//	GunInventory[i]->SheathAndDeactivate();
+	//	//UE_LOG(LogTemp, Warning, TEXT("Gun should still be inactive: %s"), GunInventory[i]->GetIsActive() ? TEXT("GunACtive") : TEXT("GunInactive"));
+	//}
+	//GunInventory[CurrentEquipIndex]->SheathAndDeactivate();
+	
+	//GunInventory[3]->WieldAndActivate();
+	//CurrentEquippedGun = GunInventory[3];
+
+
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+
+
+	//GunInventory[i]->SheathAndDeactivate();
+
+	for (size_t i = 0; i < GunInventory.Num(); i++)
+	{
+		if (GunInventory[i] == nullptr) continue;
+		bool bIsActive = GunInventory[i]->GetIsActive();
+		if (bIsActive)
+		{
+			// HIDE EQUIPPED GUN
+			FTimerHandle TempHan;
+			FTimerDelegate TempDelegate;
+			TempDelegate.BindUFunction(this, FName("HideCurrentGun"), i);
+			World->GetTimerManager().SetTimer(TempHan, TempDelegate, 0.6f, false);
+			float Duration = ChangeGunAnimation(i);
+			break;
+		}
+		else
+		{
+			GunInventory[i]->SheathAndDeactivate();
+		}
+	}
+	// REVEAL NEW GUN
+	FTimerHandle TempHandle;
+	FTimerDelegate TempDel;
+	TempDel.BindUFunction(this, FName("FinishSwapping"), 3);
+	World->GetTimerManager().SetTimer(TempHandle, TempDel, 0.65f, false);
+	CurrentEquipIndex = 3;
+	//bHasNeedleEquipped = true;
+	CanSwapGun = false;
+}
+
+void AQuackCharacter::UnforceNeedleGun()
+{
+	CanSwapGun = true;
+}
+
 void AQuackCharacter::HandleChangeToNewGun()
 {
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
 	if (CanSwapGun)
 	{
 		if (CurrentEquippedGun != nullptr)
@@ -166,6 +291,7 @@ void AQuackCharacter::HandleChangeToNewGun()
 		// This should be auto maintainable 
 		// Auto cycling, until last gun - for reset
 
+
 		int GunIndexToEquip = 0;
 		for (size_t i = 0; i < GunInventory.Num(); i++)
 		{
@@ -183,9 +309,19 @@ void AQuackCharacter::HandleChangeToNewGun()
 					GunIndexToEquip = i + 1;
 					CurrentEquipIndex = i + 1;
 				}
-				GunInventory[i]->SheathAndDeactivate();
-				GunInventory[GunIndexToEquip]->WieldAndActivate();
-				CurrentEquippedGun = GunInventory[GunIndexToEquip];
+				// HIDE EQUIPPED GUN
+				FTimerHandle TempHan;
+				FTimerDelegate TempDelegate;
+				TempDelegate.BindUFunction(this, FName("HideCurrentGun"), i);
+				World->GetTimerManager().SetTimer(TempHan, TempDelegate, 0.6f, false);
+
+				//GunInventory[i]->SheathAndDeactivate();
+				// REVEAL NEW GUN
+				float Duration = ChangeGunAnimation(i);
+				FTimerHandle TempHandle;
+				FTimerDelegate TempDel;
+				TempDel.BindUFunction(this, FName("FinishSwapping"), GunIndexToEquip);
+				World->GetTimerManager().SetTimer(TempHandle, TempDel, 0.65f, false);
 				break;
 			}
 			else
@@ -193,6 +329,17 @@ void AQuackCharacter::HandleChangeToNewGun()
 				GunInventory[i]->SheathAndDeactivate();
 			}
 		}
+		//FinishSwapping(GunIndexToEquip);
+		//GunInventory[GunIndexToEquip]->WieldAndActivate();
+		//CurrentEquippedGun = GunInventory[GunIndexToEquip];
+		//if (CurrentEquippedGun == GunInventory[3])
+		//{
+		//	bHasNeedleEquipped = true;
+		//}
+		//else
+		//{
+		//	bHasNeedleEquipped = false;
+		//}
 	}
 
 
@@ -230,6 +377,27 @@ void AQuackCharacter::HandleChangeToNewGun()
 
 	//GunInventory[GunToEquipIndex]->WieldAndActivate();
 	//CurrentEquippedGun = GunInventory[GunToEquipIndex];
+}
+
+void AQuackCharacter::HideCurrentGun(int Index)
+{
+	if(GunInventory[Index] != nullptr)
+		GunInventory[Index]->SheathAndDeactivate();
+}
+
+void AQuackCharacter::FinishSwapping(int Index)
+{
+	GunInventory[Index]->WieldAndActivate();
+	CurrentEquippedGun = GunInventory[Index];
+	if (CurrentEquippedGun == GunInventory[3])
+	{
+		bHasNeedleEquipped = true;
+	}
+	else
+	{
+		bHasNeedleEquipped = false;
+	}
+	bCanFire = true;
 }
 
 int AQuackCharacter::GetCurrentEquippedGunIndex() const
@@ -453,6 +621,19 @@ void AQuackCharacter::UsePoison()
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Pipe exists and has needle"));
 
+			//if (NeedleRef != nullptr)
+			//{
+			//	UAnimMontage* StabAnim = NeedleRef->GetNeedleStabAnimation();
+			//	if (StabAnim != nullptr)
+			//	{
+			//		PlayAnimMontage(StabAnim, 1.0f);
+			//		UE_LOG(LogTemp, Warning, TEXT("Animation Should Play : Stab"));
+			//	}
+			//}
+			if (NeedleRef != nullptr)
+			{
+				NeedleRef->PlayStabAnimation();
+			}
 			if (PlayerConfig.CurrentPipe->bNotABossPipe)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("This Ran Poison"));
@@ -485,6 +666,19 @@ void AQuackCharacter::UsePoison()
 					if (PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingOne || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingTwo
 						|| PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingThree || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingFour)
 					{
+						//if (NeedleRef != nullptr)
+						//{
+						//	UAnimMontage* StabAnim = NeedleRef->GetNeedleStabAnimation();
+						//	if (StabAnim != nullptr)
+						//	{
+						//		PlayAnimMontage(StabAnim, 1.0f);
+						//		UE_LOG(LogTemp, Warning, TEXT("Animation Should Play : Stab"));
+						//	}
+						//}
+						if (NeedleRef != nullptr)
+						{
+							NeedleRef->PlayStabAnimation();
+						}
 						PlayerConfig.CurrentPipe->bPoisonedPipe = true;
 						PlayerConfig.CurrentPipe->ChangeMeshColour();
 						PlayerConfig.CurrentPipe->SimulateDestroy();
@@ -631,7 +825,7 @@ void AQuackCharacter::Raycast()
 void AQuackCharacter::SemiAutomaticShooting(float DeltaTime)
 {
 	// NOTE: CHANGE TO TIMER
-
+	if (!bCanFire) return;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -749,18 +943,4 @@ void AQuackCharacter::Sprint()
 bool AQuackCharacter::IsSprinting() const
 {
 	return MovementConfig.bIsSprinting;
-}
-
-void AQuackCharacter::ForceNeedleGun()
-{
-	GunInventory[CurrentEquipIndex]->SheathAndDeactivate();
-	GunInventory[3]->WieldAndActivate();
-	CurrentEquippedGun = GunInventory[3];
-	CurrentEquipIndex = 3;
-	CanSwapGun = false;
-}
-
-void AQuackCharacter::UnforceNeedleGun()
-{
-	CanSwapGun = true;
 }

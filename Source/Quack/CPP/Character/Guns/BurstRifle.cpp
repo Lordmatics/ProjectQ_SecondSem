@@ -65,6 +65,7 @@ void ABurstRifle::StopMuzzleFlash()
 void ABurstRifle::Shoot()
 {
 	Super::Shoot();
+	UWorld* const World = GetWorld();
 	if (bIsReloading || Ammo <= 0.0f)
 	{
 		StopMuzzleFlash();
@@ -74,11 +75,14 @@ void ABurstRifle::Shoot()
 	if (bShootingInProcess)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Tried to Shoot but shooting was in process"));
+		// SEEMS TO GET STUCK SOMEHOW - NOT SURE WHY
+		// THIS SHOULD UNCHECK THIS BOOL NATURALLY	
+		FTimerHandle EndHandle2;
+		if(World != nullptr)
+			World->GetTimerManager().SetTimer(EndHandle2, this, &ABurstRifle::EndLaserDuration, ParticleLength, false);
 		return;
 	}
 	bShootingInProcess = true;
-	bIsInUseUnableToSwap = true;
-	UWorld* const World = GetWorld();
 	if (World == nullptr || LaserParticleSystem == nullptr || MyPawn->GetSpecificPawnMesh() == nullptr) return;
 	if (LaserParticleSystemComp == nullptr) return;
 	LaserParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(LaserParticleSystem, HarryLaserGun, MuzzleAttachPoint);// , ((FVector)(ForceInit)), FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
@@ -97,6 +101,8 @@ void ABurstRifle::FireRay()
 	if (World == nullptr) return;
 	if (RaycastComponent != nullptr)
 	{
+		bIsInUseUnableToSwap = true;
+		bShootingInProcess = true;
 		FTimerHandle AmmoHandle;
 		World->GetTimerManager().SetTimer(AmmoHandle, this, &ABurstRifle::SubtractAmmo, ParticleLength / 2, false);
 		FHitResult Hit = RaycastComponent->Raycast(MyPawn->GetFirstPersonCameraComponent(), IgnoredActors);
@@ -164,6 +170,7 @@ void ABurstRifle::WieldAndActivate()
 {
 	Super::WieldAndActivate();
 
+	bIsInUseUnableToSwap = false;
 	bIsActive = true;
 	EndLaserDuration();
 	if (HarryLaserGun != nullptr)
@@ -178,7 +185,11 @@ void ABurstRifle::SheathAndDeactivate()
 	Super::SheathAndDeactivate();
 
 	bIsActive = false;
+	bIsInUseUnableToSwap = false;
+	bShootingInProcess = false;
+	// EndLaserDuration seems to do nothing : this is tilting me
 	EndLaserDuration();
+	UE_LOG(LogTemp, Warning, TEXT("Burst Rifle Sheathed: %s"), bIsInUseUnableToSwap ? TEXT("InUse") : TEXT("NotInUse"));
 	if (HarryLaserGun != nullptr)
 	{
 		HarryLaserGun->SetHiddenInGame(true);

@@ -1287,22 +1287,45 @@ void AQuackBoss::ShouldEnterHealingPhase()
 		if (!bImmortal && LowerPipes.Num() + UpperPipes.Num() + 1 == 4 && TargettedPipe != nullptr && BossHealth<=(4*MaxBossHealth/5))
 		{	
 			ChangeState(BossStates::E_HealingOne);
+			if (MyCharacter != nullptr)
+			{
+				MyCharacter->ForceNeedleGun();
+				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
+			}
 		}
 		// Below 60% Phase two healing
 		else if (BossHealth <= ((3 * MaxBossHealth) / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 3 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingTwo);
+			if (MyCharacter != nullptr)
+			{
+				MyCharacter->ForceNeedleGun();
+				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
+			}
 		}
 		// Below 40% Phase three healing
 		else if (BossHealth <= (2 * MaxBossHealth / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 2 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingThree);
+			if (MyCharacter != nullptr)
+			{
+				MyCharacter->ForceNeedleGun();
+				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
+			}
 		}
 		// Below 20% Phase four healing
 		else if (BossHealth <= (MaxBossHealth / 5) && LowerPipes.Num() + UpperPipes.Num() + 1 == 1 && TargettedPipe != nullptr)
 		{
 			ChangeState(BossStates::E_HealingFour);
+			if (MyCharacter != nullptr)
+			{
+				MyCharacter->ForceNeedleGun();
+				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
+			}
 		}
+		
+		//AQuackCharacter* TempCharacter = Cast<AQuackCharacter>(UGameplayStatics::GetPlayerController(this, 0)->GetPawn());
+
 	}
 }
 
@@ -1582,11 +1605,12 @@ void AQuackBoss::BeginPipeDrain()
 	if (TargettedPipe != nullptr)
 	{
 		TargettedPipe->SetDescend(true);
-		AQuackCharacter* TempCharacter = Cast<AQuackCharacter>(UGameplayStatics::GetPlayerController(this, 0)->GetPawn());
-		if (TempCharacter != nullptr)
-		{
-			TempCharacter->ForceNeedleGun();
-		}
+		//AQuackCharacter* TempCharacter = Cast<AQuackCharacter>(UGameplayStatics::GetPlayerController(this, 0)->GetPawn());
+		//if (TempCharacter != nullptr)
+		//{
+		//	TempCharacter->ForceNeedleGun();
+		//	UE_LOG(LogTemp, Warning, TEXT("BeginPipeDrain: + ForceNeedleSwap"));
+		//}
 	}
 }
 
@@ -1677,6 +1701,7 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 			if (TempCharacter != nullptr)
 			{
 				TempCharacter->UnforceNeedleGun();
+				UE_LOG(LogTemp, Warning, TEXT("ChangeState: UnForce"));
 			}
 		}
 		else

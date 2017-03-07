@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Headers/Quack.h"
-#include "Elevator.h"
+#include "Headers/Misc/Elevator.h"
 
 
 // Sets default values
@@ -27,7 +27,7 @@ void AElevator::Tick( float DeltaTime)
 	Super::Tick( DeltaTime );
 
 	StartPos = GetActorLocation();
-	SetActorLocation(FMath::VInterpTo(StartPos, EndPos, DeltaTime, ElevatorSpeed));
+	SetActorLocation(FMath::VInterpConstantTo(StartPos, EndPos, DeltaTime, ElevatorSpeed));
 
 }
 

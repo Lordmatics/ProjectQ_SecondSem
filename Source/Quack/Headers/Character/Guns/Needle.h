@@ -16,13 +16,40 @@ class QUACK_API ANeedle : public ABaseGun
 		UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
 		USceneComponent* TheRoot;
 
-	/** Gun mesh: 1st person view (seen only by self) */
+	///** Gun mesh: 1st person view (seen only by self) */
+	//UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
+	//	class UStaticMeshComponent* NeedleMesh;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
-		class UStaticMeshComponent* NeedleMesh;
+		class USkeletalMeshComponent* NeedleSkeletalMesh;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
+		class USkeletalMeshComponent* NeedleSkeletalMeshForAnimations;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Animations")
+		UAnimMontage* NeedleStabAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Animations")
+		UAnimMontage* NeedleRaiseAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Animations")
+		UAnimMontage* NeedleLowerAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Animations")
+		UAnimMontage* NeedleLookAtAnimation;
 	
+	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Stab")
+		uint32 bStabbing : 1;
+
+	UFUNCTION()
+		void EndStab();
 public:
 
 	ANeedle();
+
+	void PlayStabAnimation();
+
+	void AdjustVisibilities(bool bForAnimations);
 
 	virtual void BeginPlay() override;
 
@@ -38,6 +65,13 @@ public:
 	virtual void ResetOrientation() override;
 
 	virtual void Shoot() override;
+
+	// Forceinlines
+	FORCEINLINE UAnimMontage* GetNeedleStabAnimation() const { return NeedleStabAnimation; }
+	FORCEINLINE UAnimMontage* GetNeedleRaiseAnimation() const { return NeedleRaiseAnimation; }
+	FORCEINLINE UAnimMontage* GetNeedleLowerAnimation() const { return NeedleLowerAnimation; }
+	FORCEINLINE UAnimMontage* GetNeedleLookAtAnimation() const { return NeedleLookAtAnimation; }
+
 
 protected:
 

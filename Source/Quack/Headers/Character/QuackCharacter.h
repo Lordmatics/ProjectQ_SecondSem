@@ -154,6 +154,32 @@ class AQuackCharacter : public ACharacter
 
 private:
 
+	UPROPERTY(EditAnywhere, Category = "C++ Animations")
+		UAnimMontage* LowerGunAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Animations")
+		UAnimMontage* RaiseGunAnimation;
+
+	float ChangeGunAnimation(int Index);
+	UFUNCTION()
+		void EquipNewGunAnim();
+	uint32 bCanFire : 1;
+	UFUNCTION()
+		void AllowFiring();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
+		bool bSwapToGun;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
+		bool bSwapToNeedle;
+	UFUNCTION()
+		void ResetGunSwapBools();
+	UFUNCTION()
+		void FinishSwapping(int Index);
+	UFUNCTION()
+		void HideCurrentGun(int Index);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
+		bool bHasNeedleEquipped = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "HUD UI")
 		bool bGotHit = false;
 
