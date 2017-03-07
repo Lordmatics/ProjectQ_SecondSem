@@ -185,6 +185,9 @@ private:
 		class ABurstRifle* BurstRifleRef;
 
 	UPROPERTY(EditAnywhere, Category = "Guns")
+		class ANeedle* NeedleRef;
+
+	UPROPERTY(EditAnywhere, Category = "Guns")
 		class ABaseGun* CurrentEquippedGun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guns", meta = (AllowPrivateAccess = "true"))
@@ -242,6 +245,8 @@ private:
 	UFUNCTION()
 		void OnSprintEnd();
 
+	bool CanSwapGun = true;
+
 	void Sprint();
 
 	UPROPERTY()
@@ -294,8 +299,13 @@ public:
 
 	FName GetWeaponAttachPointLaser() const;
 
+	UFUNCTION()
+		void ForceNeedleGun();
 
-	USkeletalMeshComponent* GetSpecifcPawnMesh() const;
+	UFUNCTION()
+		void UnforceNeedleGun();
+
+	USkeletalMeshComponent* GetSpecificPawnMesh() const;
 
 	virtual void BeginPlay();
 

@@ -20,6 +20,7 @@
 #include "Headers/Character/Guns/AssaultRifle.h"
 #include "Headers/Character/Guns/PlasmaRifle.h"
 #include "Headers/Character/Guns/BurstRifle.h"
+#include "Headers/Character/Guns/Needle.h"
 #include "Classes/Components/PostProcessComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -121,69 +122,78 @@ void AQuackCharacter::SpawnGunInventory()
 		BurstRifleRef->SheathAndDeactivate();
 		GunInventory.Add(BurstRifleRef);
 	}
+	if (GunInventoryClasses.Num() < 4) return;
+	ANeedle* Needle = World->SpawnActor<ANeedle>(GunInventoryClasses[3], SpawnInfo);
+	if (Needle != nullptr)
+	{
+		NeedleRef = Needle;
+		NeedleRef->SetOwningPawn(this);
+		NeedleRef->SheathAndDeactivate();
+		GunInventory.Add(NeedleRef);
+	}
 }
 
 void AQuackCharacter::HandleChangeToNewGun()
 {
-	if (CurrentEquippedGun != nullptr)
+	if (CanSwapGun)
 	{
-		// Alternatively, can cancel reload and force swap
-		// Discuss what we want
-		if (CurrentEquippedGun->GetIsReloading() || CurrentEquippedGun->InUseUnableToSwap())
+		if (CurrentEquippedGun != nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Tried to Swap Gun but was shut down"));
-
-			return;
-		}
-	}
-	// Thinking about it, this would need to change if we have more than two guns
-	//for (ABaseGun* Gun : GunInventory)
-	//{
-	//	if (Gun == nullptr) continue;
-	//	if (Gun->GetIsActive())
-	//	{
-	//		Gun->SheathAndDeactivate();
-	//	}
-	//	else
-	//	{
-	//		Gun->WieldAndActivate();
-	//		CurrentEquippedGun = Gun;
-	//	}
-	//}
-
-	// This should be auto maintainable 
-	// Auto cycling, until last gun - for reset
-
-	int GunIndexToEquip = 0;
-	for (size_t i = 0; i < GunInventory.Num(); i++)
-	{
-		if (GunInventory[i] == nullptr) continue;
-		bool bIsActive = GunInventory[i]->GetIsActive();
-		if (bIsActive)
-		{
-			if (i == GunInventory.Num() - 1)
+			// Alternatively, can cancel reload and force swap
+			// Discuss what we want
+			if (CurrentEquippedGun->GetIsReloading() || CurrentEquippedGun->InUseUnableToSwap())
 			{
-				GunIndexToEquip = 0;
-				CurrentEquipIndex = 0;
+				UE_LOG(LogTemp, Warning, TEXT("Tried to Swap Gun but was shut down"));
+
+				return;
+			}
+		}
+		// Thinking about it, this would need to change if we have more than two guns
+		//for (ABaseGun* Gun : GunInventory)
+		//{
+		//	if (Gun == nullptr) continue;
+		//	if (Gun->GetIsActive())
+		//	{
+		//		Gun->SheathAndDeactivate();
+		//	}
+		//	else
+		//	{
+		//		Gun->WieldAndActivate();
+		//		CurrentEquippedGun = Gun;
+		//	}
+		//}
+
+		// This should be auto maintainable 
+		// Auto cycling, until last gun - for reset
+
+		int GunIndexToEquip = 0;
+		for (size_t i = 0; i < GunInventory.Num(); i++)
+		{
+			if (GunInventory[i] == nullptr) continue;
+			bool bIsActive = GunInventory[i]->GetIsActive();
+			if (bIsActive)
+			{
+				if (i == GunInventory.Num() - 1)
+				{
+					GunIndexToEquip = 0;
+					CurrentEquipIndex = 0;
+				}
+				else
+				{
+					GunIndexToEquip = i + 1;
+					CurrentEquipIndex = i + 1;
+				}
+				GunInventory[i]->SheathAndDeactivate();
+				GunInventory[GunIndexToEquip]->WieldAndActivate();
+				CurrentEquippedGun = GunInventory[GunIndexToEquip];
+				break;
 			}
 			else
 			{
-				GunIndexToEquip = i + 1;
-				CurrentEquipIndex = i + 1;
+				GunInventory[i]->SheathAndDeactivate();
 			}
-			GunInventory[i]->SheathAndDeactivate();
-			GunInventory[GunIndexToEquip]->WieldAndActivate();
-			CurrentEquippedGun = GunInventory[GunIndexToEquip];
-			break;
-		}
-		else
-		{
-			GunInventory[i]->SheathAndDeactivate();
 		}
 	}
-
-
-
 
 
 	//int GunToEquipIndex = 0;
@@ -227,7 +237,7 @@ int AQuackCharacter::GetCurrentEquippedGunIndex() const
 	return CurrentEquipIndex;
 }
 
-USkeletalMeshComponent* AQuackCharacter::GetSpecifcPawnMesh() const
+USkeletalMeshComponent* AQuackCharacter::GetSpecificPawnMesh() const
 {
 	return Mesh1P;
 }
@@ -437,63 +447,65 @@ void AQuackCharacter::IncreaseAmmo(int Amount)
 void AQuackCharacter::UsePoison()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Pressed E Poison"));
-
-	if (PlayerConfig.CurrentPipe != nullptr && 	PoisonConfig.bHasNeedle)
+	if (CurrentEquipIndex == 3)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Pipe exists and has needle"));
+		if (PlayerConfig.CurrentPipe != nullptr && 	PoisonConfig.bHasNeedle)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Pipe exists and has needle"));
 
-		if (PlayerConfig.CurrentPipe->bNotABossPipe)
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("This Ran Poison"));
-			PlayerConfig.CurrentPipe->bPoisonedPipe = true;
-			PlayerConfig.CurrentPipe->bNotABossPipe = false;
-			PlayerConfig.CurrentPipe->ChangeMeshColour();
-			PlayerConfig.CurrentPipe->SimulateDestroy();
-			PlayerConfig.CurrentPipe->ToggleHighlight(false);
-			if (TutorialManager != nullptr)
+			if (PlayerConfig.CurrentPipe->bNotABossPipe)
 			{
-				PlayerConfig.CurrentPipe->OnPipeFinishedDraining.AddDynamic(TutorialManager, &ATutorialManager::RemoveAPipe);
-			}
-			//TutorialManager->RemoveAPipe();
-			return;
-		}
-	}
-	// Must have poison vials
-	if (PoisonConfig.PoisonVialsCount == 0) return;
-	// Cant be using poison already
-	if (PoisonConfig.bIsPoisoning) return;
-	// Must be within the pipe radius
-	if (!PoisonConfig.bCanPoisonPipe) return;
-	// Reduce vial count
-	if (PlayerConfig.Boss != nullptr)
-	{
-		if (PlayerConfig.CurrentPipe != nullptr && PlayerConfig.Boss->TargettedPipe != nullptr)
-		{
-			if (PlayerConfig.CurrentPipe->GetName() == PlayerConfig.Boss->TargettedPipe->GetName())
-			{
-				if (PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingOne || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingTwo 
-					|| PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingThree || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingFour)
+				//UE_LOG(LogTemp, Warning, TEXT("This Ran Poison"));
+				PlayerConfig.CurrentPipe->bPoisonedPipe = true;
+				PlayerConfig.CurrentPipe->bNotABossPipe = false;
+				PlayerConfig.CurrentPipe->ChangeMeshColour();
+				PlayerConfig.CurrentPipe->SimulateDestroy();
+				PlayerConfig.CurrentPipe->ToggleHighlight(false);
+				if (TutorialManager != nullptr)
 				{
-					PlayerConfig.CurrentPipe->bPoisonedPipe = true;
-					PlayerConfig.CurrentPipe->ChangeMeshColour();
-					PlayerConfig.CurrentPipe->SimulateDestroy();
-					PlayerConfig.CurrentPipe->ToggleHighlight(false);
-					PlayerConfig.Boss->ChangeState(BossStates::E_Poisoned);
-					if (PlayerConfig.Boss->LowerPipes.Num() == 0 && PlayerConfig.Boss->UpperPipes.Num() == 0)
+					PlayerConfig.CurrentPipe->OnPipeFinishedDraining.AddDynamic(TutorialManager, &ATutorialManager::RemoveAPipe);
+				}
+				//TutorialManager->RemoveAPipe();
+				return;
+			}
+		}
+		// Must have poison vials
+		if (PoisonConfig.PoisonVialsCount == 0) return;
+		// Cant be using poison already
+		if (PoisonConfig.bIsPoisoning) return;
+		// Must be within the pipe radius
+		if (!PoisonConfig.bCanPoisonPipe) return;
+		// Reduce vial count
+		if (PlayerConfig.Boss != nullptr)
+		{
+			if (PlayerConfig.CurrentPipe != nullptr && PlayerConfig.Boss->TargettedPipe != nullptr)
+			{
+				if (PlayerConfig.CurrentPipe->GetName() == PlayerConfig.Boss->TargettedPipe->GetName())
+				{
+					if (PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingOne || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingTwo
+						|| PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingThree || PlayerConfig.Boss->CurrentBossState == BossStates::E_HealingFour)
 					{
-						PlayerConfig.Boss->TargettedPipe = nullptr;
-					}
-					PoisonConfig.PoisonVialsCount--;
-					UWorld* const World = GetWorld();
-					if (World != nullptr)
-					{
-						PoisonConfig.bIsPoisoning = true;
-						World->GetTimerManager().SetTimer(PoisonConfig.PoisonUsageDelay, this, &AQuackCharacter::PoisonCooldown, PoisonConfig.PoisonCD, false);
+						PlayerConfig.CurrentPipe->bPoisonedPipe = true;
+						PlayerConfig.CurrentPipe->ChangeMeshColour();
+						PlayerConfig.CurrentPipe->SimulateDestroy();
+						PlayerConfig.CurrentPipe->ToggleHighlight(false);
+						PlayerConfig.Boss->ChangeState(BossStates::E_Poisoned);
+						if (PlayerConfig.Boss->LowerPipes.Num() == 0 && PlayerConfig.Boss->UpperPipes.Num() == 0)
+						{
+							PlayerConfig.Boss->TargettedPipe = nullptr;
+						}
+						PoisonConfig.PoisonVialsCount--;
+						UWorld* const World = GetWorld();
+						if (World != nullptr)
+						{
+							PoisonConfig.bIsPoisoning = true;
+							World->GetTimerManager().SetTimer(PoisonConfig.PoisonUsageDelay, this, &AQuackCharacter::PoisonCooldown, PoisonConfig.PoisonCD, false);
+						}
 					}
 				}
-			}
 
-		} 
+			}
+		}
 	}
 }
 
@@ -737,4 +749,18 @@ void AQuackCharacter::Sprint()
 bool AQuackCharacter::IsSprinting() const
 {
 	return MovementConfig.bIsSprinting;
+}
+
+void AQuackCharacter::ForceNeedleGun()
+{
+	GunInventory[CurrentEquipIndex]->SheathAndDeactivate();
+	GunInventory[3]->WieldAndActivate();
+	CurrentEquippedGun = GunInventory[3];
+	CurrentEquipIndex = 3;
+	CanSwapGun = false;
+}
+
+void AQuackCharacter::UnforceNeedleGun()
+{
+	CanSwapGun = true;
 }

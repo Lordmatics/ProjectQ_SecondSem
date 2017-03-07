@@ -43,11 +43,11 @@ void AAssaultRifle::Tick(float DeltaTime)
 	{
 		if (MyPawn != nullptr)
 		{
-			if (MyPawn->GetSpecifcPawnMesh() != nullptr)
+			if (MyPawn->GetSpecificPawnMesh() != nullptr)
 			{
 				if (bIsReloading)
 				{
-					Magazine->AttachToComponent(MyPawn->GetSpecifcPawnMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("MagazineSocket"));
+					Magazine->AttachToComponent(MyPawn->GetSpecificPawnMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("MagazineSocket"));
 				}
 				else
 				{
@@ -107,8 +107,8 @@ void AAssaultRifle::Shoot()
 	{
 		PlayFeedbackShake();
 		SpawnVisualEffects();
-		PlayFeedbackAudio(MyPawn->GetSpecifcPawnMesh());
-		DecreaseAmmo(1, MyPawn->GetSpecifcPawnMesh());
+		PlayFeedbackAudio(MyPawn->GetSpecificPawnMesh());
+		DecreaseAmmo(1, MyPawn->GetSpecificPawnMesh());
 
 		if (RaycastComponent != nullptr)
 		{
@@ -199,7 +199,7 @@ void AAssaultRifle::AttachMeshToPawn()
 	{
 		IgnoredActors.Add(MyPawn);
 		FName AttachPoint = MyPawn->GetWeaponAttachPoint();
-		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();
+		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecificPawnMesh();
 		if (PawnMesh1p != nullptr)
 		{
 			HarryAssaultRifle->SetHiddenInGame(false);

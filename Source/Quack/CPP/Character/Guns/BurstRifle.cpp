@@ -79,7 +79,7 @@ void ABurstRifle::Shoot()
 	bShootingInProcess = true;
 	bIsInUseUnableToSwap = true;
 	UWorld* const World = GetWorld();
-	if (World == nullptr || LaserParticleSystem == nullptr || MyPawn->GetSpecifcPawnMesh() == nullptr) return;
+	if (World == nullptr || LaserParticleSystem == nullptr || MyPawn->GetSpecificPawnMesh() == nullptr) return;
 	if (LaserParticleSystemComp == nullptr) return;
 	LaserParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(LaserParticleSystem, HarryLaserGun, MuzzleAttachPoint);// , ((FVector)(ForceInit)), FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
 	FTimerHandle RayHandle;
@@ -88,7 +88,7 @@ void ABurstRifle::Shoot()
 	World->GetTimerManager().SetTimer(RayHandle, this, &ABurstRifle::FireRay, (ParticleLength / 2), false);
 
 	//PlayFeedbackShake();
-	//PlayFeedbackAudio(MyPawn->GetSpecifcPawnMesh());
+	//PlayFeedbackAudio(MyPawn->GetSpecificPawnMesh());
 }
 
 void ABurstRifle::FireRay()
@@ -145,9 +145,9 @@ void ABurstRifle::FireRay()
 
 void ABurstRifle::SubtractAmmo()
 {
-	if (MyPawn->GetSpecifcPawnMesh() != nullptr)
+	if (MyPawn->GetSpecificPawnMesh() != nullptr)
 	{
-		DecreaseAmmo(1, MyPawn->GetSpecifcPawnMesh());
+		DecreaseAmmo(1, MyPawn->GetSpecificPawnMesh());
 		EndLaserDuration();
 	}
 }
@@ -193,7 +193,7 @@ void ABurstRifle::AttachMeshToPawn()
 	{
 		IgnoredActors.Add(MyPawn);
 		FName AttachPoint = MyPawn->GetWeaponAttachPointLaser();
-		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();
+		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecificPawnMesh();
 		if (PawnMesh1p != nullptr)
 		{
 			HarryLaserGun->SetHiddenInGame(false);

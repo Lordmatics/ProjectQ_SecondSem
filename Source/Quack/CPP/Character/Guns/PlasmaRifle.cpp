@@ -55,8 +55,8 @@ void APlasmaRifle::Tick(float DeltaTime)
 			//PlayFeedbackShake();
 			// Any visuals ?
 			// Can use timer for audio.. but not important at the moment
-			//PlayFeedbackAudio(MyPawn->GetSpecifcPawnMesh());
-			DecreaseAmmo(AmmoDecayPerSecond * DeltaTime, MyPawn->GetSpecifcPawnMesh());
+			//PlayFeedbackAudio(MyPawn->GetSpecificPawnMesh());
+			DecreaseAmmo(AmmoDecayPerSecond * DeltaTime, MyPawn->GetSpecificPawnMesh());
 			EnableBeam();
 			// Projectile logic for hitting a target
 			// Note: Do here, or Within Prj class
@@ -260,7 +260,7 @@ void APlasmaRifle::AttachMeshToPawn()
 
 		UE_LOG(LogTemp, Warning, TEXT("PlasmaAttachedToPawn"));
 		FName AttachPoint = MyPawn->GetWeaponAttachPointLaser();
-		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecifcPawnMesh();
+		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecificPawnMesh();
 		if (PawnMesh1p != nullptr)
 		{
 			HarryPlasmaGun->SetHiddenInGame(false);

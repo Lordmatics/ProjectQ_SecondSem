@@ -1582,6 +1582,11 @@ void AQuackBoss::BeginPipeDrain()
 	if (TargettedPipe != nullptr)
 	{
 		TargettedPipe->SetDescend(true);
+		AQuackCharacter* TempCharacter = Cast<AQuackCharacter>(UGameplayStatics::GetPlayerController(this, 0)->GetPawn());
+		if (TempCharacter != nullptr)
+		{
+			TempCharacter->ForceNeedleGun();
+		}
 	}
 }
 
@@ -1668,6 +1673,11 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 		if (CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo || CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour)
 		{
 			CurrentBossState = DesiredState;
+			AQuackCharacter* TempCharacter = Cast<AQuackCharacter>(UGameplayStatics::GetPlayerController(this, 0)->GetPawn());
+			if (TempCharacter != nullptr)
+			{
+				TempCharacter->UnforceNeedleGun();
+			}
 		}
 		else
 		{
