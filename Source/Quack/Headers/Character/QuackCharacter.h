@@ -153,6 +153,14 @@ class AQuackCharacter : public ACharacter
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(VisibleAnywhere, Category = "MovementOverride")
+		uint32 bMovementPrevented : 1;
+
+	FTimerHandle DelayRecoilHandle;
+	UPROPERTY(EditAnywhere, Category = "C++ Poison Tweak")
+		float DelayRecoilDuration = 1.0f;
+	UFUNCTION()
+		void DelayRecoil();
 
 	UPROPERTY(EditAnywhere, Category = "C++ Animations")
 		UAnimMontage* LowerGunAnimation;
@@ -311,6 +319,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		float BaseLookUpRate;
 
+	// Function to force player to be aiming at tongue / pipe during animation
+	void RotateTowardsTargettedPipe(float DeltaTime);
+	UFUNCTION()
+		void RegainMovement();
+	FTimerHandle RegainMovementHandle;
 public:
 	AQuackCharacter();
 
@@ -356,6 +369,12 @@ public:
 	FORCEINLINE float GetCurrentHealth() const { return PlayerConfig.Health; }
 
 	FORCEINLINE float GetMaxHealth() const { return PlayerConfig.MaxHealth; }
+
+	FORCEINLINE void SetPlayerMovement(bool _bCanMove) { bMovementPrevented = _bCanMove; }
+	FORCEINLINE bool GetPlayerMovement() const { return bMovementPrevented; }
+
+	UPROPERTY(EditAnywhere, Category = "C++ Rotation")
+		float RotationSpeed = 200.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "C++ Functions")
 	int GetCurrentEquippedGunIndex() const;

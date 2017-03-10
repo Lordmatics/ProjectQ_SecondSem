@@ -23,6 +23,7 @@
 #include "Headers/Character/Guns/Needle.h"
 #include "Classes/Components/PostProcessComponent.h"
 #include "Animation/AnimMontage.h"
+#include "Engine.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -455,7 +456,56 @@ void AQuackCharacter::Tick(float DeltaTime)
 		// Might change this to actual timer code
 		SemiAutomaticShooting(DeltaTime);
 
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("PlayerMovement Restricted: %s"), bMovementPrevented ? TEXT("True") : TEXT("False")));
+		}
+		if (GetPlayerMovement())
+		{
+			// This doesn't want to work, even though its the same rotating logic as the boss
+			//RotateTowardsTargettedPipe(DeltaTime);
+		}
 
+
+}
+
+void AQuackCharacter::RotateTowardsTargettedPipe(float DeltaTime)
+{
+	if (PlayerConfig.Boss->TargettedPipe != nullptr)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("RotatingToPipe"));
+		FRotator MyRotation = GetActorRotation();
+		const FVector MyLocation = GetActorLocation();
+		//// Get other transform
+		const FVector OtherLocation = PlayerConfig.Boss->TargettedPipe->GetLookAtLocation();
+		//// Find vector that connects the transforms
+		FVector Direction = MyLocation - OtherLocation;
+		// Project it to 2D
+		Direction = FVector(Direction.X, Direction.Y, 0.0f);
+		FRotator EndRotation = Direction.Rotation();
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 25.0f, FColor::Red, FString::Printf(TEXT("Rotation: %s, EndRotation: %s"), *MyRotation.ToString(), *EndRotation.ToString()));
+		}
+		UE_LOG(LogTemp,Warning,TEXT("Rotation: %s, EndRotation: %s"), *MyRotation.ToString(), *EndRotation.ToString());
+		//MyRotation = FMath::RInterpConstantTo(MyRotation, EndRotation, DeltaTime, RotationSpeed);
+		//SetActorRotation(MyRotation);
+
+		// calculate delta for this frame from the rate information
+		//if (EndRotation.Yaw > MyRotation.Yaw + 10.0f)
+		//{
+		//	AddControllerYawInput(-3.0f * BaseTurnRate * DeltaTime);
+		//}
+		//else if (EndRotation.Yaw < MyRotation.Yaw - 10.0f)
+		//{
+		//	AddControllerYawInput(3.0f * BaseTurnRate * DeltaTime);
+		//}
+		//MyRotation.Yaw = FMath::Clamp(MyRotation.Yaw, 0.0f, -180.0f);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("IN FUNCTION BUT NOT ROTATING"));
+	}
 }
 
 // Interact
@@ -630,18 +680,22 @@ void AQuackCharacter::UsePoison()
 			//		UE_LOG(LogTemp, Warning, TEXT("Animation Should Play : Stab"));
 			//	}
 			//}
-			if (NeedleRef != nullptr)
-			{
-				NeedleRef->PlayStabAnimation();
-			}
+
 			if (PlayerConfig.CurrentPipe->bNotABossPipe)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("This Ran Poison"));
 				PlayerConfig.CurrentPipe->bPoisonedPipe = true;
+				//PlayerConfig.CurrentPipe->
 				PlayerConfig.CurrentPipe->bNotABossPipe = false;
+				// Need to turn it off - to prevent stabbing a poisonned pipe animation
+				PoisonConfig.bCanPoisonPipe = false;
 				PlayerConfig.CurrentPipe->ChangeMeshColour();
 				PlayerConfig.CurrentPipe->SimulateDestroy();
 				PlayerConfig.CurrentPipe->ToggleHighlight(false);
+				if (NeedleRef != nullptr)
+				{
+					NeedleRef->PlayStabAnimation();
+				}
 				if (TutorialManager != nullptr)
 				{
 					PlayerConfig.CurrentPipe->OnPipeFinishedDraining.AddDynamic(TutorialManager, &ATutorialManager::RemoveAPipe);
@@ -677,13 +731,20 @@ void AQuackCharacter::UsePoison()
 						//}
 						if (NeedleRef != nullptr)
 						{
+							// Cannot Move
+							SetPlayerMovement(true);
+							//UE_LOG(LogTemp, Warning, TEXT("PlayerCanMoveAgain: %s"), bMovementPrevented ? TEXT("CANMOVE") : TEXT("CANNOTMOVE"));
 							NeedleRef->PlayStabAnimation();
 						}
 						PlayerConfig.CurrentPipe->bPoisonedPipe = true;
 						PlayerConfig.CurrentPipe->ChangeMeshColour();
 						PlayerConfig.CurrentPipe->SimulateDestroy();
 						PlayerConfig.CurrentPipe->ToggleHighlight(false);
+						// Need to turn it off - to prevent stabbing a poisonned pipe animation
+						PoisonConfig.bCanPoisonPipe = false;
+						// Force boss to go to next state
 						PlayerConfig.Boss->ChangeState(BossStates::E_Poisoned);
+						// No Pipes left, set TargettedPipe - NULL
 						if (PlayerConfig.Boss->LowerPipes.Num() == 0 && PlayerConfig.Boss->UpperPipes.Num() == 0)
 						{
 							PlayerConfig.Boss->TargettedPipe = nullptr;
@@ -692,7 +753,9 @@ void AQuackCharacter::UsePoison()
 						UWorld* const World = GetWorld();
 						if (World != nullptr)
 						{
-							PoisonConfig.bIsPoisoning = true;
+							if(!World->GetTimerManager().IsTimerActive(DelayRecoilHandle))
+								World->GetTimerManager().SetTimer(DelayRecoilHandle, this, &AQuackCharacter::DelayRecoil, DelayRecoilDuration, false);
+							//PoisonConfig.bIsPoisoning = true;
 							World->GetTimerManager().SetTimer(PoisonConfig.PoisonUsageDelay, this, &AQuackCharacter::PoisonCooldown, PoisonConfig.PoisonCD, false);
 						}
 					}
@@ -701,6 +764,30 @@ void AQuackCharacter::UsePoison()
 			}
 		}
 	}
+}
+
+void AQuackCharacter::DelayRecoil()
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	World->GetTimerManager().ClearTimer(DelayRecoilHandle);
+	PoisonConfig.bIsPoisoning = true;
+	// Regain Movement - Might wanna delay another second to finish anim
+	
+	if (!World->GetTimerManager().IsTimerActive(RegainMovementHandle))
+	{
+		World->GetTimerManager().SetTimer(RegainMovementHandle, this, &AQuackCharacter::RegainMovement, 1.3f, false);
+	}
+	//SetPlayerMovement(false);
+}
+
+void AQuackCharacter::RegainMovement()
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	World->GetTimerManager().ClearTimer(RegainMovementHandle);
+	SetPlayerMovement(false);
+	//UE_LOG(LogTemp, Warning, TEXT("PlayerCanMoveAgain: %s"), bMovementPrevented ? TEXT("CANMOVE") : TEXT("CANNOTMOVE"));
 }
 
 void AQuackCharacter::PoisonCooldown()
@@ -880,6 +967,7 @@ void AQuackCharacter::MouseUp()
 // MOVEMENT AND CAMERA TURN
 void AQuackCharacter::MoveForward(float Value)
 {
+	if (bMovementPrevented) return;
 	if (Value != 0.0f)
 	{
 		// add movement in that direction
@@ -889,6 +977,8 @@ void AQuackCharacter::MoveForward(float Value)
 
 void AQuackCharacter::MoveRight(float Value)
 {
+	if (bMovementPrevented) return;
+
 	if (Value != 0.0f)
 	{
 		// add movement in that direction
@@ -898,12 +988,16 @@ void AQuackCharacter::MoveRight(float Value)
 
 void AQuackCharacter::TurnAtRate(float Rate)
 {
+	if (bMovementPrevented) return;
+
 	// calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AQuackCharacter::LookUpAtRate(float Rate)
 {
+	if (bMovementPrevented) return;
+
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
@@ -913,7 +1007,7 @@ void AQuackCharacter::OnSprintBegin()
 {
 	// Very subtle bug, u could technically exploit, sprint bonus if u
 	// jumped and reloaded then remained at sprint speed
-	if (!MovementConfig.bReloading && !WeaponConfig.bMouseDown)
+	if (!MovementConfig.bReloading && !WeaponConfig.bMouseDown)// && (GetVelocity().X > 0.0f))
 	{
 		MovementConfig.bIsSprinting = true;
 	}
@@ -928,7 +1022,9 @@ void AQuackCharacter::OnSprintEnd()
 
 void AQuackCharacter::Sprint()
 {
-	if (MovementConfig.bIsSprinting)
+	if (bMovementPrevented) return;
+
+	if (MovementConfig.bIsSprinting )
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, GetWorld()->GetDeltaSeconds(), FColor::Green, FString::Printf(TEXT("Sprinting")));
 		GetCharacterMovement()->MaxWalkSpeed = MovementConfig.SprintSpeed;

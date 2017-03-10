@@ -14,6 +14,10 @@ APipe::APipe()
 	MyRoot = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	RootComponent = MyRoot;
 
+	LookAtTransform = CreateDefaultSubobject<USceneComponent>(TEXT("LookAT"));
+	LookAtTransform->SetRelativeLocation(FVector(171.0f, 0.0f, 76.5f));
+	LookAtTransform->SetupAttachment(MyRoot);
+
 	MyTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractTrigger"));
 	MyTrigger->SetupAttachment(MyRoot);
 
@@ -75,6 +79,18 @@ void APipe::BeginPlay()
 void APipe::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
+	// PreRequisites for being Stabbable
+	if (!bPoisonedPipe && bTargettedByBoss && bDescend && !bNotABossPipe)
+	{
+		// Limitations, to only allow it within the pipes radius
+		if (CharRef != nullptr && bCharacterInTrigger)
+		{
+			// Reason - If you were in the tirgger, prior to it being leached, you would
+			// Have to exit and re-enter to validate the conditions 
+			CharRef->PoisonConfig.bCanPoisonPipe = true;
+			ToggleHighlight(true);
+		}
+	}
 	if (bTargettedByBoss && bDescend)
 	{
 		ToggleHighlight(true);
@@ -193,13 +209,15 @@ void APipe::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 	AQuackCharacter* MyCharacter = Cast<AQuackCharacter>(OtherActor);
 	if (MyCharacter != nullptr)
 	{
+		CharRef = MyCharacter;
+		bCharacterInTrigger = true;
 		//UE_LOG(LogTemp, Warning, TEXT("Poison Pipe enter"));
 		// Poisonable
 		if (bNotABossPipe) return;
 		if (!bPoisonedPipe && bTargettedByBoss && bDescend)
 		{
-			MyCharacter->PoisonConfig.bCanPoisonPipe = true;
-			ToggleHighlight(true);
+			//MyCharacter->PoisonConfig.bCanPoisonPipe = true;
+			//ToggleHighlight(true);
 		}
 		else
 		{
@@ -214,6 +232,8 @@ void APipe::OnTriggerExit(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	AQuackCharacter* MyCharacter = Cast<AQuackCharacter>(OtherActor);
 	if (MyCharacter != nullptr)
 	{
+		CharRef = nullptr;
+		bCharacterInTrigger = false;
 		//UE_LOG(LogTemp, Warning, TEXT("Poison Pipe exit"));
 		// Poisonable
 		MyCharacter->PoisonConfig.bCanPoisonPipe = false;

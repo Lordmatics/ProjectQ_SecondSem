@@ -25,6 +25,9 @@ class QUACK_API APipe : public AActor
 		USceneComponent* MyRoot;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
+		USceneComponent* LookAtTransform;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
 		UShapeComponent* MyTrigger;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
@@ -94,6 +97,13 @@ class QUACK_API APipe : public AActor
 	void BeginDescend(float DeltaTime);
 
 	void BeginAscend(float DeltaTime);
+
+
+	UPROPERTY(EditAnywhere, Category = "Pipe Movement")
+		uint32 bCharacterInTrigger : 1;
+
+	UPROPERTY(EditAnywhere, Category = "Char")
+		class AQuackCharacter* CharRef;
 public:
 	// Sets default values for this actor's properties
 	APipe();
@@ -133,6 +143,10 @@ public:
 	FORCEINLINE bool IsFinishedDraining() const { return bFinishedDraining; }
 
 	FORCEINLINE bool GetDescend() const { return bDescend; }
+
+	FORCEINLINE FVector GetLookAtLocation() const { return LookAtTransform != nullptr ? LookAtTransform->GetComponentLocation() : FVector(); }
+	FORCEINLINE FRotator GetLookAtRotation() const { return LookAtTransform != nullptr ? LookAtTransform->GetComponentRotation() : FRotator(); }
+
 protected:
 
 };
