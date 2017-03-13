@@ -146,6 +146,7 @@ void AQuackCharacter::AllowFiring()
 
 void AQuackCharacter::SpawnGunInventory()
 {
+
 	UWorld* const World = GetWorld();
 	// Early exits - should never want this to occur
 	if (World == nullptr) return;
@@ -154,6 +155,7 @@ void AQuackCharacter::SpawnGunInventory()
 	{
 		if (GunInventoryClasses[i] == nullptr) return;
 	}
+
 	//if (GunInventoryClasses[0] == nullptr || GunInventoryClasses[1] == nullptr) return;
 
 	FActorSpawnParameters SpawnInfo;
@@ -162,6 +164,8 @@ void AQuackCharacter::SpawnGunInventory()
 	AAssaultRifle* AR = World->SpawnActor<AAssaultRifle>(GunInventoryClasses[0], SpawnInfo);
 	if (AR != nullptr)
 	{
+
+
 		AssaultRifleRef = AR;
 		AssaultRifleRef->SetOwningPawn(this);
 		AssaultRifleRef->WieldAndActivate();
