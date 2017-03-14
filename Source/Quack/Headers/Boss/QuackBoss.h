@@ -13,6 +13,27 @@ class QUACK_API AQuackBoss : public AActor
 
 private:
 
+	UFUNCTION()
+		void LowerRedHealthBar();
+
+	UPROPERTY(EditAnywhere, Category = "C++ Health")
+		float RedDelay = 4.0f;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Health")
+		float DrainRate = 25.0f;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Health")
+		float CurrentDrainCache = 1.0f;
+
+	void RenewRedBarHandle();
+	
+
+	FTimerHandle RedBarHandle;
+
+	uint32 bBeginDrainingRedBar : 1;
+	void DrainInTick(float DeltaTime);
+
+
 	uint32 bDontDoAnything : 1;
 
 	uint32 bIsStabbingAnimation : 1;
@@ -305,8 +326,8 @@ public:
 	UFUNCTION()
 		void OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY()
-	class AQuackCharacter* MyCharacter;
+	UPROPERTY(VisibleAnywhere, Category = "C++ Character Ref")
+		class AQuackCharacter* MyCharacter;
 	UPROPERTY()
 	class ARockSpawner* RockSpawner;
 
@@ -422,6 +443,8 @@ public:
 		float BossRegenRate = 5.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 		float BossHealth = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+		float BossHealthRed = 100.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Niall")
 		float MaxBossHealth = 100.0f;
 

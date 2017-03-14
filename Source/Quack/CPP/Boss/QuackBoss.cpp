@@ -21,6 +21,7 @@
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 #include "Headers/CustomComponents/RaycastComponent.h"
 #include "Classes/Animation/AnimMontage.h"
+#include "Engine.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -232,13 +233,15 @@ void AQuackBoss::BeginPlay()
 	//{
 	//	MyCharacter->BossHP = MaxBossHealth / 100.0f;
 	//}
-	BossHealth = 10.0f;
+	BossHealth = BossHealthRed = 10.0f;
+	 
 	if (MyCharacter != nullptr)
 	{
 		MyCharacter->BossHP = BossHealth / MaxBossHealth;
+		MyCharacter->BossHPRed = BossHealth / MaxBossHealth;
 		MyCharacter->bShowBossBar = false;
 	}
-	BossHealth = FMath::Clamp(BossHealth, 0.0f, MaxBossHealth);
+	BossHealth = BossHealthRed = FMath::Clamp(BossHealth, 0.0f, MaxBossHealth);
 	LocateNearbyPipe();
 	ToggleShield(false);
 
@@ -420,6 +423,11 @@ void AQuackBoss::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bDontDoAnything) return;
 	MapBossMovementToPlayer(DeltaTime);
+	DrainInTick(DeltaTime);
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("DrainRedBar: %s"), bBeginDrainingRedBar ? TEXT("TRUE") : TEXT("FALSE")));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("CurrentDrainCache: %f"), CurrentDrainCache));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("HP: %f, RedHP: %f"), BossHealth,BossHealthRed));
+
 	if (PinRefLL != nullptr && PinRefUL != nullptr && PinRefLR != nullptr && PinRefUR != nullptr)
 	{
 		if (PinRefLL->bHasBeenDestroyed && PinRefLR->bHasBeenDestroyed && PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
@@ -1352,9 +1360,68 @@ void AQuackBoss::SufferDamage(float Amount)
 	// Utility Function to Deduct Damage from Health then clamp for safety
 	BossHealth -= Amount;
 	if (MyCharacter != nullptr)
+	{
 		MyCharacter->BossHP = BossHealth / MaxBossHealth;
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			if (!World->GetTimerManager().IsTimerActive(RedBarHandle))
+			{
+				World->GetTimerManager().SetTimer(RedBarHandle, this, &AQuackBoss::LowerRedHealthBar, RedDelay, false);
+			}
+		}
+	}
+		
 	BossHealth = FMath::Clamp(BossHealth, 0.0f, MaxBossHealth);
+	BossHealthRed = FMath::Clamp(BossHealthRed, 0.0f, MaxBossHealth);
+
 	CheckForDead();
+}
+
+void AQuackBoss::LowerRedHealthBar()
+{
+	bBeginDrainingRedBar = true;
+	CurrentDrainCache = BossHealth;
+}
+
+void AQuackBoss::DrainInTick(float DeltaTime)
+{
+	if (bBeginDrainingRedBar)
+	{
+		if (MyCharacter != nullptr)
+		{
+			BossHealthRed -= (DrainRate * DeltaTime);
+			MyCharacter->BossHPRed = BossHealthRed / MaxBossHealth;
+			UE_LOG(LogTemp, Warning, TEXT("BossRedHP: %f, Threshold: %f"), MyCharacter->BossHPRed, CurrentDrainCache);
+			if (BossHealthRed <= CurrentDrainCache)
+			{
+				RenewRedBarHandle();
+			}
+				//BossHealth / MaxBossHealth;
+			//FTimerHandle TempHandle;
+			//UWorld* const World = GetWorld();
+			//if (World != nullptr)
+			//{
+			//	World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::LowerRedHealthBar, RedDelay, false);
+			//}
+		}
+	}
+}
+
+void AQuackBoss::RenewRedBarHandle()
+{
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		World->GetTimerManager().ClearTimer(RedBarHandle);
+		bBeginDrainingRedBar = false;	
+		// Check for More Damage To Reduce
+		if (!World->GetTimerManager().IsTimerActive(RedBarHandle))
+		{
+			World->GetTimerManager().SetTimer(RedBarHandle, this, &AQuackBoss::LowerRedHealthBar, RedDelay, false);
+		}
+		
+	}
 }
 
 void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
@@ -1367,14 +1434,32 @@ void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 	{
 		// Want a 5s matinee now as well
 		BossHealth += DeltaTime * BossRegenRate * 15.0f;
+
 		if (MyCharacter != nullptr)
+		{
 			MyCharacter->BossHP = BossHealth / MaxBossHealth;
+			if (BossHealth > BossHealthRed)
+			{
+				BossHealthRed = BossHealth;
+				MyCharacter->BossHPRed = BossHealthRed / MaxBossHealth;
+			}
+			RenewRedBarHandle();
+		}
 	}
 	else
 	{
 		BossHealth += BossRegenRate * DeltaTime;
+
 		if (MyCharacter != nullptr)
+		{
 			MyCharacter->BossHP = BossHealth / MaxBossHealth;
+			if (BossHealth > BossHealthRed)
+			{
+				BossHealthRed = BossHealth;
+				MyCharacter->BossHPRed = BossHealthRed / MaxBossHealth;
+			}
+			RenewRedBarHandle();
+		}
 	}
 }
 
@@ -1559,7 +1644,6 @@ void AQuackBoss::RotateTowardsPlayer()
 		FRotator EndRotation = Direction.Rotation();
 		MyRotation = FMath::RInterpTo(MyRotation, EndRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
 		SetActorRotation(MyRotation);
-
 		// Allow Horizontal strafe when rotation towards player
 		bStopChase = false;
 	}

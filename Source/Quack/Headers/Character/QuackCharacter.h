@@ -386,6 +386,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BossHP;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BossHPRed;
+
 	/** poison data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
 		FPoisonData PoisonConfig = FPoisonData();
