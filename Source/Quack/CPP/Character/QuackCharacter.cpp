@@ -460,10 +460,10 @@ void AQuackCharacter::Tick(float DeltaTime)
 		// Might change this to actual timer code
 		SemiAutomaticShooting(DeltaTime);
 
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("PlayerMovement Restricted: %s"), bMovementPrevented ? TEXT("True") : TEXT("False")));
-		}
+		//if (GEngine)
+		//{
+		//	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("PlayerMovement Restricted: %s"), bMovementPrevented ? TEXT("True") : TEXT("False")));
+		//}
 		if (GetPlayerMovement())
 		{
 			// This doesn't want to work, even though its the same rotating logic as the boss

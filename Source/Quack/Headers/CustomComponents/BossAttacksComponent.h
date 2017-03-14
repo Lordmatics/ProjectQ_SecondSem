@@ -42,6 +42,22 @@ private:
 	/** Float to determine how frequently boss shoots*/
 	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
 		float TailFireRate = 5.0f;
+
+private:
+	// My Variables - Bile Spray
+	FTimerHandle BileSprayHandle;
+
+	/** Bool to determine if boss is Bile Spraying*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		uint32 bIsSpraying : 1;
+
+	/** Float to determine how frequently boss shoots*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		float SprayFrequency = 0.5f;
+
+	/** Particle System to shoot spray*/
+	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
+		UParticleSystem* BileSprayPS;
 public:	
 	// Sets default values for this component's properties
 	UBossAttacksComponent();
@@ -99,6 +115,31 @@ public:
 
 	/** Utility function to get the current fire rate of the boss*/
 	FORCEINLINE float GetTailFireRate() const { return TailFireRate; }
+
+public:
+
+	// My Functions - Bile Spray
+
+	/** Function to initiate the bile spitting*/
+	UFUNCTION()
+		void StartBileSpraying(class UArrowComponent* MouthArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent, float OverridenFireRate = 1.0f);
+
+	/** Function that plays the animation for the attack, with an appropriate delay, for the attack to match the animation*/
+	UFUNCTION()
+		void BeginShootTheSpray(UArrowComponent* MouthArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent);
+
+	/** Function that actually fires the projectile*/
+	UFUNCTION()
+		void ShootTheSpray(class UArrowComponent* MouthArrow, class UAnimInstance* BossAnimInstance, class UAnimationComponent* BossAnimComponent);
+
+	/** Function to end the bile spitting*/
+	void StopBileSpraying();
+
+	/** Utility function to determine is bile spitting in motion*/
+	FORCEINLINE bool GetIsBileSpraying() const { return bIsSpraying; }
+
+	/** Utility function to get the current fire rate of the boss*/
+	FORCEINLINE float GetBileSprayFireRate() const { return SprayFrequency; }
 public:
 	// My Variables
 

@@ -424,9 +424,9 @@ void AQuackBoss::Tick(float DeltaTime)
 	if (bDontDoAnything) return;
 	MapBossMovementToPlayer(DeltaTime);
 	DrainInTick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("DrainRedBar: %s"), bBeginDrainingRedBar ? TEXT("TRUE") : TEXT("FALSE")));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("CurrentDrainCache: %f"), CurrentDrainCache));
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("HP: %f, RedHP: %f"), BossHealth,BossHealthRed));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("DrainRedBar: %s"), bBeginDrainingRedBar ? TEXT("TRUE") : TEXT("FALSE")));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("CurrentDrainCache: %f"), CurrentDrainCache));
+	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("HP: %f, RedHP: %f"), BossHealth,BossHealthRed));
 
 	if (PinRefLL != nullptr && PinRefUL != nullptr && PinRefLR != nullptr && PinRefUR != nullptr)
 	{
@@ -703,7 +703,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
 			//UE_LOG(LogTemp, Warning, TEXT("Fighting Three : Check for Melee Attack : %s"), Check ? TEXT("true") : TEXT("false"));
-			if (!CheckForMeleeAttack() && BossAttacksComponent != nullptr)
+			if (/*!CheckForMeleeAttack() &&*/ BossAttacksComponent != nullptr)
 			{
 				// Bile during spawn phase, but half as often - balance
 				float NewFireRate = BossAttacksComponent->GetBileFireRate() / 2;
@@ -762,10 +762,10 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			SetTongueToNormal();
 			if (bFacingTargettedPipe && bFacingTargettedPipeLower) return;
 
-			if (!CheckForMeleeAttack())
-			{
+			//if (!CheckForMeleeAttack())
+			//{
 				BeginMultipleAttacksPattern();
-			}
+			//}
 			// Only Drop Once during the phases - and get back up regardless after 30s
 			if(!bFightingFourDrop)
 				BeginWaveSpawningCycle();
@@ -1040,6 +1040,7 @@ void AQuackBoss::MapBossMovementToPlayer(float DeltaTime)
 	}
 }
 
+// DEPRECATED
 bool AQuackBoss::CheckForMeleeAttack()
 {
 	// THINK I MAY OF FIGURED IT OUT
@@ -1081,6 +1082,7 @@ bool AQuackBoss::CheckForMeleeAttack()
 				// SO MIGHT NEED TO CACHE WHAT PART OF MULTIPLE PHASE YOU WAS IN, TO RESUME IT
 				StopTailShot();
 				StopBileShot();
+				StopBileSpray();
 				ResetMultipleAttacksPattern();
 				CurrentAnimationState = AnimationStates::E_AnimMelee;
 
@@ -1241,12 +1243,22 @@ void AQuackBoss::ChangeAttack()
 		if (BossAttacksComponent->GetIsBileSpitting())
 		{
 			StopBileShot();
-			StartTailShot();
+			StopTailShot();
+			//StartTailShot();
+			StartBileSpray();
 		}
+		// Tail Attack has been made redundant
 		else if(BossAttacksComponent->GetIsTailShooting())
 		{
 			StopTailShot();
+			StopBileSpray();
 			// set bilespitting to true once then repeat the attack function
+			StartBileShot();
+		}
+		else if (BossAttacksComponent->GetIsBileSpraying())
+		{
+			StopBileSpray();
+			StopTailShot();
 			StartBileShot();
 		}
 		else
@@ -1256,11 +1268,13 @@ void AQuackBoss::ChangeAttack()
 			if (Rand == 0)
 			{
 				StopTailShot();
+				StopBileSpray();
 				StartBileShot();
 			}
 			else
 			{
 				StartBileShot();
+				StopBileSpray();
 				StopTailShot();
 			}
 		}
@@ -1770,6 +1784,7 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 	FireCooldown = InitialFireCooldown;
 	StopBileShot();
 	StopTailShot();
+	StopBileSpray();
 	if(bUsingPrimaryAttack)
 		ResetMultipleAttacksPattern();
 	if (bMeleeStabbing)
@@ -1842,6 +1857,26 @@ void AQuackBoss::StopTailShot()
 	}
 }
 
+void AQuackBoss::StartBileSpray(float OverridenFireRate)
+{
+	if (BossAttacksComponent != nullptr)
+	{
+		if (MouthArrow == nullptr) return;
+		UAnimInstance* AnimInst = MySkeletalMesh->GetAnimInstance();
+		if (AnimInst != nullptr && AnimationComponent != nullptr)
+		{
+			BossAttacksComponent->StartBileSpraying(MouthArrow, AnimInst, AnimationComponent);
+		}
+	}
+}
+
+void AQuackBoss::StopBileSpray()
+{
+	if (BossAttacksComponent != nullptr)
+	{
+		BossAttacksComponent->StopBileSpraying();
+	}
+}
 void AQuackBoss::RotateTowardsWall()
 {
 

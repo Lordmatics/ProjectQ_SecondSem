@@ -392,6 +392,10 @@ public:
 	UFUNCTION()
 		void StopTailShot();
 
+	void StartBileSpray(float OverridenFireRate = 1.0f);
+	UFUNCTION()
+		void StopBileSpray();
+
 	FTimerHandle AttackIterationTimer;
 	UPROPERTY(EditAnywhere, Category = "Bile")
 		float ChangeAttackPatternRate = 0.25f;

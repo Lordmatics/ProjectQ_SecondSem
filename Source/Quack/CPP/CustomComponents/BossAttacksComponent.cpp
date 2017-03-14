@@ -193,3 +193,89 @@ void UBossAttacksComponent::StopTailShoot()
 	}
 }
 // END TAIL SHOT
+
+// BILE SPRAY
+void UBossAttacksComponent::StartBileSpraying(UArrowComponent* MouthArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent, float OverridenFireRate)
+{
+	if (bIsSpraying) return;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		float Rate = 1.0f / SprayFrequency;
+		if (OverridenFireRate < 1.0f)
+		{
+			Rate = 1.0f / OverridenFireRate;
+		}
+		FTimerDelegate TimerDel;
+		TimerDel.BindUFunction(this, FName("BeginShootTheSpray"), MouthArrow, BossAnimInstance, BossAnimComponent);
+		World->GetTimerManager().SetTimer(BileSprayHandle, TimerDel, Rate, true);
+		bIsSpraying = true;
+	}
+}
+
+void UBossAttacksComponent::BeginShootTheSpray(UArrowComponent* MouthArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent)
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	if (BossAnimComponent != nullptr && BossAnimInstance != nullptr)
+	{
+		if (BossAnimComponent->GetBileSpitAnim() == nullptr) return;
+		float BileAnimDuration = BossAnimInstance->Montage_Play(BossAnimComponent->GetBileSpitAnim(), 1.0f);
+		FTimerHandle AnimDelayHandle;
+		FTimerDelegate AnimDelayDelegate;
+		AnimDelayDelegate.BindUFunction(this, FName("ShootTheSpray"), MouthArrow, BossAnimInstance, BossAnimComponent);
+		World->GetTimerManager().SetTimer(AnimDelayHandle, AnimDelayDelegate, 9 * (BileAnimDuration / 10), false);
+	}
+}
+
+void UBossAttacksComponent::ShootTheSpray(UArrowComponent* MouthArrow, UAnimInstance* BossAnimInstance, UAnimationComponent* BossAnimComponent)
+{
+	// PLAY ANIM MONTAGE BEFORE THIS FUNCTION IN BOSS CONTAINER
+
+	// FIRES THE PROJECTILE
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	//if (BossProjectilesArray.Num() == 0) return;
+	//if (BossProjectilesArray[1] == nullptr) return;
+
+	//CurrentAnimationState = AnimationStates::E_AnimBileSpit;
+	if (MouthArrow == nullptr) return;
+	if (BileSprayPS == nullptr) return;
+	const FVector Location = MouthArrow->GetComponentLocation();
+	const FRotator Rotation = MouthArrow->GetComponentRotation();
+	UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAtLocation(World, BileSprayPS, Location, Rotation);
+
+	//AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(BossProjectilesArray[1], Location, Rotation);
+	//if (Proj != nullptr)
+	//{
+	//	float NewScale = 0.5f; // 0.5f * BileShotsFired;
+
+	//						   // THIS PROBABLY WANTS CHANGING TO ADJUST TO NEW ENVIRONMENTS FLOORS
+	//						   // DO THIS SOME OTHER TIME THOUGH
+	//	BileShotsFired++;
+	//	if (BileShotsFired > 3)
+	//		BileShotsFired = 1;
+	//	//med far close
+	//	if (BileShotsFired == 1)
+	//		NewScale = 0.375f;
+	//	else if (BileShotsFired == 2)
+	//		NewScale = 0.075f;
+	//	else if (BileShotsFired == 3)
+	//		NewScale = 0.675f;
+	//	Proj->AdjustProjectileMovementScale(NewScale);
+	//}
+
+
+}
+
+void UBossAttacksComponent::StopBileSpraying()
+{
+	bIsSpraying = false;
+	//bWasBileMostRecent = false;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		World->GetTimerManager().ClearTimer(BileSprayHandle);
+	}
+}
+// END BILE SPRAY
