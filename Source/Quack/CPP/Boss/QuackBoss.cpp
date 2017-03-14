@@ -104,7 +104,6 @@ AQuackBoss::AQuackBoss()
 	////MouthArrow->SetRelativeRotation(FRotator(0.0f, -20.0f, 0.0f));
 	////	MouthArrow->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 
-	InitialisePlayerCharacterReference();
 	//InitialiseRockSpawnerReference();
 
 	MinionFactory = CreateDefaultSubobject<UMinionFactoryComponent>(TEXT("MinionFactory"));
@@ -122,6 +121,8 @@ AQuackBoss::AQuackBoss()
 			AudioManager = *ActorItr;
 		}
 	}
+	InitialisePlayerCharacterReference();
+
 
 }
 
@@ -214,6 +215,8 @@ void AQuackBoss::StartBoss()
 void AQuackBoss::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InitialisePlayerCharacterReference();
 
 	bFirstTimeHealing = true;
 	bDontDoAnything = true;
@@ -1452,6 +1455,13 @@ void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 		if (MyCharacter != nullptr)
 		{
 			MyCharacter->BossHP = BossHealth / MaxBossHealth;
+			MyCharacter->SetPlayerMovement(true);
+			FTimerHandle TempTimer;
+			UWorld* TempWorld = GetWorld();
+			if (TempWorld != nullptr)
+			{
+				TempWorld->GetTimerManager().SetTimer(TempTimer, this, &AQuackBoss::RestorePlayerMovement, 5.0f, false);
+			}
 			if (BossHealth > BossHealthRed)
 			{
 				BossHealthRed = BossHealth;
@@ -1474,6 +1484,14 @@ void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 			}
 			RenewRedBarHandle();
 		}
+	}
+}
+
+void AQuackBoss::RestorePlayerMovement()
+{
+	if (MyCharacter != nullptr)
+	{
+		MyCharacter->SetPlayerMovement(false);
 	}
 }
 

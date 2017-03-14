@@ -44,5 +44,7 @@ public:
 	FORCEINLINE float GetRayLength() const { return Raylength; }
 
 	FORCEINLINE UMaterialInterface* GetBulletHoleDecal() const { return BulletHoleDecal; }
+
+	FHitResult GetDownHit(AActor* _Actor, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors = TArray<TWeakObjectPtr<AActor>>());
 	
 };

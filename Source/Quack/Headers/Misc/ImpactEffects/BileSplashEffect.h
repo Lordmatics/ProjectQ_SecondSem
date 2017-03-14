@@ -19,6 +19,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Bile")
 		UParticleSystemComponent* Particle;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Bile")
+		class URaycastComponent* RaycastComp;
+
 	UPROPERTY(EditAnywhere, Category = "Bile")
 		float DOTFrequency = 0.5f;
 

@@ -3,6 +3,7 @@
 #include "Headers/Quack.h"
 #include "Headers/Misc/ImpactEffects/BileSplashEffect.h"
 #include "Headers/Character/QuackCharacter.h"
+#include "Headers/CustomComponents/RaycastComponent.h"
 
 // Sets default values
 ABileSplashEffect::ABileSplashEffect()
@@ -20,13 +21,20 @@ ABileSplashEffect::ABileSplashEffect()
 	TEMPBile->SetupAttachment(MyRoot);
 
 	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleComp"));
-	Particle->SetupAttachment(MyRoot);
+	Particle->SetupAttachment(TEMPBile);
+
+	RaycastComp = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComponent"));
 }
 
 // Called when the game starts or when spawned
 void ABileSplashEffect::BeginPlay()
 {
 	Super::BeginPlay();
+	if (RaycastComp != nullptr)
+	{
+		const FVector NewLocation = RaycastComp->GetDownHit(this).Location;
+		SetActorLocation(NewLocation);
+	}
 	StartDOT();
 }
 

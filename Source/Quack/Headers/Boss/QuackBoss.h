@@ -411,6 +411,8 @@ public:
 	void LocateNearbyWall();
 	void SmashWall();
 
+	UFUNCTION()
+		void RestorePlayerMovement();
 
 	FTimerHandle WaveSpawnerTimer;
 	UPROPERTY(VisibleAnywhere, Category = "Spawning")

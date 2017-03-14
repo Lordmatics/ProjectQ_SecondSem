@@ -33,9 +33,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 // AWAKE
 AQuackCharacter::AQuackCharacter()
 {
-
-	
-
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
@@ -1044,3 +1041,4 @@ bool AQuackCharacter::IsSprinting() const
 {
 	return MovementConfig.bIsSprinting;
 }
+
