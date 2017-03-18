@@ -125,6 +125,9 @@ public:
 		bool bLowerPipe;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+		bool bLeftPipe;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 		bool bPoisonedPipe;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")

@@ -13,6 +13,7 @@ class QUACK_API AQuackBoss : public AActor
 
 private:
 
+	
 	UFUNCTION()
 		void LowerRedHealthBar();
 
@@ -113,16 +114,25 @@ private:
 	{
 		FTransform TargettedTransform;
 		uint32 bIsLowerPipe : 1;
+		uint32 bIsLeftPipe : 1;
 
 		FPipeTransform()
 		{
 			TargettedTransform = FTransform();
 			bIsLowerPipe = false;
+			bIsLeftPipe = false;
 		}
 		FPipeTransform(FTransform Transform, bool IsLower)
 		{
 			TargettedTransform = Transform;
 			bIsLowerPipe = IsLower;
+			bIsLeftPipe = false;
+		}
+		FPipeTransform(FTransform Transform, bool IsLower, bool IsLeftPipe)
+		{
+			TargettedTransform = Transform;
+			bIsLowerPipe = IsLower;
+			bIsLeftPipe = IsLeftPipe;
 		}
 	};
 	// Constraints for animation
@@ -210,6 +220,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "C++ Gun")
 		class URaycastComponent* RaycastComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "C++ Cutscenes")
+		class UMatineeContainerComponent* CutsceneContainer;
+
+	// Bool to make sure matinee only plays once
+	uint32 bPlayOnce : 1;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
 		FVector LaserTargetLocation;

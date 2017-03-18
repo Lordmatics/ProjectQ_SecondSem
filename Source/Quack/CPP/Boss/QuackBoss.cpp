@@ -21,6 +21,7 @@
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 #include "Headers/CustomComponents/RaycastComponent.h"
 #include "Classes/Animation/AnimMontage.h"
+#include "Headers/CustomComponents/Matinee/MatineeContainerComponent.h"
 #include "Engine.h"
 
 // Sets default values
@@ -112,6 +113,7 @@ AQuackBoss::AQuackBoss()
 	BossAttacksComponent = CreateDefaultSubobject<UBossAttacksComponent>(TEXT("BossAttacksComponent"));
 	BossArmourComponent = CreateDefaultSubobject<UBossArmourComponent>(TEXT("BossArmourComponent"));
 	RaycastComponent = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComponent"));
+	CutsceneContainer = CreateDefaultSubobject<UMatineeContainerComponent>(TEXT("MatineeContainer"));
 
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -1409,7 +1411,7 @@ void AQuackBoss::DrainInTick(float DeltaTime)
 		{
 			BossHealthRed -= (DrainRate * DeltaTime);
 			MyCharacter->BossHPRed = BossHealthRed / MaxBossHealth;
-			UE_LOG(LogTemp, Warning, TEXT("BossRedHP: %f, Threshold: %f"), MyCharacter->BossHPRed, CurrentDrainCache);
+			//UE_LOG(LogTemp, Warning, TEXT("BossRedHP: %f, Threshold: %f"), MyCharacter->BossHPRed, CurrentDrainCache);
 			if (BossHealthRed <= CurrentDrainCache)
 			{
 				RenewRedBarHandle();
@@ -1456,10 +1458,29 @@ void AQuackBoss::Regenerate(float DeltaTime, bool bOverride)
 		{
 			MyCharacter->BossHP = BossHealth / MaxBossHealth;
 			MyCharacter->SetPlayerMovement(true);
+			if (CutsceneContainer != nullptr && !bPlayOnce)
+			{
+				bPlayOnce = true;
+				switch (CurrentTargettedPipeTransform.bIsLeftPipe)
+				{
+					case true:
+					{
+						bool bSuccess = CutsceneContainer->PlayLowerPipeLeftMatinee();
+						break;
+					}
+					case false:
+					{
+						bool bSuccess = CutsceneContainer->PlayLowerPipeRightMatinee();
+						break;
+					}
+				}
+				//float Duration = CutsceneContainer->GetMatineeLength(CutsceneContainer->GetLowerPipeMatinee());
+			}
 			FTimerHandle TempTimer;
 			UWorld* TempWorld = GetWorld();
 			if (TempWorld != nullptr)
 			{
+				// Technically some overhead here, but not noticeable since this function is just a flag setter
 				TempWorld->GetTimerManager().SetTimer(TempTimer, this, &AQuackBoss::RestorePlayerMovement, 5.0f, false);
 			}
 			if (BossHealth > BossHealthRed)
@@ -1767,7 +1788,7 @@ void AQuackBoss::LocateNearbyPipe()
 		{
 			LowerPipes.Remove(TargettedPipe);
 			TargettedPipe->bTargettedByBoss = true;
-			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe);
+			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe, TargettedPipe->bLeftPipe);
 		}
 		// Search for a pipe in scene
 		// and return the transform of it
@@ -1782,7 +1803,7 @@ void AQuackBoss::LocateNearbyPipe()
 		{
 			UpperPipes.Remove(TargettedPipe);
 			TargettedPipe->bTargettedByBoss = true;
-			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe);
+			CurrentTargettedPipeTransform = FPipeTransform(TargettedPipe->GetActorTransform(), TargettedPipe->bLowerPipe, TargettedPipe->bLeftPipe);
 		}
 	}
 	//}
