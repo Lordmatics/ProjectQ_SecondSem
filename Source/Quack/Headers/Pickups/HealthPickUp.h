@@ -12,7 +12,9 @@ UCLASS()
 class QUACK_API AHealthPickUp : public APickUpBase
 {
 	GENERATED_BODY()
-	
+private:
+	UPROPERTY(EditAnywhere, Category = "C++ Respawner Ref")
+		class AHealthRespawners* RespawnerRef;
 public:
 	// Sets default values for this actor's properties
 	AHealthPickUp();
@@ -32,5 +34,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 		UParticleSystem* HealParticle;
 	
+	FORCEINLINE void SetRespawnerRef(class AHealthRespawners* _Ref) { RespawnerRef = _Ref; }
 	
 };

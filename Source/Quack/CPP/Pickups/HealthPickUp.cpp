@@ -3,6 +3,7 @@
 #include "Headers/Quack.h"
 #include "Headers/Pickups/HealthPickUp.h"
 #include "Headers/Character/QuackCharacter.h"
+#include "Headers/Misc/HealthRespawners.h"
 
 // Sets default values
 AHealthPickUp::AHealthPickUp()
@@ -23,6 +24,10 @@ void AHealthPickUp::BeginPlay()
 		MyStaticMesh->OnComponentBeginOverlap.RemoveDynamic(this, &APickUpBase::OnTriggerEnter);
 		MyStaticMesh->OnComponentBeginOverlap.AddDynamic(this, &AHealthPickUp::OnTriggerEnter);
 	}
+	//if (RespawnerRef != nullptr)
+	//{
+	//	RespawnerRef->OnHealthPickedup.AddDynamic(RespawnerRef, &AHealthRespawners::RespawnHealthPack);
+	//}
 }
 
 // Called every frame
@@ -38,6 +43,13 @@ void AHealthPickUp::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* 
 	if (MyCharacter != nullptr)
 	{
 		if (MyCharacter->IsFullHP()) return;
+		if (RespawnerRef != nullptr)
+		{
+			if (RespawnerRef->OnHealthPickedup.IsBound())
+			{
+				RespawnerRef->OnHealthPickedup.Broadcast(this);
+			}
+		}
 		// Add to Inventory or something
 		MyCharacter->IncreaseHealth(HealthCrateValue);
 		UWorld* TempWorld = GetWorld();
