@@ -22,6 +22,7 @@
 #include "Headers/CustomComponents/RaycastComponent.h"
 #include "Classes/Animation/AnimMontage.h"
 #include "Headers/CustomComponents/Matinee/MatineeContainerComponent.h"
+#include "Headers/CustomComponents/SmashByBeamComponent.h"
 #include "Engine.h"
 
 // Sets default values
@@ -359,15 +360,21 @@ void AQuackBoss::BeamLogic()
 			// Anything thats not an ignored actor, will make the laser stop
 			LaserTargetLocation = Hit.Location;
 			//UE_LOG(LogTemp, Warning, TEXT("ActorHit: %s"), *HitActor->GetName());
+			USmashByBeamComponent* FractureComp = Cast<USmashByBeamComponent>(HitActor->GetComponentByClass(USmashByBeamComponent::StaticClass()));
+			if (FractureComp != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Has FractureComp"));
+				FractureComp->OwnerFracture();
+			}
+			AQuackCharacter* Char = Cast<AQuackCharacter>(HitActor);
+			if (Char != nullptr)
+			{
+				Char->DecreaseHealth(5.0f * GetWorld()->GetDeltaSeconds());
+			}
 		}
 		else
 		{
 			LaserTargetLocation = EndLocation;
-		}
-		AQuackCharacter* Char = Cast<AQuackCharacter>(Hit.GetActor());
-		if (Char != nullptr)
-		{
-			Char->DecreaseHealth(5.0f * GetWorld()->GetDeltaSeconds());
 		}
 		SetLaserSource();
 		SetLaserEnd();

@@ -37,7 +37,7 @@ void ADestructibleInnerPipes::BeginPlay()
 void ADestructibleInnerPipes::Fracture()
 {
 	// Called when arm overlaps trigger
-	if (MyDestructibleMesh != nullptr && MyStaticMesh != nullptr)
+	if (MyDestructibleMesh != nullptr && MyStaticMesh != nullptr && !bFractured)
 	{
 		//MyDestructibleMesh->ApplyRadiusDamage(100, MyStaticMesh->GetComponentLocation(), 35.0f, 15.0f, true);
 
@@ -60,6 +60,7 @@ void ADestructibleInnerPipes::Tick( float DeltaTime )
 
 void ADestructibleInnerPipes::OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection)
 {
+	bFractured = true;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{

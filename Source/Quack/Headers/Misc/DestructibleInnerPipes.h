@@ -28,6 +28,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "DestructibleFenceExtension")
 		uint32 bKillStaticMesh : 1;
+
+	UPROPERTY(VisibleAnywhere, Category = "DestructibleFenceExtension")
+		uint32 bFractured : 1;
 private:
 
 	UFUNCTION()
