@@ -58,6 +58,9 @@ private:
 	/** Particle System to shoot spray*/
 	UPROPERTY(EditAnywhere, Category = "C++ Boss Variables")
 		UParticleSystem* BileSprayPS;
+
+	//UFUNCTION()
+		//void InflictDamage(const FName& EventName, float EmitterTime, int ParticleTime, const FVector& Location, const FVector& Velocity, const FVector& Direction, const FVector& Normal, const FName& BoneName, UPhysicalMaterial* PhysicsMaterial);
 public:	
 	// Sets default values for this component's properties
 	UBossAttacksComponent();

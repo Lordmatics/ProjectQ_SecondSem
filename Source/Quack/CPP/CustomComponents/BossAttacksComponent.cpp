@@ -7,6 +7,7 @@
 #include "Classes/Animation/AnimInstance.h"
 #include "Headers/CustomComponents/AnimationComponent.h"
 #include "Classes/Components/ArrowComponent.h"
+#include "Headers/Character/QuackCharacter.h"
 
 // Sets default values for this component's properties
 UBossAttacksComponent::UBossAttacksComponent()
@@ -244,29 +245,30 @@ void UBossAttacksComponent::ShootTheSpray(UArrowComponent* MouthArrow, UAnimInst
 	const FVector Location = MouthArrow->GetComponentLocation();
 	const FRotator Rotation = MouthArrow->GetComponentRotation();
 	UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAtLocation(World, BileSprayPS, Location, Rotation);
+	if (BossProjectilesArray.Num() > 0)
+	{
+		if (BossProjectilesArray[2] != nullptr)
+		{
+			AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(BossProjectilesArray[2], Location, Rotation);
+			if (Proj != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ShotCollisionBox"));
+			}
+		}
+	}
 
-	//AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(BossProjectilesArray[1], Location, Rotation);
-	//if (Proj != nullptr)
+	//if (PSC != nullptr)
 	//{
-	//	float NewScale = 0.5f; // 0.5f * BileShotsFired;
-
-	//						   // THIS PROBABLY WANTS CHANGING TO ADJUST TO NEW ENVIRONMENTS FLOORS
-	//						   // DO THIS SOME OTHER TIME THOUGH
-	//	BileShotsFired++;
-	//	if (BileShotsFired > 3)
-	//		BileShotsFired = 1;
-	//	//med far close
-	//	if (BileShotsFired == 1)
-	//		NewScale = 0.375f;
-	//	else if (BileShotsFired == 2)
-	//		NewScale = 0.075f;
-	//	else if (BileShotsFired == 3)
-	//		NewScale = 0.675f;
-	//	Proj->AdjustProjectileMovementScale(NewScale);
+	//	PSC->OnParticleCollide.AddDynamic(this, &UBossAttacksComponent::InflictDamage);
 	//}
-
-
 }
+
+//void UBossAttacksComponent::InflictDamage(const FName& EventName, float EmitterTime, int ParticleTime,const FVector& Location, const FVector& Velocity, const FVector& Direction, const FVector& Normal, const FName& BoneName, UPhysicalMaterial* PhysicsMaterial)
+//{
+//	UWorld* const World = GetWorld();
+//	if (World == nullptr) return;
+//	AQuackCharacter* Char = Cast<AQuackCharacter>(World->GetFirstPlayerController()->GetPawn());
+//}
 
 void UBossAttacksComponent::StopBileSpraying()
 {
