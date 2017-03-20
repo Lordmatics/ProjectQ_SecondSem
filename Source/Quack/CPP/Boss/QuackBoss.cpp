@@ -1535,6 +1535,10 @@ void AQuackBoss::CheckForDead()
 			AudioManager->ChangeStateTo(AudioStates::E_Victory, 0.25f, 0.5f);
 		}
 		// Play Death matinee / animation / spawn effects etc etc
+		// Quick fix to kill bar when boss is dead
+		BossHealthRed = 0.0f;
+		if(MyCharacter != nullptr)
+			MyCharacter->bShowBossBar = false;
 		Destroy();
 	}
 }
