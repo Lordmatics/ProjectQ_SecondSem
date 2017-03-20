@@ -370,6 +370,8 @@ public:
 
 	FORCEINLINE float GetMaxHealth() const { return PlayerConfig.MaxHealth; }
 
+	FORCEINLINE bool IsFullHP() const { return PlayerConfig.Health >= PlayerConfig.MaxHealth ? true : false; }
+
 	FORCEINLINE void SetPlayerMovement(bool _bCanMove) { bMovementPrevented = _bCanMove; }
 	FORCEINLINE bool GetPlayerMovement() const { return bMovementPrevented; }
 

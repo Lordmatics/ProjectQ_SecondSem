@@ -37,6 +37,7 @@ void AHealthPickUp::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* 
 	AQuackCharacter* MyCharacter = Cast<AQuackCharacter>(OtherActor);
 	if (MyCharacter != nullptr)
 	{
+		if (MyCharacter->IsFullHP()) return;
 		// Add to Inventory or something
 		MyCharacter->IncreaseHealth(HealthCrateValue);
 		UWorld* TempWorld = GetWorld();
