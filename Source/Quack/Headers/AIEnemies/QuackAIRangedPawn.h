@@ -30,8 +30,14 @@ class QUACK_API AQuackAIRangedPawn : public AQuackAIPawn
 	UPROPERTY(EditAnywhere, Category = "Projectile")
 		TSubclassOf<class AQuackProjectile> Projectile;
 
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+		TSubclassOf<class ABileSplashEffect> DeathParticle;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "Projectile")
 		class UArrowComponent* ProjectileSpawn;
+
+	//UPROPERTY(EditAnywhere, Category = "Projectile")
+	//	UParticleSystem* DeathParticle;
 
 	UPROPERTY(Category = "Stats", EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		float AttackRange;

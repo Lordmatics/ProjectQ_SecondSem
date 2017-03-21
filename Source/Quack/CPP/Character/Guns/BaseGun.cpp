@@ -10,6 +10,8 @@ ABaseGun::ABaseGun()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	DisabledEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("DisabledEffect"));
+	
 
 }
 
@@ -17,6 +19,8 @@ ABaseGun::ABaseGun()
 void ABaseGun::BeginPlay()
 {
 	Super::BeginPlay();
+	if(DisabledEffect != nullptr)
+		DisabledEffect->SetActive(false);
 	
 }
 
@@ -29,12 +33,18 @@ void ABaseGun::Tick( float DeltaTime )
 
 void ABaseGun::Shoot()
 {
+
 }
 
 /** Set as main weapon, and make it visible */
 void ABaseGun::WieldAndActivate()
 {
 	bIsActive = true;
+	//if (bShowStatic)
+	//{
+	//	if (DisabledEffect != nullptr)
+	//		DisabledEffect->SetActive(false);
+	//}
 }
 
 /** Set as secondary weapon, and make it invisible */
@@ -43,6 +53,11 @@ void ABaseGun::SheathAndDeactivate()
 	bIsActive = false;
 	bIsReloading = false;
 	StopMuzzleFlash();
+	//if (bShowStatic)
+	//{
+	//	if (DisabledEffect != nullptr)
+	//		DisabledEffect->SetActive(true);
+	//}
 }
 
 void ABaseGun::SetOwningPawn(AQuackCharacter* NewOwner)
@@ -214,4 +229,18 @@ float ABaseGun::GetCurrentAmmo() const
 float ABaseGun::GetMaxAmmo() const
 {
 	return ReservedAmmo;
+}
+
+void ABaseGun::DisableGun()
+{
+	//bShowStatic = true;
+	if(DisabledEffect != nullptr)
+		DisabledEffect->SetActive(true);
+}
+
+void ABaseGun::EnableGun()
+{
+	//bShowStatic = false;
+	if (DisabledEffect != nullptr)
+		DisabledEffect->SetActive(false);
 }

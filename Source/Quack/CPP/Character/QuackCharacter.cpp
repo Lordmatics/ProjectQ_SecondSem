@@ -227,6 +227,7 @@ void AQuackCharacter::ForceNeedleGun()
 	for (size_t i = 0; i < GunInventory.Num(); i++)
 	{
 		if (GunInventory[i] == nullptr) continue;
+		GunInventory[i]->DisableGun();
 		bool bIsActive = GunInventory[i]->GetIsActive();
 		if (bIsActive)
 		{
@@ -256,14 +257,17 @@ void AQuackCharacter::ForceNeedleGun()
 void AQuackCharacter::UnforceNeedleGun()
 {
 	CanSwapGun = true;
+	for (size_t i = 0; i < GunInventory.Num(); i++)
+	{
+		if (GunInventory[i] == nullptr) continue;
+		GunInventory[i]->EnableGun();
+	}
 }
 
 void AQuackCharacter::HandleChangeToNewGun()
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
-	if (CanSwapGun)
-	{
 		if (CurrentEquippedGun != nullptr)
 		{
 			// Alternatively, can cancel reload and force swap
@@ -330,7 +334,6 @@ void AQuackCharacter::HandleChangeToNewGun()
 			{
 				GunInventory[i]->SheathAndDeactivate();
 			}
-		}
 		//FinishSwapping(GunIndexToEquip);
 		//GunInventory[GunIndexToEquip]->WieldAndActivate();
 		//CurrentEquippedGun = GunInventory[GunIndexToEquip];
@@ -913,7 +916,7 @@ void AQuackCharacter::Raycast()
 void AQuackCharacter::SemiAutomaticShooting(float DeltaTime)
 {
 	// NOTE: CHANGE TO TIMER
-	if (!bCanFire) return;
+	if (!bCanFire || !CanSwapGun) return;
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{

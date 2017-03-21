@@ -266,6 +266,8 @@ void APlasmaRifle::AttachMeshToPawn()
 			HarryPlasmaGun->SetHiddenInGame(false);
 			//HarryPlasmaGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 			HarryPlasmaGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachPoint);
+			DisabledEffect->AttachToComponent(HarryPlasmaGun, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
 		}
 	}
 }

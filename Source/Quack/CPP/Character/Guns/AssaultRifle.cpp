@@ -205,6 +205,7 @@ void AAssaultRifle::AttachMeshToPawn()
 			HarryAssaultRifle->SetHiddenInGame(false);
 			//HarryAssaultRifle->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 			HarryAssaultRifle->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachPoint);
+			DisabledEffect->AttachToComponent(HarryAssaultRifle, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 		}
 	}
 }

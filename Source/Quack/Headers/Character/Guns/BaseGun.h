@@ -11,6 +11,8 @@ class QUACK_API ABaseGun : public AActor
 	GENERATED_BODY()
 private:
 
+	UPROPERTY(VisibleAnywhere, Category = "C++ Effects")
+		uint32 bShowStatic : 1;
 public:	
 	// Sets default values for this actor's properties
 	ABaseGun();
@@ -59,6 +61,10 @@ public:
 	float Reload(USkeletalMeshComponent* SpecificGun);
 
 	void IncreaseAmmo(float Amount);
+
+	void DisableGun();
+
+	void EnableGun();
 
 protected:
 
@@ -124,6 +130,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++ Gun Variables")
 		float GunDamage = 15.0f;
 
+	bool IsDisabled;
+
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++ Gun Variables")
 		FVector GunOffset = FVector(100.0f, 30.0f, 10.0f);
@@ -151,6 +159,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class UParticleSystem* FireEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		class UParticleSystemComponent* DisabledEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class UParticleSystem* HitEffect;

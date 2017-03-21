@@ -208,6 +208,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Armour Plate")
 		UParticleSystemComponent* LaserParticleSystemComp;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "EMP")
+		UParticleSystemComponent* EMPParticleSystem;
+
 	// If you want an effect at hit location
 	UPROPERTY(VisibleDefaultsOnly, Category = "Armour Plate")
 		UParticleSystemComponent* MuzzleFlashParticleSystem;

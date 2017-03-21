@@ -210,6 +210,8 @@ void ABurstRifle::AttachMeshToPawn()
 			HarryLaserGun->SetHiddenInGame(false);
 			//HarryLaserGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 			HarryLaserGun->AttachToComponent(PawnMesh1p, FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachPoint);
+			DisabledEffect->AttachToComponent(HarryLaserGun, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
 			UE_LOG(LogTemp, Warning, TEXT("BurstRifle, should go to attachpoint"));
 		}
 	}

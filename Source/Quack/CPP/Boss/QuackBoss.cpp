@@ -92,6 +92,9 @@ AQuackBoss::AQuackBoss()
 	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
 	LaserCannon->SetHiddenInGame(true);
 
+	EMPParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EMPParticle"));
+	EMPParticleSystem->SetupAttachment(RootComponent);
+
 	//BodyPlate = CreateDefaultSubobject<UStaticMeshComponent>(TEXT(""))
 
 	MouthArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("MouthArrow"));
@@ -269,6 +272,7 @@ void AQuackBoss::BeginPlay()
 	BodyUR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
 
 	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
+	EMPParticleSystem->SetActive(false);
 }
 
 void AQuackBoss::SetLaserSource()
@@ -1324,6 +1328,7 @@ void AQuackBoss::ShouldEnterHealingPhase()
 			if (MyCharacter != nullptr)
 			{
 				MyCharacter->ForceNeedleGun();
+				EMPParticleSystem->SetActive(true);
 				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
 			}
 		}
@@ -1334,6 +1339,7 @@ void AQuackBoss::ShouldEnterHealingPhase()
 			if (MyCharacter != nullptr)
 			{
 				MyCharacter->ForceNeedleGun();
+				EMPParticleSystem->SetActive(true);
 				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
 			}
 		}
@@ -1344,6 +1350,7 @@ void AQuackBoss::ShouldEnterHealingPhase()
 			if (MyCharacter != nullptr)
 			{
 				MyCharacter->ForceNeedleGun();
+				EMPParticleSystem->SetActive(true);
 				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
 			}
 		}
@@ -1354,6 +1361,7 @@ void AQuackBoss::ShouldEnterHealingPhase()
 			if (MyCharacter != nullptr)
 			{
 				MyCharacter->ForceNeedleGun();
+				EMPParticleSystem->SetActive(true);
 				UE_LOG(LogTemp, Warning, TEXT("Should Enter Healing: + ForceNeedleSwap"));
 			}
 		}
@@ -1850,6 +1858,7 @@ void AQuackBoss::ChangeState(BossStates DesiredState)
 			if (TempCharacter != nullptr)
 			{
 				TempCharacter->UnforceNeedleGun();
+				EMPParticleSystem->SetActive(false);
 				UE_LOG(LogTemp, Warning, TEXT("ChangeState: UnForce"));
 			}
 		}

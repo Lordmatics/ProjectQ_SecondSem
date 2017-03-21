@@ -7,6 +7,7 @@
 #include "Classes/Components/ArrowComponent.h"
 #include "Headers/AIEnemies/QuackAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Headers/Misc/ImpactEffects/BileSplashEffect.h"
 
 AQuackAIRangedPawn::AQuackAIRangedPawn()
 {
@@ -94,6 +95,16 @@ void AQuackAIRangedPawn::TakeDamages(float DamageIn)
 			OnEnemyDestroyed.Broadcast(this);
 		if (OnEnemyDestroyedRoom.IsBound())
 			OnEnemyDestroyedRoom.Broadcast(this);
+		UWorld* TempWorld = GetWorld();
+		BoxCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		if (TempWorld != nullptr && DeathParticle != nullptr)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			TempWorld->SpawnActor<ABileSplashEffect>(DeathParticle, GetActorLocation(), GetActorRotation(), SpawnParams);
+		}
+		//UGameplayStatics::SpawnEmitterAtLocation(this, DeathParticle, GetActorLocation());
 		Destroy();
 	}
 }
