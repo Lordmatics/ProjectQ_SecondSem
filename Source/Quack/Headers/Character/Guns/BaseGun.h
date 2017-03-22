@@ -13,9 +13,13 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "C++ Effects")
 		uint32 bShowStatic : 1;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Animation")
+		float DelayTillOffScreen = 0.6f;
 public:	
 	// Sets default values for this actor's properties
 	ABaseGun();
+
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -33,6 +37,8 @@ public:
 	virtual void ResetOrientation();
 
 	virtual USkeletalMeshComponent* GetGunMesh() const;
+
+	FORCEINLINE float GetDelayTillOffscreen() const { return DelayTillOffScreen; }
 
 	FORCEINLINE float GetGunDamage() const { return GunDamage; }
 	

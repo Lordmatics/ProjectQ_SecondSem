@@ -23,7 +23,7 @@
 #include "Headers/Character/Guns/Needle.h"
 #include "Classes/Components/PostProcessComponent.h"
 #include "Animation/AnimMontage.h"
-#include "Engine.h"
+#include "Headers/Misc/QuackGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -315,11 +315,14 @@ void AQuackCharacter::HandleChangeToNewGun()
 					GunIndexToEquip = i + 1;
 					CurrentEquipIndex = i + 1;
 				}
-				// HIDE EQUIPPED GUN
+				
+				// HIDE EQUIPPED GUN 
+				bLowerGun = true;
 				FTimerHandle TempHan;
 				FTimerDelegate TempDelegate;
 				TempDelegate.BindUFunction(this, FName("HideCurrentGun"), i);
-				World->GetTimerManager().SetTimer(TempHan, TempDelegate, 0.6f, false);
+				// 0.6f;
+				World->GetTimerManager().SetTimer(TempHan, TempDelegate, GunInventory[i]->GetDelayTillOffscreen(), false);
 
 				//GunInventory[i]->SheathAndDeactivate();
 				// REVEAL NEW GUN
@@ -327,7 +330,7 @@ void AQuackCharacter::HandleChangeToNewGun()
 				FTimerHandle TempHandle;
 				FTimerDelegate TempDel;
 				TempDel.BindUFunction(this, FName("FinishSwapping"), GunIndexToEquip);
-				World->GetTimerManager().SetTimer(TempHandle, TempDel, 0.65f, false);
+				World->GetTimerManager().SetTimer(TempHandle, TempDel, GunInventory[i]->GetDelayTillOffscreen() + 0.05f, false);
 				break;
 			}
 			else
@@ -386,8 +389,14 @@ void AQuackCharacter::HandleChangeToNewGun()
 
 void AQuackCharacter::HideCurrentGun(int Index)
 {
-	if(GunInventory[Index] != nullptr)
+	if (GunInventory[Index] != nullptr)
+	{
 		GunInventory[Index]->SheathAndDeactivate();
+		bLowerGun = false;
+		bRaiseGun = true;
+		AnimationEquipIndex = CurrentEquipIndex;
+	}
+
 }
 
 void AQuackCharacter::FinishSwapping(int Index)
@@ -403,6 +412,8 @@ void AQuackCharacter::FinishSwapping(int Index)
 		bHasNeedleEquipped = false;
 	}
 	bCanFire = true;
+	bRaiseGun = false;
+	bLowerGun = false;
 }
 
 int AQuackCharacter::GetCurrentEquippedGunIndex() const
@@ -487,11 +498,11 @@ void AQuackCharacter::RotateTowardsTargettedPipe(float DeltaTime)
 		// Project it to 2D
 		Direction = FVector(Direction.X, Direction.Y, 0.0f);
 		FRotator EndRotation = Direction.Rotation();
-		if (GEngine)
+		/*if (GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 25.0f, FColor::Red, FString::Printf(TEXT("Rotation: %s, EndRotation: %s"), *MyRotation.ToString(), *EndRotation.ToString()));
-		}
-		UE_LOG(LogTemp,Warning,TEXT("Rotation: %s, EndRotation: %s"), *MyRotation.ToString(), *EndRotation.ToString());
+		}*/
+		//UE_LOG(LogTemp,Warning,TEXT("Rotation: %s, EndRotation: %s"), *MyRotation.ToString(), *EndRotation.ToString());
 		//MyRotation = FMath::RInterpConstantTo(MyRotation, EndRotation, DeltaTime, RotationSpeed);
 		//SetActorRotation(MyRotation);
 
@@ -700,6 +711,7 @@ void AQuackCharacter::UsePoison()
 				{
 					NeedleRef->PlayStabAnimation();
 				}
+
 				if (TutorialManager != nullptr)
 				{
 					PlayerConfig.CurrentPipe->OnPipeFinishedDraining.AddDynamic(TutorialManager, &ATutorialManager::RemoveAPipe);
@@ -739,6 +751,19 @@ void AQuackCharacter::UsePoison()
 							SetPlayerMovement(true);
 							//UE_LOG(LogTemp, Warning, TEXT("PlayerCanMoveAgain: %s"), bMovementPrevented ? TEXT("CANMOVE") : TEXT("CANNOTMOVE"));
 							NeedleRef->PlayStabAnimation();
+						}
+						UWorld* TempWorld = GetWorld();
+						if (TempWorld != nullptr)
+						{
+							AQuackGameMode* TempGameMode = Cast<AQuackGameMode>(TempWorld->GetAuthGameMode());
+							if (TempGameMode != nullptr)
+							{
+								float RealtimeSeconds = UGameplayStatics::GetRealTimeSeconds(TempWorld);
+								FString TempString = TEXT("Used needle at: ");
+								TempString += FString::FromInt(RealtimeSeconds);
+								TempString += LINE_TERMINATOR;
+								TempGameMode->AddToString(TempString);
+							}
 						}
 						PlayerConfig.CurrentPipe->bPoisonedPipe = true;
 						PlayerConfig.CurrentPipe->ChangeMeshColour();
@@ -861,6 +886,20 @@ void AQuackCharacter::DecreaseHealth(float Amount)
 	if (PlayerConfig.Health <= 0.0f)
 	{
 		// You Dead
+		UWorld* TempWorld = GetWorld();
+		if (TempWorld != nullptr)
+		{
+			AQuackGameMode* TempGameMode = Cast<AQuackGameMode>(TempWorld->GetAuthGameMode());
+			if (TempGameMode != nullptr)
+			{
+				float RealtimeSeconds = UGameplayStatics::GetRealTimeSeconds(TempWorld);
+				FString TempString = TEXT("Died at: ");
+				TempString += FString::FromInt(RealtimeSeconds);
+				TempString += LINE_TERMINATOR;
+				TempGameMode->AddToString(TempString);
+				TempGameMode->WriteToFile();
+			}
+		}
 		UGameplayStatics::OpenLevel(this, FName("MainMenu"), false);
 	}
 	PlayerConfig.Health = FMath::Clamp(PlayerConfig.Health, 0.0f, PlayerConfig.MaxHealth);

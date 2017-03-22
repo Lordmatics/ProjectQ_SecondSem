@@ -23,7 +23,7 @@
 #include "Classes/Animation/AnimMontage.h"
 #include "Headers/CustomComponents/Matinee/MatineeContainerComponent.h"
 #include "Headers/CustomComponents/SmashByBeamComponent.h"
-#include "Engine.h"
+#include "Headers/Misc/QuackGameMode.h"
 
 // Sets default values
 AQuackBoss::AQuackBoss()
@@ -886,19 +886,28 @@ void AQuackBoss::Stab()
 		case 1:
 		{
 			if (AnimationComponent->GetMeleeAnimLeft() != nullptr)
+			{
+				ArmDamage = 20.0f;
 				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimLeft(), 1.0f);
+			}
 			break;
 		}
 		case 2:
 		{
 			if (AnimationComponent->GetMeleeAnimBoth() != nullptr)
+			{
+				ArmDamage = 35.0f;
 				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimBoth(), 1.0f);
+			}
 			break;
 		}
 		case 3:
 		{
-			if(AnimationComponent->GetMeleeAnimRight() != nullptr)
+			if (AnimationComponent->GetMeleeAnimRight() != nullptr)
+			{
+				ArmDamage = 20.0f;
 				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimRight(), 1.0f);
+			}
 			break;
 		}
 	}
@@ -1547,6 +1556,22 @@ void AQuackBoss::CheckForDead()
 		BossHealthRed = 0.0f;
 		if(MyCharacter != nullptr)
 			MyCharacter->bShowBossBar = false;
+
+		UWorld* TempWorld = GetWorld();
+		if (TempWorld != nullptr)
+		{
+			AQuackGameMode* TempGameMode = Cast<AQuackGameMode>(TempWorld->GetAuthGameMode());
+			if (TempGameMode != nullptr)
+			{
+				float RealtimeSeconds = UGameplayStatics::GetRealTimeSeconds(TempWorld);
+				FString TempString = TEXT("Boss Killed At: ");
+				TempString += FString::FromInt(RealtimeSeconds);
+				TempString += LINE_TERMINATOR;
+				TempGameMode->AddToString(TempString);
+				TempGameMode->WriteToFile();
+			}
+		}
+
 		Destroy();
 	}
 }

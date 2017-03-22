@@ -153,6 +153,13 @@ class AQuackCharacter : public ACharacter
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
+		bool bRaiseGun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
+		bool bLowerGun;
+
+
 	UPROPERTY(VisibleAnywhere, Category = "MovementOverride")
 		uint32 bMovementPrevented : 1;
 
@@ -203,8 +210,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Guns")
 		int PreviousEquipIndex = -1;
 
-	UPROPERTY(VisibleAnywhere, Category = "Guns")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Guns")
 		int CurrentEquipIndex = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Guns")
+		int AnimationEquipIndex = 0;
 
 	UPROPERTY(EditAnywhere, Category = "Guns")
 		TArray<TSubclassOf<class ABaseGun>> GunInventoryClasses;

@@ -79,7 +79,8 @@ void APlasmaRifle::Tick(float DeltaTime)
 					if (ArmourPin->GetArmourValue() >= 0.0f)
 					{
 						//UE_LOG(LogTemp, Warning, TEXT("%s , Armour: %f"), *ArmourPin->GetName(), ArmourPin->GetArmourValue());
-						ArmourPin->DecreaseArmourValue(GunDamage);
+						ArmourPin->DecreaseArmourValue(GunDamage * DeltaTime);
+						ArmourPin->White();
 					}
 				}
 				AQuackBoss* Boss = Cast<AQuackBoss>(HitActor);

@@ -4,6 +4,7 @@
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 #include "Classes/Components/DestructibleComponent.h"
 #include "Classes/PhysicsEngine/RadialForceComponent.h"
+#include "Headers/Misc/QuackGameMode.h"
 
 // Sets default values
 AQuackBossArmourBaseClass::AQuackBossArmourBaseClass()
@@ -107,6 +108,19 @@ void AQuackBossArmourBaseClass::Die()
 		ArmourHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ArmourPiece->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+		UWorld* TempWorld = GetWorld();
+		if (TempWorld != nullptr)
+		{
+			AQuackGameMode* TempGameMode = Cast<AQuackGameMode>(TempWorld->GetAuthGameMode());
+			if (TempGameMode != nullptr)
+			{
+				float RealtimeSeconds = UGameplayStatics::GetRealTimeSeconds(TempWorld);
+				FString TempString = TEXT("Armour pin destroyed at: ");
+				TempString += FString::FromInt(RealtimeSeconds);
+				TempString += LINE_TERMINATOR;
+				TempGameMode->AddToString(TempString);
+			}
+		}
 		// Perhaps, interpolate it out of the armour
 		// Then "kill it"
 	}
