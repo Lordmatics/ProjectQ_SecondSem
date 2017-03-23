@@ -89,7 +89,8 @@ AQuackBoss::AQuackBoss()
 	LaserBuildup->SetupAttachment(LaserCannon);
 	LaserParticleSystemComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LaserPS"));
 	LaserParticleSystemComp->SetupAttachment(LaserCannon);
-	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
+	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.0015f));
+	LaserParticleSystemComp->SetActive(false);
 	LaserCannon->SetHiddenInGame(true);
 
 	EMPParticleSystem = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EMPParticle"));
@@ -272,7 +273,7 @@ void AQuackBoss::BeginPlay()
 	BodyUR->SetRenderCustomDepth(true);
 	BodyUR->CustomDepthStencilValue = STENCIL_ENEMY_OUTLINE;
 
-	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.025f));
+	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.0015));
 	EMPParticleSystem->SetActive(false);
 }
 
@@ -324,7 +325,8 @@ void AQuackBoss::EnableBeam()
 	{
 		if (LaserPS != nullptr)
 		{
-			LaserParticleSystemComp->SetTemplate(LaserPS);
+
+			//LaserParticleSystemComp->SetTemplate(LaserPS);
 			LaserParticleSystemComp->SetVisibility(true);
 		}
 	}
@@ -335,7 +337,7 @@ void AQuackBoss::DisableBeam()
 	//UE_LOG(LogTemp, Warning, TEXT("Disable Beam"));
 	if (LaserParticleSystemComp != nullptr)
 	{
-		LaserParticleSystemComp->SetTemplate(EmptyPS);
+		//LaserParticleSystemComp->SetTemplate(EmptyPS);
 		LaserParticleSystemComp->SetVisibility(false);
 		//UE_LOG(LogTemp, Warning, TEXT("Disable Beam --- Set to false"));
 	}
