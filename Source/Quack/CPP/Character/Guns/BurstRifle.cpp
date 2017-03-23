@@ -203,7 +203,7 @@ void ABurstRifle::AttachMeshToPawn()
 	if (MyPawn)
 	{
 		IgnoredActors.Add(MyPawn);
-		FName AttachPoint = MyPawn->GetWeaponAttachPointLaser();
+		FName AttachPoint = MyPawn->GetWeaponAttachPointPlasma();
 		USkeletalMeshComponent* PawnMesh1p = MyPawn->GetSpecificPawnMesh();
 		if (PawnMesh1p != nullptr)
 		{

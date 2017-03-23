@@ -346,6 +346,8 @@ public:
 	/** get weapon attach point */
 	FName GetWeaponAttachPoint() const;
 
+	FName GetWeaponAttachPointPlasma() const;
+
 	FName GetWeaponAttachPointLaser() const;
 
 	UFUNCTION()
@@ -416,7 +418,10 @@ protected:
 
 	/** socket or bone name for attaching weapon mesh */ // Temp - Laser adjust
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall", meta = (AllowPrivateAccess = "true"))
-		FName WeaponAttachPointLaser = FName("LaserGripPoint");
+		FName WeaponAttachPointPlasma = FName("LaserGripPoint");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall", meta = (AllowPrivateAccess = "true"))
+		FName WeaponAttachPointLaser = FName("PlasmaGripPoint");
 
 	/** weapon data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom")
