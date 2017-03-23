@@ -252,6 +252,7 @@ void UBossAttacksComponent::ShootTheSpray(UArrowComponent* MouthArrow, UAnimInst
 			AQuackProjectile* Proj = World->SpawnActor<AQuackProjectile>(BossProjectilesArray[2], Location, Rotation);
 			if (Proj != nullptr)
 			{
+				Proj->EarlyDestroy();
 				UE_LOG(LogTemp, Warning, TEXT("ShotCollisionBox"));
 			}
 		}

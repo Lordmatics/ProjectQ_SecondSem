@@ -9,7 +9,7 @@ class AQuackGameMode : public AGameMode
 	GENERATED_BODY()
 
 
-	FString SaveDirectory = FString("E:/Unreal/TeamProject/Master/Saved/TestingResults");
+	FString SaveDirectory = FString("F:/Unreal/TeamProject/Master/Saved/TestingResults");
 
 	FString FileName = FString("TestResults");
 

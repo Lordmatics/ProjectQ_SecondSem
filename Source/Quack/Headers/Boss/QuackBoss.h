@@ -259,7 +259,10 @@ private:
 		TArray<int> MinionWaves;
 
 	UPROPERTY(EditAnywhere, Category = "Arm")
-		float ArmDamage = 15.0f;
+		float ArmDamage = 7.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Arm")
+		float InitialArmDamage = 7.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Arm")
 		float MeleeRangeDistanceThreshold = 1000.0f;

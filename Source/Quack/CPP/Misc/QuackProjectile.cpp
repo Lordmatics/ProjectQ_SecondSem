@@ -35,6 +35,25 @@ AQuackProjectile::AQuackProjectile()
 	InitialLifeSpan = 3.0f;
 }
 
+void AQuackProjectile::EarlyDestroy()
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	FTimerHandle TempHandle;
+	World->GetTimerManager().SetTimer(TempHandle, this, &AQuackProjectile::DisableCollision, 1.5f, false);
+	UE_LOG(LogTemp, Warning, TEXT("EarlyDestroy Initiaited"));
+}
+
+void AQuackProjectile::DisableCollision()
+{
+	if (CollisionComp != nullptr)
+	{
+		CollisionComp->SetCollisionResponseToChannels(ECR_Ignore);
+		//CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Warning, TEXT("CollisionDisabled"));
+	}
+}
+
 void AQuackProjectile::BeginPlay()
 {
 	Super::BeginPlay();

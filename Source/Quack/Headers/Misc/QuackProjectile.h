@@ -24,7 +24,8 @@ protected:
 	void AdjustProjectileMovement(float _InitSpd, float _MaxVel);
 
 
-
+	UFUNCTION()
+		void DisableCollision();
 public:
 	void AdjustProjectileMovementScale(float _RandomVelScale);
 
@@ -33,6 +34,8 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	void EarlyDestroy();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
 		float GravityForce = 100.0f;

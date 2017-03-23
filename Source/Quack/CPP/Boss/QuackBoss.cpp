@@ -222,6 +222,7 @@ void AQuackBoss::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitialArmDamage = ArmDamage;
 	InitialisePlayerCharacterReference();
 
 	bFirstTimeHealing = true;
@@ -887,7 +888,7 @@ void AQuackBoss::Stab()
 		{
 			if (AnimationComponent->GetMeleeAnimLeft() != nullptr)
 			{
-				ArmDamage = 20.0f;
+				ArmDamage = InitialArmDamage;
 				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimLeft(), 1.0f);
 			}
 			break;
@@ -896,7 +897,7 @@ void AQuackBoss::Stab()
 		{
 			if (AnimationComponent->GetMeleeAnimBoth() != nullptr)
 			{
-				ArmDamage = 35.0f;
+				ArmDamage = (InitialArmDamage * 2);
 				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimBoth(), 1.0f);
 			}
 			break;
@@ -905,7 +906,7 @@ void AQuackBoss::Stab()
 		{
 			if (AnimationComponent->GetMeleeAnimRight() != nullptr)
 			{
-				ArmDamage = 20.0f;
+				ArmDamage = InitialArmDamage;
 				AnimInst->Montage_Play(AnimationComponent->GetMeleeAnimRight(), 1.0f);
 			}
 			break;
