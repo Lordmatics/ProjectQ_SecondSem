@@ -326,7 +326,7 @@ void AQuackBoss::EnableBeam()
 		if (LaserPS != nullptr)
 		{
 
-			//LaserParticleSystemComp->SetTemplate(LaserPS);
+			LaserParticleSystemComp->SetTemplate(LaserPS);
 			LaserParticleSystemComp->SetVisibility(true);
 		}
 	}
@@ -337,7 +337,7 @@ void AQuackBoss::DisableBeam()
 	//UE_LOG(LogTemp, Warning, TEXT("Disable Beam"));
 	if (LaserParticleSystemComp != nullptr)
 	{
-		//LaserParticleSystemComp->SetTemplate(EmptyPS);
+		LaserParticleSystemComp->SetTemplate(EmptyPS);
 		LaserParticleSystemComp->SetVisibility(false);
 		//UE_LOG(LogTemp, Warning, TEXT("Disable Beam --- Set to false"));
 	}
