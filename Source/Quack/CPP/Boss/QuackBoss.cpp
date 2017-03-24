@@ -376,7 +376,7 @@ void AQuackBoss::BeamLogic()
 			AQuackCharacter* Char = Cast<AQuackCharacter>(HitActor);
 			if (Char != nullptr)
 			{
-				Char->DecreaseHealth(5.0f * GetWorld()->GetDeltaSeconds());
+				Char->DecreaseHealth(BeamDamage * GetWorld()->GetDeltaSeconds());
 			}
 		}
 		else
@@ -1617,6 +1617,7 @@ void AQuackBoss::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* Oth
 	ADestructibleInnerPipes* Pipe = Cast<ADestructibleInnerPipes>(OtherActor);
 	if (Pipe != nullptr)
 	{
+		// Prevents melee attacks breaking the fences
 		if (!Pipe->IsFenceWall() || CurrentBossState == BossStates::E_HealingOne || CurrentBossState == BossStates::E_HealingTwo
 			|| CurrentBossState == BossStates::E_HealingThree || CurrentBossState == BossStates::E_HealingFour)
 		{

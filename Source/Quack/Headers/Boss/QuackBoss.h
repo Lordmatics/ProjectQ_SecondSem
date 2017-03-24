@@ -279,6 +279,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall", meta = (AllowPrivateAccess = "true"))
 		float InitialFireCooldown;
 	
+	UPROPERTY(EditAnywhere, Category = "C++ Beam")
+		float BeamDamage = 5.0f;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "Bullet Spawns")
 		USceneComponent* MyRoot;
 
@@ -312,7 +315,6 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Boss Armour")
 		class UBossArmourComponent* BossArmourComponent;
 
-
 	// Return true if should attack
 	bool CheckForMeleeAttack();
 
@@ -338,6 +340,8 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
+
+	
 	void ToggleShield(bool Visibility);
 	void BeginAscend();
 	void Ascend(float DeltaTime);

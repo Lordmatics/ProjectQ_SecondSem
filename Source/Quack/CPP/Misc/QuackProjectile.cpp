@@ -40,7 +40,7 @@ void AQuackProjectile::EarlyDestroy()
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
 	FTimerHandle TempHandle;
-	World->GetTimerManager().SetTimer(TempHandle, this, &AQuackProjectile::DisableCollision, 1.5f, false);
+	World->GetTimerManager().SetTimer(TempHandle, this, &AQuackProjectile::DisableCollision, 2.0f, false);
 	UE_LOG(LogTemp, Warning, TEXT("EarlyDestroy Initiaited"));
 }
 
