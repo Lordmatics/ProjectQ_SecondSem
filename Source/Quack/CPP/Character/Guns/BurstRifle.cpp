@@ -59,12 +59,32 @@ void ABurstRifle::StopMuzzleFlash()
 		//LaserParticleSystemComp = nullptr;
 	}
 	EndLaserDuration();
+	ResetLaserCharge();
 
 }
 
-void ABurstRifle::Shoot()
+void ABurstRifle::Charge()
 {
-	Super::Shoot();
+	if (MyPawn != nullptr)
+	{
+		MyPawn->SetLaserCharge(true);
+		bCharging = true;
+	}
+}
+
+void ABurstRifle::ResetLaserCharge()
+{
+	if (MyPawn != nullptr)
+	{
+		MyPawn->SetLaserCharge(false);
+		bCharging = false;
+	}
+}
+
+void ABurstRifle::Blast()
+{
+	if (!bCharging) return;
+	ResetLaserCharge();
 	UWorld* const World = GetWorld();
 	if (bIsReloading || Ammo <= 0.0f)
 	{
@@ -78,7 +98,7 @@ void ABurstRifle::Shoot()
 		// SEEMS TO GET STUCK SOMEHOW - NOT SURE WHY
 		// THIS SHOULD UNCHECK THIS BOOL NATURALLY	
 		FTimerHandle EndHandle2;
-		if(World != nullptr)
+		if (World != nullptr)
 			World->GetTimerManager().SetTimer(EndHandle2, this, &ABurstRifle::EndLaserDuration, ParticleLength, false);
 		return;
 	}
@@ -91,7 +111,15 @@ void ABurstRifle::Shoot()
 	World->GetTimerManager().SetTimer(EndHandle, this, &ABurstRifle::EndLaserDuration, ParticleLength, false);
 	World->GetTimerManager().SetTimer(RayHandle, this, &ABurstRifle::FireRay, (ParticleLength / 2), false);
 
-	//PlayFeedbackShake();
+	PlayFeedbackShake();	// Fire Blast
+
+}
+
+void ABurstRifle::Shoot()
+{
+	Super::Shoot();
+	Charge();
+
 	//PlayFeedbackAudio(MyPawn->GetSpecificPawnMesh());
 }
 

@@ -159,6 +159,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
 		bool bLowerGun;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
+		bool bLaserCharge;
 
 	UPROPERTY(VisibleAnywhere, Category = "MovementOverride")
 		uint32 bMovementPrevented : 1;
@@ -468,5 +470,7 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	FORCEINLINE void SetLaserCharge(bool _Charge) { bLaserCharge = _Charge; }
+	FORCEINLINE bool GetLaserCharge() const { return bLaserCharge; }
 };
 

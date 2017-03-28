@@ -72,6 +72,8 @@ public:
 
 	void EnableGun();
 
+	UFUNCTION(BlueprintCallable, Category = "AQuackCharacter")
+		class AQuackCharacter* GetOwningCharacter();
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "C++ Gun")

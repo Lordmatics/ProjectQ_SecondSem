@@ -1006,6 +1006,10 @@ void AQuackCharacter::MouseUp()
 {
 	WeaponConfig.bMouseDown = false;
 	WeaponConfig.bMouseUp = true;
+	if (CurrentEquippedGun == BurstRifleRef)
+	{
+		BurstRifleRef->Blast();
+	}
 	if (MovementConfig.bSprintingCache)
 	{
 		OnSprintBegin();

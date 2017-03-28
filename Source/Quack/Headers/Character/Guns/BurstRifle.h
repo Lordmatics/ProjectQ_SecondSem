@@ -48,6 +48,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
 		uint32 bIsFiring : 1;
 
+	void Charge();
+
+	uint32 bCharging : 1;
 public:
 	// Sets default values for this actor's properties
 	ABurstRifle();
@@ -71,6 +74,10 @@ public:
 	USkeletalMeshComponent* GetGunMesh() const override;
 
 	virtual void StopMuzzleFlash() override;
+
+	void ResetLaserCharge();
+
+	void Blast();
 
 protected:
 

@@ -76,6 +76,11 @@ void ABaseGun::SetOwningPawn(AQuackCharacter* NewOwner)
 	}
 }
 
+AQuackCharacter* ABaseGun::GetOwningCharacter()
+{
+	return MyPawn;
+}
+
 void ABaseGun::AttachMeshToPawn()
 {
 	// Overridden
