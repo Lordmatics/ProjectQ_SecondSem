@@ -40,6 +40,9 @@ private:
 		UParticleSystemComponent* LaserParticleSystemComp;
 
 	UPROPERTY(EditAnywhere, Category = "C++ Gun")
+		UParticleSystemComponent* ChargingPS;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Gun")
 		UParticleSystem* LaserParticleSystem;
 
 	UPROPERTY(EditDefaultsOnly, Category = "C++ Gun")

@@ -24,6 +24,11 @@ ABurstRifle::ABurstRifle()
 	LaserParticleSystemComp->SetRelativeLocation(FVector((0.0f, 50.0f, 5.0f)));
 	LaserParticleSystemComp->SetupAttachment(HarryLaserGun);
 
+	ChargingPS = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ChargingPS"));
+	//CharginPS->SetWorldScale3D(FVector(0.8f));
+	//CharginPS->SetRelativeLocation(FVector((0.0f, 50.0f, 5.0f)));
+	ChargingPS->SetupAttachment(HarryLaserGun);
+
 	RaycastComponent = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComp"));
 
 	Ammo = 100;
@@ -69,6 +74,7 @@ void ABurstRifle::Charge()
 	{
 		MyPawn->SetLaserCharge(true);
 		bCharging = true;
+		ChargingPS->SetActive(true, true);
 	}
 }
 
@@ -78,6 +84,7 @@ void ABurstRifle::ResetLaserCharge()
 	{
 		MyPawn->SetLaserCharge(false);
 		bCharging = false;
+		ChargingPS->SetActive(false, true);
 	}
 }
 
@@ -88,7 +95,7 @@ void ABurstRifle::Blast()
 	UWorld* const World = GetWorld();
 	if (bIsReloading || Ammo <= 0.0f)
 	{
-		StopMuzzleFlash();
+		//StopMuzzleFlash();
 		//UE_LOG(LogTemp, Warning, TEXT("Tried to Shoot but was shut down"));
 		return;
 	}
