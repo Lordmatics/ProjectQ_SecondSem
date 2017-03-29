@@ -29,6 +29,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "C++ Gun")
 		float ParticleLength = 2.3f;
 
+	UPROPERTY(EditAnywhere, Category = "C++ Gun")
+		float Radius = 75.0f;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "C++ Gun")
 		USceneComponent* TheRoot;
 

@@ -41,6 +41,8 @@ public:
 
 	FHitResult RaycastBossLaser(UParticleSystemComponent* FirstPersonCamera, const FVector& EndLocation, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors = TArray<TWeakObjectPtr<AActor>>());
 
+	FHitResult RaycastSphere(UCameraComponent* FirstPersonCamera,float Radius = 50.0f, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors = TArray<TWeakObjectPtr<AActor>>());
+
 	FORCEINLINE float GetRayLength() const { return Raylength; }
 
 	FORCEINLINE UMaterialInterface* GetBulletHoleDecal() const { return BulletHoleDecal; }

@@ -462,9 +462,11 @@ void AQuackCharacter::BeginPlay()
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	//FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 	//CheckForMaxClip();
-
+	if (GetCapsuleComponent() != nullptr)
+	{
 		GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AQuackCharacter::OnTriggerEnter);
 		GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AQuackCharacter::OnTriggerExit);
+	}
 }
 
 // UPDATE

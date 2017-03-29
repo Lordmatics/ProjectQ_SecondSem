@@ -16,6 +16,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "C++ Animation")
 		float DelayTillOffScreen = 0.6f;
+
 public:	
 	// Sets default values for this actor's properties
 	ABaseGun();
@@ -82,6 +83,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "C++ Gun")
 		uint32 bIsInUseUnableToSwap : 1;
 	
+	UPROPERTY(EditAnywhere, Category = "C++ Animation")
+		float HitEffectScale = 5.0f;
 
 	void DecreaseAmmo(float Amount, USkeletalMeshComponent* SpecificGun);
 

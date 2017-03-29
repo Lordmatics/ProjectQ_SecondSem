@@ -11,7 +11,7 @@ void AQuackArmourPin::BeginPlay()
 {
 	Super::BeginPlay();
 	EmissivePin = ArmourPiece->CreateDynamicMaterialInstance(1);
-	UE_LOG(LogTemp, Warning, TEXT("EmissivePin should exist"));
+	//UE_LOG(LogTemp, Warning, TEXT("EmissivePin should exist"));
 }
 
 void AQuackArmourPin::Tick(float DeltaTime)
@@ -30,8 +30,7 @@ void AQuackArmourPin::White()
 		
 		FTimerHandle RedHandle;
 		World->GetTimerManager().SetTimer(RedHandle, this, &AQuackArmourPin::Red, TurnBackToRedDelay, false);
-		UE_LOG(LogTemp, Warning, TEXT("Pin is White"));
-		
+		//UE_LOG(LogTemp, Warning, TEXT("Pin is White"));
 	}
 }
 
@@ -41,6 +40,6 @@ void AQuackArmourPin::Red()
 	{
 		FLinearColor NewColour = FLinearColor::Red;
 		EmissivePin->SetVectorParameterValue(FName("PinColour"), NewColour);
-		UE_LOG(LogTemp, Warning, TEXT("Pin is Red"));
+		//UE_LOG(LogTemp, Warning, TEXT("Pin is Red"));
 	}
 }

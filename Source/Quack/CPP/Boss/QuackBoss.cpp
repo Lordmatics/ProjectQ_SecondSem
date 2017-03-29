@@ -348,6 +348,9 @@ void AQuackBoss::BeamLogic()
 	if (RaycastComponent != nullptr && LaserParticleSystemComp != nullptr)
 	{
 		EnableBeam();
+		// This is actually for the beam...
+		// Beam Animation on
+		bBileSpitting = true;
 		TArray<TWeakObjectPtr<AActor>> IgnoredActors;
 		IgnoredActors.Add(this);
 		if(RockyFloorRef != nullptr)
@@ -389,6 +392,8 @@ void AQuackBoss::BeamLogic()
 	else
 	{
 		DisableBeam();
+		// Beam animation off
+		bBileSpitting = false;
 	}
 }
 
@@ -451,15 +456,17 @@ void AQuackBoss::Tick(float DeltaTime)
 	{
 		if (PinRefLL->bHasBeenDestroyed && PinRefLR->bHasBeenDestroyed && PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
 		{
-			bImmortal = false;
-			if (MainBodyRef != nullptr)
+			if (MainBodyRef != nullptr && bImmortal)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Fracture"));
 				// TEMP FIX
 				// Hide Cannon, whilst armour is on, so it doesnt peak through
 				// Due to wierd socket not following bug
+				bImmortal = false;
 				LaserCannon->SetHiddenInGame(false);
 				MainBodyRef->Fracture();
+				// Should auto push into next phase instead of having to damage him after killing 4 pins
+				ShouldEnterHealingPhase();
 				if (MyCharacter != nullptr)
 				{
 					MyCharacter->bShowBossBar = true;
@@ -1574,7 +1581,6 @@ void AQuackBoss::CheckForDead()
 				TempGameMode->WriteToFile();
 			}
 		}
-
 		Destroy();
 	}
 }
@@ -1604,7 +1610,7 @@ void AQuackBoss::CheckForPoisoned(float DeltaTime)
 				// Bad - but might work
 				CurrentAnimationState = AnimationStates::E_AnimRecoil;
 			}
-			SufferDamage(DeltaTime * 5.0f);
+			SufferDamage(DeltaTime * NeedleStabDamage);
 		}
 	}
 }

@@ -58,7 +58,7 @@ void ABurstRifle::StopMuzzleFlash()
 {
 	Super::StopMuzzleFlash();
 	//UE_LOG(LogTemp, Warning, TEXT("StopMuzzleFlash Called"));
-	if (LaserParticleSystemComp != nullptr && bShootingInProcess)
+	if (LaserParticleSystemComp != nullptr)// && bShootingInProcess)
 	{
 		LaserParticleSystemComp->DeactivateSystem();
 		//LaserParticleSystemComp = nullptr;
@@ -74,7 +74,8 @@ void ABurstRifle::Charge()
 	{
 		MyPawn->SetLaserCharge(true);
 		bCharging = true;
-		ChargingPS->SetActive(true, true);
+		if(!ChargingPS->IsActive())
+			ChargingPS->SetActive(true, true);
 	}
 }
 
@@ -99,17 +100,17 @@ void ABurstRifle::Blast()
 		//UE_LOG(LogTemp, Warning, TEXT("Tried to Shoot but was shut down"));
 		return;
 	}
-	if (bShootingInProcess)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Tried to Shoot but shooting was in process"));
-		// SEEMS TO GET STUCK SOMEHOW - NOT SURE WHY
-		// THIS SHOULD UNCHECK THIS BOOL NATURALLY	
-		FTimerHandle EndHandle2;
-		if (World != nullptr)
-			World->GetTimerManager().SetTimer(EndHandle2, this, &ABurstRifle::EndLaserDuration, ParticleLength, false);
-		return;
-	}
-	bShootingInProcess = true;
+	//if (bShootingInProcess)
+	//{
+	//	//UE_LOG(LogTemp, Warning, TEXT("Tried to Shoot but shooting was in process"));
+	//	// SEEMS TO GET STUCK SOMEHOW - NOT SURE WHY
+	//	// THIS SHOULD UNCHECK THIS BOOL NATURALLY	
+	//	FTimerHandle EndHandle2;
+	//	if (World != nullptr)
+	//		World->GetTimerManager().SetTimer(EndHandle2, this, &ABurstRifle::EndLaserDuration, ParticleLength, false);
+	//	return;
+	//}
+	//bShootingInProcess = true;
 	if (World == nullptr || LaserParticleSystem == nullptr || MyPawn->GetSpecificPawnMesh() == nullptr) return;
 	if (LaserParticleSystemComp == nullptr) return;
 	LaserParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(LaserParticleSystem, HarryLaserGun, MuzzleAttachPoint);// , ((FVector)(ForceInit)), FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
@@ -137,10 +138,11 @@ void ABurstRifle::FireRay()
 	if (RaycastComponent != nullptr)
 	{
 		bIsInUseUnableToSwap = true;
-		bShootingInProcess = true;
+		//bShootingInProcess = true;
 		FTimerHandle AmmoHandle;
 		World->GetTimerManager().SetTimer(AmmoHandle, this, &ABurstRifle::SubtractAmmo, ParticleLength / 2, false);
-		FHitResult Hit = RaycastComponent->Raycast(MyPawn->GetFirstPersonCameraComponent(), IgnoredActors);
+		FHitResult Hit = RaycastComponent->RaycastSphere(MyPawn->GetFirstPersonCameraComponent(), Radius, IgnoredActors);
+		//FHitResult Hit = RaycastComponent->Raycast(MyPawn->GetFirstPersonCameraComponent(), IgnoredActors);
 		AActor* HitActor = Hit.GetActor();
 		if (HitActor != nullptr)
 		{
@@ -155,7 +157,11 @@ void ABurstRifle::FireRay()
 					//ArmourPin->Setvectorparam
 					if (HitEffect != nullptr)
 					{
-						UGameplayStatics::SpawnEmitterAtLocation(World, HitEffect, Hit.Location);
+						UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAtLocation(World, HitEffect, Hit.Location);
+						if (PSC != nullptr)
+						{
+							PSC->SetWorldScale3D(FVector(HitEffectScale));
+						}
 					}
 				}
 			}

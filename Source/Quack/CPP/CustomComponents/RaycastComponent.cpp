@@ -52,6 +52,28 @@ FHitResult URaycastComponent::Raycast(UCameraComponent* FirstPersonCamera, const
 	else return FHitResult();
 }
 
+// Test
+FHitResult URaycastComponent::RaycastSphere(UCameraComponent* FirstPersonCamera, float Radius, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors)
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return FHitResult();
+	FHitResult Hit;
+	FVector Start = FirstPersonCamera->GetComponentLocation();
+	FVector Forward = FirstPersonCamera->GetForwardVector();
+	FVector End = Start + (Forward * Raylength);
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActors(IgnoredActors);
+	if (World->SweepSingleByChannel(Hit, Start, End, FQuat(), ECC_Visibility, FCollisionShape::MakeSphere(Radius), CQP))
+	{
+		AActor* HitActor = Hit.GetActor();
+		if(HitActor != nullptr)
+			UE_LOG(LogTemp, Warning, TEXT("Sphere Hit Something: %s"), *HitActor->GetName());
+		//CreateBulletHole(Hit);
+		return Hit;
+	}
+	else return FHitResult();
+}
+
 // ForLaser
 FHitResult URaycastComponent::RaycastLaser(UParticleSystemComponent* ParticleSystem, const TArray<TWeakObjectPtr<AActor>>& IgnoredActors)
 {
