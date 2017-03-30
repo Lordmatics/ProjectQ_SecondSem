@@ -341,6 +341,7 @@ void AQuackBoss::DisableBeam()
 		LaserParticleSystemComp->SetVisibility(false);
 		//UE_LOG(LogTemp, Warning, TEXT("Disable Beam --- Set to false"));
 	}
+	bBossLaserAnimation = false;
 }
 
 void AQuackBoss::BeamLogic()
@@ -350,7 +351,7 @@ void AQuackBoss::BeamLogic()
 		EnableBeam();
 		// This is actually for the beam...
 		// Beam Animation on
-		bBileSpitting = true;
+		bBossLaserAnimation = true;
 		TArray<TWeakObjectPtr<AActor>> IgnoredActors;
 		IgnoredActors.Add(this);
 		if(RockyFloorRef != nullptr)
@@ -393,7 +394,7 @@ void AQuackBoss::BeamLogic()
 	{
 		DisableBeam();
 		// Beam animation off
-		bBileSpitting = false;
+		//bBossLaserAnimation = false;
 	}
 }
 

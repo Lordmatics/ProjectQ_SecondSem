@@ -188,7 +188,7 @@ private:
 		float NeedleStabDamage = 15.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++ Bile Animation", meta = (AllowPrivateAccess = "true"))
-		bool bBileSpitting;
+		bool bBossLaserAnimation;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Armour Plate", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* BodyPlate;
