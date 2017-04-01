@@ -4,6 +4,7 @@
 #include "Headers/CustomComponents/MinionFactoryComponent.h"
 #include "Headers/AIEnemies/QuackAIPawn.h"
 #include "Headers/Misc/MinionSpawnPoint.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
 UMinionFactoryComponent::UMinionFactoryComponent()
@@ -76,6 +77,57 @@ void UMinionFactoryComponent::SpawnMinionWaveB()
 		}
 	}
 }*/
+
+bool UMinionFactoryComponent::SpawnElevatorWave(int HowMany, UBoxComponent* SpawnZone)
+{
+	FVector Origin = SpawnZone->Bounds.Origin;
+	FVector Extents = SpawnZone->Bounds.BoxExtent;
+	UWorld* const World = GetWorld();
+	if (World == nullptr || EnemyFactory.Num() == 0 || SpawnZone == nullptr) return false;
+	float HeightOffset = 0.0f;
+	for (size_t i = 0; i < HowMany; i++)
+	{
+		FVector SpawnPos = UKismetMathLibrary::RandomPointInBoundingBox(Origin, Extents);
+		int EnemyIndex = i > EnemyFactory.Num() - 2 ? 0 : FMath::RandRange(0, EnemyFactory.Num() - 2);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactory[EnemyIndex], SpawnPos + FVector(0.0f, 0.0f, HeightOffset), FRotator::ZeroRotator, SpawnParams);
+		if (Minion != nullptr)
+		{
+			// This is a misleading name - Sets Character as Target for Minions
+			Minion->SetBossMinion();
+			Minion->OnEnemyDestroyed.AddDynamic(this, &UMinionFactoryComponent::RemoveFromList);
+			MinionArray.Add(Minion);
+			HeightOffset += 150.0f;
+			if (i == (HowMany - 1)) return true;
+		}
+	}
+	return false;
+}
+
+bool UMinionFactoryComponent::SpawnBear(UBoxComponent* SpawnZone)
+{
+	FVector Origin = SpawnZone->Bounds.Origin;
+	FVector Extents = SpawnZone->Bounds.BoxExtent;
+	UWorld* const World = GetWorld();
+	if (World == nullptr || EnemyFactory.Num() <= 2 || SpawnZone == nullptr) return false;
+	float HeightOffset = 0.0f;
+	FVector SpawnPos = UKismetMathLibrary::RandomPointInBoundingBox(Origin, Extents);
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (EnemyFactory[2] == nullptr) return false;
+	AQuackAIPawn* Minion = World->SpawnActor<AQuackAIPawn>(EnemyFactory[2], SpawnPos + FVector(0.0f, 0.0f, HeightOffset), FRotator::ZeroRotator, SpawnParams);
+	if (Minion != nullptr)
+	{
+		// This is a misleading name - Sets Character as Target for Minions
+		Minion->SetBossMinion();
+		Minion->OnEnemyDestroyed.AddDynamic(this, &UMinionFactoryComponent::RemoveFromList);
+		MinionArray.Add(Minion);
+		HeightOffset += 150.0f;
+		return true;
+	}
+	return false;
+}
 
 void UMinionFactoryComponent::SpawnMinionWave(int MinionsToSpawn)
 {

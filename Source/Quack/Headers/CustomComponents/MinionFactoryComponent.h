@@ -62,4 +62,9 @@ public:
 	void SpawnMinionWave(int MinionsToSpawn);
 	
 	bool AreMinionsAlive();
+
+	bool SpawnElevatorWave(int HowMany, UBoxComponent* SpawnZone);
+
+	bool SpawnBear(UBoxComponent* SpawnZone);
+
 };

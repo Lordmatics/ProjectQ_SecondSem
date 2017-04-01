@@ -456,7 +456,8 @@ void AQuackCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 	//InitialiseGrabberClass();
-	GetCharacterMovement()->MaxWalkSpeed = MovementConfig.InitialWalkSpeed;
+	if (GetCharacterMovement() != nullptr)
+		GetCharacterMovement()->MaxWalkSpeed = MovementConfig.InitialWalkSpeed;
 	WeaponConfig.InitialFireCooldown = WeaponConfig.FireCooldown;
 	PlayerConfig.MaxHealth = PlayerConfig.Health;
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor

@@ -101,4 +101,7 @@ public:
 	FORCEINLINE float GetGroundLaserHeight() const { return GroundLaserHeight; }
 	FORCEINLINE float GetStartingLaserHeight() const { return StartingHeight; }
 
+
+	// Elevator
+	//void BeginRaise(struct FElevatorPositions ElevatorPos);
 };

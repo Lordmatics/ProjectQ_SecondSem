@@ -3,6 +3,7 @@
 #include "Headers/Quack.h"
 #include "Headers/CustomComponents/VerticalMovementComponent.h"
 
+//#include "Headers/Misc/Elevator.h"
 
 // Sets default values for this component's properties
 UVerticalMovementComponent::UVerticalMovementComponent()
@@ -25,6 +26,10 @@ void UVerticalMovementComponent::BeginPlay()
 	
 }
 
+//void UVerticalMovementComponent::BeginRaise(FElevatorPositions ElevatorPos)
+//{
+//
+//}
 
 // Called every frame
 void UVerticalMovementComponent::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
