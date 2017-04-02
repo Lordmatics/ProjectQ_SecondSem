@@ -721,6 +721,7 @@ void AQuackBoss::HandleStates(float DeltaTime)
 			//ShootFromTail(DeltaTime);
 			ToggleShield(false);
 			RotateTowardsPlayer();
+
 			InitiateMeleeAttacks();
 			if (!CheckForMeleeAttack())
 			{

@@ -73,7 +73,8 @@ void UBossAttacksComponent::BeginShootTheBile(UArrowComponent* MouthArrow, UAnim
 		FTimerHandle AnimDelayHandle;
 		FTimerDelegate AnimDelayDelegate;
 		AnimDelayDelegate.BindUFunction(this, FName("ShootTheBile"), MouthArrow, BossAnimInstance, BossAnimComponent);
-		World->GetTimerManager().SetTimer(AnimDelayHandle, AnimDelayDelegate, 9 * (BileAnimDuration / 10), false);
+
+		World->GetTimerManager().SetTimer(AnimDelayHandle, AnimDelayDelegate, 6 * (BileAnimDuration / 10), false);
 	}
 }
 
