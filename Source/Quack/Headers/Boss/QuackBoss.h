@@ -71,6 +71,25 @@ private:
 	UPROPERTY(EditAnywhere, Category = "C++ Tongue Materials")
 		UMaterial* TongueMaterialHealing;
 
+	UPROPERTY(EditAnywhere, Category = "C++ Eye Material")
+		UMaterialInstanceDynamic* EmissiveEyes;
+
+	UPROPERTY(EditAnywhere, Category = "C++ Eye Material")
+		UCurveFloat* BlinkCurve;
+
+	float CurrentBlinkValue = 0;
+	float TargetBlinkValue = 1;
+
+	bool bEyesClosed;
+
+	FTimerHandle BlinkTImer; // Triggers the boss blink 
+
+	UFUNCTION()
+	void CloseEyes();
+
+	UFUNCTION()
+	void OpenEyes();
+
 	void SetTongueToNormal();
 	void SetTongueToHealing();
 
@@ -189,6 +208,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++ Bile Animation", meta = (AllowPrivateAccess = "true"))
 		bool bBossLaserAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall", meta = (AllowPrivateAccess = "true"))
+		bool bIsDead;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Armour Plate", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* BodyPlate;
@@ -331,6 +353,10 @@ private:
 
 	void EndPipeDrain();
 
+	void BossDeath();
+
+
+
 	UPROPERTY(VisibleAnywhere, Category = "AudioState")
 		class AAudioManager* AudioManager;
 
@@ -383,8 +409,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
 	AnimationStates CurrentAnimationState;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
-		float KrisFloat;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Niall")
+	//	float KrisFloat;
 
 	void ChangeState(BossStates DesiredState);
 	void HandleStates(float DeltaTime);

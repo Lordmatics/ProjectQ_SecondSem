@@ -129,8 +129,6 @@ AQuackBoss::AQuackBoss()
 		}
 	}
 	InitialisePlayerCharacterReference();
-
-
 }
 
 void AQuackBoss::PostInitializeComponents()
@@ -275,6 +273,9 @@ void AQuackBoss::BeginPlay()
 
 	LaserParticleSystemComp->SetRelativeScale3D(FVector(0.0015));
 	EMPParticleSystem->SetActive(false);
+
+	EmissiveEyes = MySkeletalMesh->CreateDynamicMaterialInstance(2);
+	GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 0.5f, false);
 }
 
 void AQuackBoss::SetLaserSource()
@@ -442,11 +443,34 @@ void AQuackBoss::ChangeBackToPrevious()
 	}
 }
 
+void AQuackBoss::CloseEyes() {
+	//World->GetTimerManager().SetTimer(MeleeTimerHandle, this, &AQuackBoss::Stab, StabRate * 2, true);
+	if (!bIsDead) {
+		GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::OpenEyes, 0.5f, false);
+		TargetBlinkValue = 0.5f;
+	}
+	else TargetBlinkValue = 1.f;
+}
+
+void AQuackBoss::OpenEyes() {
+	if (!bIsDead) GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 7, false);
+	TargetBlinkValue = 0;
+}
+
 // Called every frame
 void AQuackBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (bDontDoAnything) return;
+
+	if (bEyesClosed) {
+
+	}
+	if (BlinkCurve != nullptr) {
+		CurrentBlinkValue = FMath::Lerp(CurrentBlinkValue, TargetBlinkValue, DeltaTime);
+		EmissiveEyes->SetScalarParameterValue(FName("EyesGlowMultiplier"), BlinkCurve->GetFloatValue(CurrentBlinkValue));
+	}
+
+	if (bDontDoAnything || bIsDead) return;
 	MapBossMovementToPlayer(DeltaTime);
 	DrainInTick(DeltaTime);
 	//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, FString::Printf(TEXT("DrainRedBar: %s"), bBeginDrainingRedBar ? TEXT("TRUE") : TEXT("FALSE")));
@@ -1582,8 +1606,13 @@ void AQuackBoss::CheckForDead()
 				TempGameMode->WriteToFile();
 			}
 		}
-		Destroy();
+		BossDeath();
 	}
+}
+
+void AQuackBoss::BossDeath() {
+	bIsDead = true;
+	GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 3.f, false);
 }
 
 void AQuackBoss::CheckForPoisoned(float DeltaTime)
