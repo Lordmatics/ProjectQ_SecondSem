@@ -67,23 +67,27 @@ void AElevator::PostInitializeComponents()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (ArmourComp->PinClassUL != nullptr)
 	{
-		AQuackBossArmourBaseClass* PinUL = World->SpawnActor<AQuackBossArmourBaseClass>(ArmourComp->PinClassUL, LeftElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
+		AQuackArmourPin* PinUL = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUL, LeftElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
 		if (PinUL != nullptr)
 		{
 			PinUL->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			PinUL->SetActorRelativeScale3D(FVector(5.0f));
 			PinUL->SetActorRelativeLocation(FVector(-650.0f, -200.0f, 1000.0f), false);
+			PinUL->SetAlpha(0.0f);
+			UE_LOG(LogTemp, Warning, TEXT("PinAlpha 0: %f"), PinUL->GetAlpha());
 			PinRefUL = PinUL;
 		}
 	}
 	if (ArmourComp->PinClassUR != nullptr)
 	{
-		AQuackBossArmourBaseClass* PinUR = World->SpawnActor<AQuackBossArmourBaseClass>(ArmourComp->PinClassUR, RightElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
+		AQuackArmourPin* PinUR = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUR, RightElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
 		if (PinUR != nullptr)
 		{
 			PinUR->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			PinUR->SetActorRelativeScale3D(FVector(5.0f));
 			PinUR->SetActorRelativeLocation(FVector(-200.0f, -200.0f, 1000.0f), false);
+			PinUR->SetAlpha(0.0f);
+			UE_LOG(LogTemp, Warning, TEXT("PinAlpha 0: %f"), PinUR->GetAlpha());
 			PinRefUR = PinUR;
 		}
 	}
@@ -102,6 +106,53 @@ void AElevator::Tick( float DeltaTime)
 
 	//}
 	// Elevator Stop true, once reach a certain pos
+	if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr)
+	{
+		if (bOpenDoors)
+		{
+			if (LeftElevatorDoor->GetComponentLocation().X >= DoorPositions.LeftDoorStartX && RightElevatorDoor->GetComponentLocation().X <= DoorPositions.RightDoorStartX)
+			{
+				//LeftElevatorDoor->GetComponentLocation();
+				float LeftX = LeftElevatorDoor->GetComponentLocation().X;
+				float LeftY = LeftElevatorDoor->GetComponentLocation().Y;
+				float LeftZ = LeftElevatorDoor->GetComponentLocation().Z;
+
+				LeftX = FMath::FInterpConstantTo(LeftX, DoorPositions.LeftDoorTargetX, DeltaTime, ElevatorSpeed);
+				FVector NewLocationLeft = FVector(LeftX, LeftY, LeftZ);
+				LeftElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
+
+				float RightX = RightElevatorDoor->GetComponentLocation().X;
+				float RightY = RightElevatorDoor->GetComponentLocation().Y;
+				float RightZ = RightElevatorDoor->GetComponentLocation().Z;
+
+				RightX = FMath::FInterpConstantTo(RightX, DoorPositions.RightDoorTargetX, DeltaTime, ElevatorSpeed);
+				FVector NewLocationRight = FVector(RightX, RightY, RightZ);
+				RightElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
+			}
+		}
+		else 
+		{
+			if (LeftElevatorDoor->GetComponentLocation().X <= DoorPositions.LeftDoorStartX && RightElevatorDoor->GetComponentLocation().X >= DoorPositions.RightDoorStartX)
+			{
+				float LeftX = LeftElevatorDoor->GetComponentLocation().X;
+				float LeftY = LeftElevatorDoor->GetComponentLocation().Y;
+				float LeftZ = LeftElevatorDoor->GetComponentLocation().Z;
+
+				LeftX = FMath::FInterpConstantTo(LeftX, DoorPositions.LeftDoorStartX, DeltaTime, ElevatorSpeed);
+				FVector NewLocationLeft = FVector(LeftX, LeftY, LeftZ);
+				LeftElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
+
+				float RightX = RightElevatorDoor->GetComponentLocation().X;
+				float RightY = RightElevatorDoor->GetComponentLocation().Y;
+				float RightZ = RightElevatorDoor->GetComponentLocation().Z;
+
+				RightX = FMath::FInterpConstantTo(RightX, DoorPositions.RightDoorStartX, DeltaTime, ElevatorSpeed);
+				FVector NewLocationRight = FVector(RightX, RightY, RightZ);
+				RightElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
+			}
+		}
+	}
+
 	if (bElevatorStop)
 	{
 		if (MinionFactoryComp != nullptr)
@@ -131,20 +182,33 @@ void AElevator::Tick( float DeltaTime)
 	// Handle Movement Upwards
 	FVector MyLocation = GetActorLocation();
 	float CurPos = MyLocation.Z;
-	UE_LOG(LogTemp, Warning, TEXT("CurPos: %f"), CurPos);
-	UE_LOG(LogTemp, Warning, TEXT("TargetPos: %f"), ElevatorPositions.ElevatorTarget);
+	//UE_LOG(LogTemp, Warning, TEXT("CurPos: %f"), CurPos);
+	//UE_LOG(LogTemp, Warning, TEXT("TargetPos: %f"), ElevatorPositions.ElevatorTarget);
 	if (CurPos >= ElevatorPositions.ElevatorTarget)
 	{
 		CurPos = ElevatorPositions.ElevatorTarget;
 		FVector NewLocation = FVector(GetActorLocation().X, GetActorLocation().Y, CurPos);
 		SetActorLocation(NewLocation, true);
-		if (LeftElevatorDoor != nullptr)
+
+		if (PinRefUL != nullptr && PinRefUR != nullptr)
 		{
-			LeftElevatorDoor->DestroyComponent();
-		}
-		if (RightElevatorDoor != nullptr)
-		{
-			RightElevatorDoor->DestroyComponent();
+			// Fade into reality once u reach the top
+			PinRefUL->SetFade(true);
+			PinRefUR->SetFade(true);
+			// Play Cutscene
+			if (PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
+			{
+				if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr)
+				{
+					bOpenDoors = true;
+					// Change to open and close code
+					//LeftElevatorDoor->DestroyComponent();
+				}
+				//if (RightElevatorDoor != nullptr)
+				//{
+				//	RightElevatorDoor->DestroyComponent();
+				//}
+			}
 		}
 	}
 	else
@@ -220,4 +284,9 @@ void AElevator::DestroyThis()
 {
 	if(SmashablePanelDM != nullptr)
 		SmashablePanelDM->DestroyComponent();
+}
+
+void AElevator::CloseDoors()
+{
+	bOpenDoors = false;
 }

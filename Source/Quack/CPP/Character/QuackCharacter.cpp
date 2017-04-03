@@ -632,6 +632,18 @@ void AQuackCharacter::OnTriggerExit(UPrimitiveComponent* OverlappedComp, AActor*
 	}
 }
 
+void AQuackCharacter::Jump()
+{
+	if (!bCanJump) return;
+	Super::Jump();
+}
+
+void AQuackCharacter::StopJumping()
+{
+	if (!bCanJump) return;
+	Super::StopJumping();
+}
+
 // INPUT MANAGER
 void AQuackCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -641,8 +653,8 @@ void AQuackCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("SwapGun", IE_Pressed, this, &AQuackCharacter::SwapGun);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AQuackCharacter::Reload);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AQuackCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AQuackCharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AQuackCharacter::Interact);
 
@@ -940,12 +952,30 @@ void AQuackCharacter::EndReload()
 	}
 }
 
+void AQuackCharacter::BurstFix()
+{
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	World->GetTimerManager().ClearTimer(CanFireHandle);
+	bCanFire = true;
+}
+
 void AQuackCharacter::Raycast()
 {
 	// REMAKE THIS
-	if (CurrentEquippedGun != nullptr && !MovementConfig.bIsSprinting)
+	if (CurrentEquippedGun != nullptr && !MovementConfig.bIsSprinting && bCanFire)
 	{
 		CurrentEquippedGun->Shoot();
+		if (CurrentEquippedGun == BurstRifleRef)
+		{
+			bCanFire = false;
+			//UWorld* const World = GetWorld();
+			//if (World != nullptr)
+			//{
+			//	if(!World->GetTimerManager().IsTimerActive(CanFireHandle))
+			//		World->GetTimerManager().SetTimer(CanFireHandle, this, &AQuackCharacter::BurstFix, Duration, false);
+			//}
+		}
 	}
 	else
 	{
@@ -1002,7 +1032,6 @@ void AQuackCharacter::MouseDown()
 {
 	WeaponConfig.bMouseDown = true;
 	WeaponConfig.bMouseUp = false;
-
 }
 
 void AQuackCharacter::MouseUp()
@@ -1011,7 +1040,15 @@ void AQuackCharacter::MouseUp()
 	WeaponConfig.bMouseUp = true;
 	if (CurrentEquippedGun == BurstRifleRef)
 	{
-		BurstRifleRef->Blast();
+		float Duration = BurstRifleRef->Blast();
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			if (!World->GetTimerManager().IsTimerActive(CanFireHandle))
+			{
+				World->GetTimerManager().SetTimer(CanFireHandle, this, &AQuackCharacter::BurstFix, Duration, false);
+			}
+		}
 	}
 	if (MovementConfig.bSprintingCache)
 	{
@@ -1082,13 +1119,15 @@ void AQuackCharacter::Sprint()
 	if (MovementConfig.bIsSprinting )
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, GetWorld()->GetDeltaSeconds(), FColor::Green, FString::Printf(TEXT("Sprinting")));
-		GetCharacterMovement()->MaxWalkSpeed = MovementConfig.SprintSpeed;
+		if(GetCharacterMovement())
+			GetCharacterMovement()->MaxWalkSpeed = MovementConfig.SprintSpeed;
 	}
 	else
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, GetWorld()->GetDeltaSeconds(), FColor::Green, FString::Printf(TEXT("Walking")));
-		GetCharacterMovement()->MaxWalkSpeed = MovementConfig.InitialWalkSpeed;
-	}
+		if (GetCharacterMovement())
+			GetCharacterMovement()->MaxWalkSpeed = MovementConfig.InitialWalkSpeed;
+	}	
 }
 
 bool AQuackCharacter::IsSprinting() const

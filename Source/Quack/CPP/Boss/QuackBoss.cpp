@@ -462,10 +462,13 @@ void AQuackBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bEyesClosed) {
+	// Kris code
+	if (bEyesClosed) 
+	{
 
 	}
-	if (BlinkCurve != nullptr) {
+	if (BlinkCurve != nullptr) 
+	{
 		CurrentBlinkValue = FMath::Lerp(CurrentBlinkValue, TargetBlinkValue, DeltaTime);
 		EmissiveEyes->SetScalarParameterValue(FName("EyesGlowMultiplier"), BlinkCurve->GetFloatValue(CurrentBlinkValue));
 	}

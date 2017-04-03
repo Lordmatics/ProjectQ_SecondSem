@@ -153,6 +153,12 @@ class AQuackCharacter : public ACharacter
 	GENERATED_BODY()
 
 private:
+
+	FTimerHandle CanFireHandle;
+
+	UFUNCTION()
+		void BurstFix();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
 		bool bRaiseGun;
 
@@ -412,6 +418,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sprint")
 		bool IsSprinting() const;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jump")
+		bool bCanJump;
+
+	UFUNCTION()
+		virtual void Jump() override;
+
+	UFUNCTION()
+		virtual void StopJumping() override;
 protected:
 
 	/** socket or bone name for attaching weapon mesh */

@@ -34,6 +34,35 @@ struct FElevatorPositions
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FDoorPositions
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		float LeftDoorTargetX;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		float RightDoorTargetX;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		float LeftDoorStartX;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		float RightDoorStartX;
+
+	/** defaults */
+	FDoorPositions()
+	{
+		//bIsUsingGravityGun = false;
+		//bHasGravityGun = false;
+		LeftDoorTargetX = -725.0f;
+		RightDoorTargetX = -75.0f;
+		LeftDoorStartX = -365.0f;
+		RightDoorStartX = -495.0f;
+	}
+};
+
 UCLASS()
 class QUACK_API AElevator : public AActor
 {
@@ -74,10 +103,10 @@ private:
 		class UBossArmourComponent* ArmourComp;
 
 	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
-		class AQuackBossArmourBaseClass* PinRefUL;
+		class AQuackArmourPin* PinRefUL;
 
 	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
-		class AQuackBossArmourBaseClass* PinRefUR;
+		class AQuackArmourPin* PinRefUR;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Elevator")
@@ -101,9 +130,15 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		uint32 bDefeatedBear : 1;
 
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		uint32 bOpenDoors : 1;
+
 	/** Elevator Stops Data */
 	UPROPERTY(EditAnywhere, Category = "Elevator Positions")
 		FElevatorPositions ElevatorPositions = FElevatorPositions();
+
+	UPROPERTY(EditAnywhere, Category = "Elevator Door Positions")
+		FDoorPositions DoorPositions = FDoorPositions();
 private:
 
 	UFUNCTION()
@@ -126,6 +161,7 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
-
+	UFUNCTION(BlueprintCallable, Category = "C++ Functions")
+		void CloseDoors();
 	
 };

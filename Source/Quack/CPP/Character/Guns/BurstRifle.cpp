@@ -89,16 +89,16 @@ void ABurstRifle::ResetLaserCharge()
 	}
 }
 
-void ABurstRifle::Blast()
+float ABurstRifle::Blast()
 {
-	if (!bCharging) return;
+	if (!bCharging) return 0.0f;
 	ResetLaserCharge();
 	UWorld* const World = GetWorld();
 	if (bIsReloading || Ammo <= 0.0f)
 	{
 		//StopMuzzleFlash();
 		//UE_LOG(LogTemp, Warning, TEXT("Tried to Shoot but was shut down"));
-		return;
+		return 0.0f;
 	}
 	//if (bShootingInProcess)
 	//{
@@ -111,15 +111,17 @@ void ABurstRifle::Blast()
 	//	return;
 	//}
 	//bShootingInProcess = true;
-	if (World == nullptr || LaserParticleSystem == nullptr || MyPawn->GetSpecificPawnMesh() == nullptr) return;
-	if (LaserParticleSystemComp == nullptr) return;
+	if (World == nullptr || LaserParticleSystem == nullptr || MyPawn->GetSpecificPawnMesh() == nullptr) return 0.0f;
+	if (LaserParticleSystemComp == nullptr) return 0.0f;
 	LaserParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(LaserParticleSystem, HarryLaserGun, MuzzleAttachPoint);// , ((FVector)(ForceInit)), FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
 	FTimerHandle RayHandle;
 	FTimerHandle EndHandle;
 	World->GetTimerManager().SetTimer(EndHandle, this, &ABurstRifle::EndLaserDuration, ParticleLength, false);
-	World->GetTimerManager().SetTimer(RayHandle, this, &ABurstRifle::FireRay, (ParticleLength / 2), false);
+	FireRay();
+	//World->GetTimerManager().SetTimer(RayHandle, this, &ABurstRifle::FireRay, (ParticleLength / 2), false);
 
 	PlayFeedbackShake();	// Fire Blast
+	return ParticleLength;
 
 }
 

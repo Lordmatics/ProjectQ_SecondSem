@@ -83,7 +83,7 @@ public:
 
 	void ResetLaserCharge();
 
-	void Blast();
+	float Blast();
 
 protected:
 

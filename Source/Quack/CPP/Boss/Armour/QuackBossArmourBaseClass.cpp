@@ -104,7 +104,7 @@ void AQuackBossArmourBaseClass::Die()
 	{
 		bHasBeenDestroyed = true;
 		ToggleHighlight(false);
-		ArmourPiece->SetHiddenInGame(true);
+		//ArmourPiece->SetHiddenInGame(true);
 		ArmourHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ArmourPiece->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
