@@ -34,21 +34,6 @@ class QUACK_API APipe : public AActor
 		UStaticMeshComponent* MyStaticMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-		UStaticMeshComponent* PipeDecorationL;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-		UStaticMeshComponent* PipeDecorationInnerL;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-		UStaticMeshComponent* PipeDecorationR;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-		UStaticMeshComponent* PipeDecorationInnerR;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
-		UStaticMeshComponent* PipePlug;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")
 		UStaticMeshComponent* DrainMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Custom Niall")

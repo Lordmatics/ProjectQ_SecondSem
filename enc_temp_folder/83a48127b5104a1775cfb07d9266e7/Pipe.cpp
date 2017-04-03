@@ -1,0 +1,244 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "Headers/Quack.h"
+#include "Headers/Misc/Pipe.h"
+#include "Headers/Character/QuackCharacter.h"
+#include "Components/DestructibleComponent.h"
+
+
+// Sets default values
+APipe::APipe()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	MyRoot = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootComponent = MyRoot;
+
+	LookAtTransform = CreateDefaultSubobject<USceneComponent>(TEXT("LookAT"));
+	LookAtTransform->SetRelativeLocation(FVector(171.0f, 0.0f, 76.5f));
+	LookAtTransform->SetupAttachment(MyRoot);
+
+	MyTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractTrigger"));
+	MyTrigger->SetupAttachment(MyRoot);
+
+	MyStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeMesh"));
+	MyStaticMesh->SetupAttachment(MyTrigger);
+
+	PipeDecorationL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationL"));
+	PipeDecorationL->SetupAttachment(MyTrigger);
+
+	PipeDecorationInnerL = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationInnerL"));
+	PipeDecorationInnerL->SetupAttachment(MyTrigger);
+
+	PipeDecorationR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationR"));
+	PipeDecorationR->SetupAttachment(MyTrigger);
+
+	PipeDecorationInnerR = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipeDecorationInnerR"));
+	PipeDecorationInnerR->SetupAttachment(MyTrigger);
+
+	PipePlug = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PipePlug"));
+	PipePlug->SetupAttachment(MyTrigger);
+
+	PipeOuterBase = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OuterPipe"));
+	PipeOuterBase->SetupAttachment(MyTrigger);
+
+	DrainMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DrainMesh"));
+	DrainMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DrainMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	DrainMesh->SetupAttachment(MyTrigger);
+
+	DrainMeshDM = CreateDefaultSubobject<UDestructibleComponent>(TEXT("DrainMeshDM"));
+	DrainMeshDM->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DrainMeshDM->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	DrainMeshDM->SetupAttachment(MyTrigger);
+
+	LeakParticleSys = CreateAbstractDefaultSubobject<UParticleSystemComponent>(TEXT("Leak"));
+	LeakParticleSys->SetupAttachment(MyTrigger);
+	LeakParticleSys->SetRelativeLocation(PipeOuterBase->RelativeLocation);
+
+
+}
+
+// Called when the game starts or when spawned
+void APipe::BeginPlay()
+{
+	Super::BeginPlay();
+	if (MyTrigger != nullptr)
+	{
+		MyTrigger->bGenerateOverlapEvents = true;
+		MyTrigger->OnComponentBeginOverlap.AddDynamic(this, &APipe::OnTriggerEnter);
+		MyTrigger->OnComponentEndOverlap.AddDynamic(this, &APipe::OnTriggerExit);
+	}
+	LeakParticleSys->Deactivate();
+	DrainMesh->SetVisibility(true);
+	DrainMeshDM->SetVisibility(false);
+	SpawnLocation = MyStaticMesh->GetComponentLocation();
+}
+
+// Called every frame
+void APipe::Tick( float DeltaTime )
+{
+	Super::Tick( DeltaTime );
+	// PreRequisites for being Stabbable
+	if (!bPoisonedPipe && bTargettedByBoss && bDescend && !bNotABossPipe)
+	{
+		// Limitations, to only allow it within the pipes radius
+		if (CharRef != nullptr && bCharacterInTrigger)
+		{
+			// Reason - If you were in the tirgger, prior to it being leached, you would
+			// Have to exit and re-enter to validate the conditions 
+			CharRef->PoisonConfig.bCanPoisonPipe = true;
+			ToggleHighlight(true);
+		}
+	}
+	if (bTargettedByBoss && bDescend)
+	{
+		ToggleHighlight(true);
+	}
+	else
+	{
+		ToggleHighlight(false);
+	}
+	if (bDescend)
+	{
+		BeginDescend(DeltaTime);
+	}
+	else
+	{
+		BeginAscend(DeltaTime);
+	}
+
+	if (bDrained && bDestroyed)
+	{
+		if (MyStaticMesh != nullptr)
+		{
+			MyStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			MyStaticMesh->SetHiddenInGame(true);
+			DrainMesh->SetVisibility(false);
+			LeakParticleSys->Deactivate();
+			bFinishedDraining = true;
+			if (OnPipeFinishedDraining.IsBound())
+			{
+				OnPipeFinishedDraining.Broadcast();
+				//UE_LOG(LogTemp, Warning, TEXT("Broadcasting"));
+				OnPipeFinishedDraining.RemoveAll(this);
+			}
+			bDrained = false;
+			bDestroyed = false;
+		}
+	}
+}
+
+void APipe::SetDescend(bool _State)
+{
+	bDescend = _State;
+}
+
+void APipe::BeginDescend(float DeltaTime)
+{
+	if (MyStaticMesh == nullptr) return;
+	//FVector CurrentLocation = MyStaticMesh->GetComponentLocation();
+	//CurrentLocation = FMath::VInterpTo(CurrentLocation, FVector(SpawnLocation.X, SpawnLocation.Y, MinPipeHeight), DeltaTime, DrainSpeed);
+	//MyStaticMesh->SetRelativeLocation(CurrentLocation);
+
+	float CurZ = MyStaticMesh->GetRelativeTransform().GetLocation().Z;
+
+	CurZ = FMath::FInterpConstantTo(CurZ, MinPipeHeight, DeltaTime, DrainSpeed);
+	MyStaticMesh->SetRelativeLocation(FVector(0.0f, 0.0f, CurZ));
+
+	if (CurZ <= MinPipeHeight + 10.0f)
+	{
+		bDrained = true;
+	}
+	//SetActorLocation(CurrentLocation);
+	
+}
+
+void APipe::BeginAscend(float DeltaTime)
+{
+	if (MyStaticMesh == nullptr) return;
+	//FVector CurrentLocation = MyStaticMesh->GetComponentLocation();
+	//CurrentLocation = FMath::VInterpTo(CurrentLocation, FVector(SpawnLocation.X, SpawnLocation.Y, MaxPipeHeight), DeltaTime, DrainSpeed);
+	//MyStaticMesh->SetRelativeLocation(CurrentLocation);
+
+	float CurZ = MyStaticMesh->GetRelativeTransform().GetLocation().Z;
+	CurZ = FMath::FInterpConstantTo(CurZ, MaxPipeHeight, DeltaTime, DrainSpeed / 2.0f);
+	MyStaticMesh->SetRelativeLocation(FVector(0.0f, 0.0f, CurZ));
+	//SetActorLocation(CurrentLocation);
+}
+
+void APipe::SimulateDestroy()
+{
+	bDescend = true;
+	bDestroyed = true;
+	DrainMesh->SetVisibility(false);
+	if (DrainMeshDM != nullptr)
+	{
+		DrainMeshDM->SetVisibility(true);
+
+		DrainMeshDM->AddImpulseAtLocation(FVector::ForwardVector, DrainMeshDM->GetComponentLocation());
+		DrainMeshDM->ApplyRadiusDamage(10.0f, DrainMeshDM->GetComponentLocation(), 100.0f, 1000.0f, true);
+		UE_LOG(LogTemp, Warning, TEXT("DrainMeshDM Applied Damage"));
+	}
+	LeakParticleSys->ActivateSystem();
+	
+
+	//MyStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//MyStaticMesh->SetHiddenInGame(true);
+}
+
+void APipe::ChangeMeshColour()
+{
+	//PipeOuterBase->SetMaterial(0, PoisonnedPipeMaterial);
+}
+
+void APipe::ToggleHighlight(bool Glow)
+{
+	//MyStaticMesh->SetCustomDepthStencilValue((uint8)Colour);
+	PipeOuterBase->SetRenderCustomDepth(Glow);
+	PipeOuterBase->CustomDepthStencilValue = STENCIL_FRIENDLY_OUTLINE;
+
+}
+
+void APipe::OnTriggerEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// Known concern - if you are standing next to the pipe, before the boss leaches it, the highlight wont occur 
+	// A long winded fix, is to cache ref to player, and toggle a variable on them, to check if they
+	// are already within a close enough proximity to the pipe, then alert the highlight function to activate if that ref is
+	// not null, since u would null it when player leaves trigger
+	AQuackCharacter* MyCharacter = Cast<AQuackCharacter>(OtherActor);
+	if (MyCharacter != nullptr)
+	{
+		CharRef = MyCharacter;
+		bCharacterInTrigger = true;
+		//UE_LOG(LogTemp, Warning, TEXT("Poison Pipe enter"));
+		// Poisonable
+		if (bNotABossPipe) return;
+		if (!bPoisonedPipe && bTargettedByBoss && bDescend)
+		{
+			//MyCharacter->PoisonConfig.bCanPoisonPipe = true;
+			//ToggleHighlight(true);
+		}
+		else
+		{
+			ToggleHighlight(false);
+		}
+		//Destroy();
+	}
+}
+
+void APipe::OnTriggerExit(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	AQuackCharacter* MyCharacter = Cast<AQuackCharacter>(OtherActor);
+	if (MyCharacter != nullptr)
+	{
+		CharRef = nullptr;
+		bCharacterInTrigger = false;
+		//UE_LOG(LogTemp, Warning, TEXT("Poison Pipe exit"));
+		// Poisonable
+		MyCharacter->PoisonConfig.bCanPoisonPipe = false;
+		ToggleHighlight(false);
+
+		//Destroy();
+	}
+}
