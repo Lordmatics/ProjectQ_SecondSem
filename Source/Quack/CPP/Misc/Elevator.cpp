@@ -6,6 +6,9 @@
 #include "Classes/PhysicsEngine/RadialForceComponent.h"
 #include "Headers/CustomComponents/VerticalMovementComponent.h"
 #include "Headers/CustomComponents/MinionFactoryComponent.h"
+#include "Headers/CustomComponents/BossArmourComponent.h"
+#include "Headers/Boss/Armour/QuackArmourPin.h"
+#include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 
 //#include "Engine.h"
 
@@ -43,6 +46,7 @@ AElevator::AElevator()
 	// Might be simpler without this tbh
 	MovementComp = CreateDefaultSubobject<UVerticalMovementComponent>(TEXT("MovementComp"));
 	MinionFactoryComp = CreateDefaultSubobject<UMinionFactoryComponent>(TEXT("MinionFactoryComp"));
+	ArmourComp = CreateDefaultSubobject<UBossArmourComponent>(TEXT("ArmourComp"));
 
 }
 
@@ -54,6 +58,36 @@ void AElevator::BeginPlay()
 	SetActorLocation(FVector(-3382.0f, 17155.0f, ElevatorPositions.ElevatorStart), true);
 }
 
+void AElevator::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (ArmourComp->PinClassUL != nullptr)
+	{
+		AQuackBossArmourBaseClass* PinUL = World->SpawnActor<AQuackBossArmourBaseClass>(ArmourComp->PinClassUL, LeftElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
+		if (PinUL != nullptr)
+		{
+			PinUL->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			PinUL->SetActorRelativeScale3D(FVector(5.0f));
+			PinUL->SetActorRelativeLocation(FVector(-650.0f, -200.0f, 1000.0f), false);
+			PinRefUL = PinUL;
+		}
+	}
+	if (ArmourComp->PinClassUR != nullptr)
+	{
+		AQuackBossArmourBaseClass* PinUR = World->SpawnActor<AQuackBossArmourBaseClass>(ArmourComp->PinClassUR, RightElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
+		if (PinUR != nullptr)
+		{
+			PinUR->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			PinUR->SetActorRelativeScale3D(FVector(5.0f));
+			PinUR->SetActorRelativeLocation(FVector(-200.0f, -200.0f, 1000.0f), false);
+			PinRefUR = PinUR;
+		}
+	}
+}
 // Called every frame
 void AElevator::Tick( float DeltaTime)
 {

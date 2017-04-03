@@ -70,6 +70,15 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
 		class UMinionFactoryComponent* MinionFactoryComp;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
+		class UBossArmourComponent* ArmourComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* PinRefUL;
+
+	UPROPERTY(VisibleAnywhere, Category = "C++ Armour References")
+		class AQuackBossArmourBaseClass* PinRefUR;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		float ElevatorSpeed = 5.0f;
@@ -114,6 +123,8 @@ public:
 	
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
+
+	virtual void PostInitializeComponents() override;
 
 
 	
