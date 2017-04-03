@@ -9,6 +9,7 @@
 #include "Headers/CustomComponents/BossArmourComponent.h"
 #include "Headers/Boss/Armour/QuackArmourPin.h"
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
+#include "Headers/CustomComponents/Matinee/MatineeContainerComponent.h"
 
 //#include "Engine.h"
 
@@ -47,6 +48,7 @@ AElevator::AElevator()
 	MovementComp = CreateDefaultSubobject<UVerticalMovementComponent>(TEXT("MovementComp"));
 	MinionFactoryComp = CreateDefaultSubobject<UMinionFactoryComponent>(TEXT("MinionFactoryComp"));
 	ArmourComp = CreateDefaultSubobject<UBossArmourComponent>(TEXT("ArmourComp"));
+	CutsceneContainer = CreateDefaultSubobject<UMatineeContainerComponent>(TEXT("CutsceneContainer"));
 
 }
 
@@ -213,6 +215,14 @@ void AElevator::Tick( float DeltaTime)
 			// Fade into reality once u reach the top
 			PinRefUL->SetFade(true);
 			PinRefUR->SetFade(true);
+			if (!bPlayPinCutsceneOnce)
+			{
+				bPlayPinCutsceneOnce = true;
+				if (CutsceneContainer != nullptr)
+				{
+					CutsceneContainer->PlayMatineeAt(0);
+				}
+			}
 			// Play Cutscene
 			if (PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
 			{

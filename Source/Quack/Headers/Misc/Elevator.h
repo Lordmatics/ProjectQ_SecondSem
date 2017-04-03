@@ -99,6 +99,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
 		class UMinionFactoryComponent* MinionFactoryComp;
 
+	UPROPERTY(EditDefaultsOnly, Category = "C++ Cutscenes")
+		class UMatineeContainerComponent* CutsceneContainer;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
 		class UBossArmourComponent* ArmourComp;
 
@@ -143,6 +146,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		uint32 bOpenDoors : 1;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		uint32 bPlayPinCutsceneOnce : 1;
 
 	/** Elevator Stops Data */
 	UPROPERTY(EditAnywhere, Category = "Elevator Positions")

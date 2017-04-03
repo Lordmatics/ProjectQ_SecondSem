@@ -89,3 +89,11 @@ bool UMatineeContainerComponent::PlayUpperPipeMatinee()
 	UE_LOG(LogTemp, Warning, TEXT("ERROR: UpperPipeMatinee Failed"));
 	return false;
 }
+
+bool UMatineeContainerComponent::PlayMatineeAt(int Index)
+{
+	if (Matinees.Num() == 0 || Index >= Matinees.Num()) return false;
+	if (Matinees[Index] == nullptr) return false;
+	Matinees[Index]->Play();
+	return true;
+}

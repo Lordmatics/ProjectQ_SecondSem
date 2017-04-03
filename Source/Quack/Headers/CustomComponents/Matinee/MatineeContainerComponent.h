@@ -48,6 +48,8 @@ public:
 		
 	bool PlayUpperPipeMatinee();
 
+	bool PlayMatineeAt(int Index);
+
 	FORCEINLINE class AMatineeActor* GetLowerPipeLeftMatinee() const { return Matinees[LowerPipeLeftMatinee]; }
 	FORCEINLINE class AMatineeActor* GetLowerPipeRightMatinee() const { return Matinees[LowerPipeRightMatinee]; }
 	FORCEINLINE class AMatineeActor* GetUpperPipeMatinee() const { return Matinees[UpperPipeMatinee]; }
