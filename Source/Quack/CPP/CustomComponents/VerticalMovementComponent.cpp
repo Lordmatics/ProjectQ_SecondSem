@@ -94,6 +94,7 @@ void UVerticalMovementComponent::ActivateMovement(float DeltaTime)
 	// Raise to initial
 	else
 	{
+		if (bStop) return;
 		FVector OwnerLocation = GetOwner()->GetActorLocation();
 		float Start = OwnerLocation.Z;
 		// Raise to 1630.0f Z 

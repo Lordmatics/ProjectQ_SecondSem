@@ -113,9 +113,14 @@ private:
 
 private:
 
+	UPROPERTY(VisibleAnywhere, Category = "Boss Ref")
+		TArray<class AActor*> QuackBoss;
+
 	FTimerHandle ResumeMovementHandle;
 	UFUNCTION()
 		void ResumeMovement();
+	UFUNCTION()
+		void DelayedActivation();
 
 	UPROPERTY(EditAnywhere, Category = "CameraShake")
 		TSubclassOf<UCameraShake> ElevatorShake;
@@ -131,6 +136,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		float DestroyPanelDelay = 1.0f;
+	
+	UPROPERTY(EditAnywhere, Category = "Elevator")	
+		float DelayTime = 2.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		uint32 bElevatorStop : 1;
@@ -149,6 +157,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		uint32 bPlayPinCutsceneOnce : 1;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		uint32 bPlayDoorCutsceneOnce : 1;
 
 	/** Elevator Stops Data */
 	UPROPERTY(EditAnywhere, Category = "Elevator Positions")

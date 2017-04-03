@@ -75,7 +75,8 @@ void ABileSplashEffect::StartDOT()
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr) return;
-	DOTDamage();
+	if(!bInstantDamageOnce)
+		DOTDamage();
 	World->GetTimerManager().SetTimer(BileTimerDOT, this, &ABileSplashEffect::DOTDamage, DOTFrequency, true);
 }
 
@@ -90,4 +91,5 @@ void ABileSplashEffect::DOTDamage()
 {
 	if (CharRef == nullptr) return;
 	CharRef->DecreaseHealth(BileDamageOverTime);
+	bInstantDamageOnce = true;
 }

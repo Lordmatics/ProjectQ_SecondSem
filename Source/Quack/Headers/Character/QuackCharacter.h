@@ -353,6 +353,8 @@ private:
 public:
 	AQuackCharacter();
 
+	void TeleportOutOfElevator();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
 	bool bEnteredBossRoom;
 	

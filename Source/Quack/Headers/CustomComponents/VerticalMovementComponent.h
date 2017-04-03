@@ -33,6 +33,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "C++ Variables")
 		uint32 bActivate : 1;
 
+	// Bool to Restrict Starting movement
+	UPROPERTY(EditAnywhere, Category = "C++ Variables")
+		uint32 bStop : 1;
+
 	// Height to match pipe heal animation - upper
 	UPROPERTY(EditAnywhere, Category = "C++ Variables")
 		float UpperPipeHealHeight = 4200.0f;
@@ -101,7 +105,8 @@ public:
 	FORCEINLINE float GetGroundLaserHeight() const { return GroundLaserHeight; }
 	FORCEINLINE float GetStartingLaserHeight() const { return StartingHeight; }
 
-
+	FORCEINLINE bool IsStopped() const { return bStop; }
+	FORCEINLINE void SetStopped(bool _Stop) { bStop = _Stop; }
 	// Elevator
 	//void BeginRaise(struct FElevatorPositions ElevatorPos);
 };

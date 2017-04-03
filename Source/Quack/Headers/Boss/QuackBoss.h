@@ -43,7 +43,7 @@ private:
 		void StabPause();
 
 	UPROPERTY(EditAnywhere, Category = "C++ BOSS MUST WAIT")
-		float DontDoAnythingTime = 4.0f;
+		float DontDoAnythingTime = 12.0f;
 	
 	UFUNCTION()
 		void StartBoss();
@@ -372,7 +372,7 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-
+	void SetCanMove();
 	
 	void ToggleShield(bool Visibility);
 	void BeginAscend();

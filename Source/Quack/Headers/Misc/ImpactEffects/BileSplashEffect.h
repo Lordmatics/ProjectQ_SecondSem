@@ -45,6 +45,8 @@ private:
 
 	UFUNCTION()
 		void DOTDamage();
+
+	uint32 bInstantDamageOnce : 1;
 public:	
 	// Sets default values for this actor's properties
 	ABileSplashEffect();

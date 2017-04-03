@@ -10,6 +10,7 @@
 #include "Headers/Boss/Armour/QuackArmourPin.h"
 #include "Headers/Boss/Armour/QuackBossArmourBaseClass.h"
 #include "Headers/CustomComponents/Matinee/MatineeContainerComponent.h"
+#include "Headers/Boss/QuackBoss.h"
 
 //#include "Engine.h"
 
@@ -70,27 +71,27 @@ void AElevator::PostInitializeComponents()
 	if (ArmourComp->PinClassUL != nullptr)
 	{
 		// LeftElevatorDoor->GetComponentLocation()
-		AQuackArmourPin* PinUL = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUL, GetActorLocation(), FRotator(), SpawnParams);
+		AQuackArmourPin* PinUL = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUL, GetActorLocation(), GetActorRotation(), SpawnParams);
 		if (PinUL != nullptr)
 		{
 			PinUL->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			PinUL->SetActorRelativeScale3D(FVector(5.0f));
 			PinUL->SetActorRelativeLocation(FVector(-650.0f, -200.0f, 1000.0f), false);
 			PinUL->SetAlpha(0.0f);
-			UE_LOG(LogTemp, Warning, TEXT("PinAlpha 0: %f"), PinUL->GetAlpha());
+		//	UE_LOG(LogTemp, Warning, TEXT("PinAlpha 0: %f"), PinUL->GetAlpha());
 			PinRefUL = PinUL;
 		}
 	}
 	if (ArmourComp->PinClassUR != nullptr)
 	{
-		AQuackArmourPin* PinUR = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUR, GetActorLocation(), FRotator(), SpawnParams);
+		AQuackArmourPin* PinUR = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUR, GetActorLocation(), GetActorRotation(), SpawnParams);
 		if (PinUR != nullptr)
 		{
 			PinUR->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			PinUR->SetActorRelativeScale3D(FVector(5.0f));
 			PinUR->SetActorRelativeLocation(FVector(-200.0f, -200.0f, 1000.0f), false);
 			PinUR->SetAlpha(0.0f);
-			UE_LOG(LogTemp, Warning, TEXT("PinAlpha 0: %f"), PinUR->GetAlpha());
+			//UE_LOG(LogTemp, Warning, TEXT("PinAlpha 0: %f"), PinUR->GetAlpha());
 			PinRefUR = PinUR;
 		}
 	}
@@ -111,14 +112,14 @@ void AElevator::Tick( float DeltaTime)
 	// Elevator Stop true, once reach a certain pos
 	if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Doors Not Null"));
+		//UE_LOG(LogTemp, Warning, TEXT("Doors Not Null"));
 		if (bOpenDoors)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Start Openning Doors"));
+			//UE_LOG(LogTemp, Warning, TEXT("Start Openning Doors"));
 
 			if (LeftElevatorDoor->GetRelativeTransform().GetLocation().X >= DoorPositions.LeftDoorTargetX && RightElevatorDoor->GetRelativeTransform().GetLocation().X <= DoorPositions.RightDoorTargetX)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Doors Began Openning"));
+			//	UE_LOG(LogTemp, Warning, TEXT("Doors Began Openning"));
 
 				//LeftElevatorDoor->GetComponentLocation();
 				float LeftX = LeftElevatorDoor->GetRelativeTransform().GetLocation().X;
@@ -140,11 +141,11 @@ void AElevator::Tick( float DeltaTime)
 		}
 		else 
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Start Closing Doors"));
+			//UE_LOG(LogTemp, Warning, TEXT("Start Closing Doors"));
 
 			if (LeftElevatorDoor->GetRelativeTransform().GetLocation().X <= DoorPositions.LeftDoorStartX && RightElevatorDoor->GetRelativeTransform().GetLocation().X >= DoorPositions.RightDoorStartX)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Doors Began Closing"));
+			//	UE_LOG(LogTemp, Warning, TEXT("Doors Began Closing"));
 
 				float LeftX = LeftElevatorDoor->GetRelativeTransform().GetLocation().X;
 				float LeftY = LeftElevatorDoor->GetRelativeTransform().GetLocation().Y;
@@ -229,6 +230,36 @@ void AElevator::Tick( float DeltaTime)
 				if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr && (PinRefUL->GetAlpha() > 0.5f || PinRefUR->GetAlpha() > 0.5f))
 				{
 					bOpenDoors = true;
+					if (!bPlayDoorCutsceneOnce)
+					{
+						bPlayDoorCutsceneOnce = true;
+						FTimerHandle Delay;
+						UWorld* const World = GetWorld();
+						if (World != nullptr)
+						{
+							World->GetTimerManager().SetTimer(Delay, this, &AElevator::DelayedActivation, DelayTime, false);
+						}
+						//if (CutsceneContainer != nullptr)
+						//{
+						//	CutsceneContainer->PlayMatineeAt(1);
+						//	UWorld* const World = GetWorld();
+						//	if (World != nullptr)
+						//	{
+						//		UGameplayStatics::GetAllActorsOfClass(World, AQuackBoss::StaticClass(), QuackBoss);
+						//		if (QuackBoss.Num() > 0)
+						//		{
+						//			for (AActor* b : QuackBoss)
+						//			{
+						//				AQuackBoss* Boss = Cast<AQuackBoss>(b);
+						//				if (Boss != nullptr)
+						//				{
+						//					Boss->SetCanMove();
+						//				}
+						//			}
+						//		}
+						//	}
+						//}
+					}
 					// Change to open and close code
 					//LeftElevatorDoor->DestroyComponent();
 				}
@@ -281,6 +312,30 @@ void AElevator::Tick( float DeltaTime)
 
 	//NewHeight = FMath::Clamp(NewHeight, ElevatorPositions.ElevatorStart, ElevatorPositions.ElevatorTarget);
 
+}
+
+void AElevator::DelayedActivation()
+{
+	if (CutsceneContainer != nullptr)
+	{
+		CutsceneContainer->PlayMatineeAt(1);
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			UGameplayStatics::GetAllActorsOfClass(World, AQuackBoss::StaticClass(), QuackBoss);
+			if (QuackBoss.Num() > 0)
+			{
+				for (AActor* b : QuackBoss)
+				{
+					AQuackBoss* Boss = Cast<AQuackBoss>(b);
+					if (Boss != nullptr)
+					{
+						Boss->SetCanMove();
+					}
+				}
+			}
+		}
+	}
 }
 
 void AElevator::ResumeMovement()

@@ -654,6 +654,13 @@ void AQuackCharacter::UnTabbed()
 	bTabbed = false;
 }
 
+void AQuackCharacter::TeleportOutOfElevator()
+{
+	//(X = -3750.000000, Y = 15880.000000, Z = 620.000000)
+	SetActorLocation(FVector(-3750.0f, 15880.0f, 620.0f));
+	SetActorLocation(FVector(-3750.0f, 15880.0f, -120.0f), true);
+}
+
 // INPUT MANAGER
 void AQuackCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {

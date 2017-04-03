@@ -147,7 +147,7 @@ void AQuackBoss::PostInitializeComponents()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (BossArmourComponent != nullptr)
 	{
-		if (BossArmourComponent->MainBodyArmourClass != nullptr)
+		if (BossArmourComponent->MainBodyArmourClass != nullptr && BodyPlate != nullptr && BodyLL != nullptr && BodyLR != nullptr && BodyUL != nullptr && BodyUR != nullptr)
 		{
 			AQuackBossArmourBaseClass* MainBody = World->SpawnActor<AQuackBossArmourBaseClass>(BossArmourComponent->MainBodyArmourClass, BodyPlate->GetComponentTransform().GetLocation(), BodyPlate->GetComponentRotation(), SpawnParams);
 			if (MainBody != nullptr)
@@ -227,8 +227,8 @@ void AQuackBoss::BeginPlay()
 			AudioManager = *ActorItr;
 		}
 
-		FTimerHandle TempHandle;
-		World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::StartBoss, DontDoAnythingTime, false);
+		//FTimerHandle TempHandle;
+		//World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::StartBoss, DontDoAnythingTime, false);
 		// add variable to character to prevent movement for cutscene
 		// this will change to a trigger, when we get an entrance
 	}
@@ -274,6 +274,11 @@ void AQuackBoss::BeginPlay()
 
 	EmissiveEyes = MySkeletalMesh->CreateDynamicMaterialInstance(2);
 	GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 0.5f, false);
+
+	if (ChandelierDropComponent != nullptr)
+	{
+		ChandelierDropComponent->SetStopped(true);
+	}
 }
 
 void AQuackBoss::SetLaserSource()
@@ -341,6 +346,25 @@ void AQuackBoss::DisableBeam()
 		//UE_LOG(LogTemp, Warning, TEXT("Disable Beam --- Set to false"));
 	}
 	bBossLaserAnimation = false;
+}
+
+void AQuackBoss::SetCanMove()
+{
+	if (ChandelierDropComponent != nullptr)
+	{
+		ChandelierDropComponent->SetStopped(false);
+		if (MyCharacter != nullptr)
+		{
+			MyCharacter->TeleportOutOfElevator();
+			FTimerHandle TempHandle;
+			UWorld* const World = GetWorld();
+			if (World != nullptr)
+			{
+				// 16 is length of the door matinee
+				World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::StartBoss, DontDoAnythingTime, false);
+			}
+		}
+	}
 }
 
 void AQuackBoss::BeamLogic()
