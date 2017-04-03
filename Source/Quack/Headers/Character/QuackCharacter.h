@@ -159,6 +159,14 @@ private:
 	UFUNCTION()
 		void BurstFix();
 
+	UFUNCTION()
+		void Tabbed();
+	UFUNCTION()
+		void UnTabbed();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (AllowPrivateAccess = "true"))
+		bool bTabbed;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Needle")
 		bool bRaiseGun;
 

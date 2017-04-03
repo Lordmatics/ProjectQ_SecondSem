@@ -232,6 +232,7 @@ void ABurstRifle::SheathAndDeactivate()
 	bShootingInProcess = false;
 	// EndLaserDuration seems to do nothing : this is tilting me
 	EndLaserDuration();
+	ResetLaserCharge();
 	UE_LOG(LogTemp, Warning, TEXT("Burst Rifle Sheathed: %s"), bIsInUseUnableToSwap ? TEXT("InUse") : TEXT("NotInUse"));
 	if (HarryLaserGun != nullptr)
 	{

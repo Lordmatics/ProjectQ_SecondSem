@@ -20,6 +20,14 @@ AAudioZoneBox::AAudioZoneBox()
 	EnemyRoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &AAudioZoneBox::MinionRoomEnter);
 	EnemyRoomTrigger->SetupAttachment(MyRoot);
 
+
+}
+
+// Called when the game starts or when spawned
+void AAudioZoneBox::BeginPlay()
+{
+	Super::BeginPlay();
+	
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -28,13 +36,7 @@ AAudioZoneBox::AAudioZoneBox()
 			AudioManager = *ActorItr;
 		}
 	}
-}
 
-// Called when the game starts or when spawned
-void AAudioZoneBox::BeginPlay()
-{
-	Super::BeginPlay();
-	
 }
 
 // Called every frame

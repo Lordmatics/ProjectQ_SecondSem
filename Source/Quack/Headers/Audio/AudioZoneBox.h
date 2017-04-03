@@ -33,7 +33,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Timers")
 		float BossIntroLength = 3.0f;
 
-	UPROPERTY(VisibleAnywhere, Category = "AudioState")
+	UPROPERTY(EditAnywhere, Category = "AudioState")
 		class AAudioManager* AudioManager;
 
 	UPROPERTY(EditAnywhere, Category = "AudioState")

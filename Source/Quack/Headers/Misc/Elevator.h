@@ -27,10 +27,10 @@ struct FElevatorPositions
 	{
 		//bIsUsingGravityGun = false;
 		//bHasGravityGun = false;
-		ElevatorTarget = 152.147598f;
+		ElevatorTarget = 152.0f;
 		ElevatorStart = -10000.0f;
-		ElevatorMinionTargetOne = -5000.0f;
-		ElevatorMinionTargetTwo = -1000.0f;
+		ElevatorMinionTargetOne = -7500.0f;
+		ElevatorMinionTargetTwo = -3000.0f;
 	}
 };
 
@@ -109,17 +109,25 @@ private:
 		class AQuackArmourPin* PinRefUR;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Elevator")
-		float ElevatorSpeed = 5.0f;
+
+	FTimerHandle ResumeMovementHandle;
+	UFUNCTION()
+		void ResumeMovement();
+
+	UPROPERTY(EditAnywhere, Category = "CameraShake")
+		TSubclassOf<UCameraShake> ElevatorShake;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
-		float DoorSpeed = 15.0f;
+		float ElevatorSpeed = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		float DoorSpeed = 100.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		float CollisionTimerDelay = 0.1f;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
-		float DestroyPanelDelay = 5.0f;
+		float DestroyPanelDelay = 1.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		uint32 bElevatorStop : 1;

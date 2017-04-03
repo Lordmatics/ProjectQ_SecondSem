@@ -171,11 +171,19 @@ void AElevator::Tick( float DeltaTime)
 			// During the stop, Resume, movement
 			if (!MinionFactoryComp->AreMinionsAlive())
 			{
-				bElevatorStop = false;
-				if (!bDefeatedWave)
-					bDefeatedWave = true;
-				else if (!bDefeatedBear)
-					bDefeatedBear = true;
+				UWorld* const World = GetWorld();
+				if (World != nullptr)
+				{
+					if(!World->GetTimerManager().IsTimerActive(ResumeMovementHandle))
+					{
+						World->GetTimerManager().SetTimer(ResumeMovementHandle, this, &AElevator::ResumeMovement, 1.0f, false);
+					}
+				}
+				//bElevatorStop = false;
+				//if (!bDefeatedWave)
+				//	bDefeatedWave = true;
+				//else if (!bDefeatedBear)
+				//	bDefeatedBear = true;
 			}
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("RETURNED: Shouldn't be moving"));
@@ -263,6 +271,25 @@ void AElevator::Tick( float DeltaTime)
 
 	//NewHeight = FMath::Clamp(NewHeight, ElevatorPositions.ElevatorStart, ElevatorPositions.ElevatorTarget);
 
+}
+
+void AElevator::ResumeMovement()
+{
+	bElevatorStop = false;
+	if (!bDefeatedWave)
+		bDefeatedWave = true;
+	else if (!bDefeatedBear)
+		bDefeatedBear = true;
+	UWorld* const World = GetWorld();
+	if (World != nullptr)
+	{
+		World->GetTimerManager().ClearTimer(ResumeMovementHandle);
+		APlayerController* PC = World->GetFirstPlayerController();
+		if (PC != nullptr)
+		{
+			PC->ClientPlayCameraShake(ElevatorShake);
+		}
+	}
 }
 
 void AElevator::OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection)

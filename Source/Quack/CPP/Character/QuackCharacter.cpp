@@ -644,6 +644,16 @@ void AQuackCharacter::StopJumping()
 	Super::StopJumping();
 }
 
+void AQuackCharacter::Tabbed()
+{
+	bTabbed = true;
+}
+
+void AQuackCharacter::UnTabbed()
+{
+	bTabbed = false;
+}
+
 // INPUT MANAGER
 void AQuackCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -657,6 +667,11 @@ void AQuackCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AQuackCharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AQuackCharacter::Interact);
+
+	PlayerInputComponent->BindAction("Tab", IE_Pressed, this, &AQuackCharacter::Tabbed);
+	PlayerInputComponent->BindAction("Tab", IE_Released, this, &AQuackCharacter::UnTabbed);
+
+
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AQuackCharacter::OnSprintBegin);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AQuackCharacter::OnSprintEnd);

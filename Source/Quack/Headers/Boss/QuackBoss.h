@@ -357,7 +357,7 @@ private:
 
 
 
-	UPROPERTY(VisibleAnywhere, Category = "AudioState")
+	UPROPERTY(EditAnywhere, Category = "AudioState")
 		class AAudioManager* AudioManager;
 
 public:	

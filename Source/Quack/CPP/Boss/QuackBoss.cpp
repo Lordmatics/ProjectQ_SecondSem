@@ -120,14 +120,7 @@ AQuackBoss::AQuackBoss()
 	RaycastComponent = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComponent"));
 	CutsceneContainer = CreateDefaultSubobject<UMatineeContainerComponent>(TEXT("MatineeContainer"));
 
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
-	{
-		for (TActorIterator<AAudioManager> ActorItr(World); ActorItr; ++ActorItr)
-		{
-			AudioManager = *ActorItr;
-		}
-	}
+
 	InitialisePlayerCharacterReference();
 }
 
@@ -229,6 +222,11 @@ void AQuackBoss::BeginPlay()
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
+		for (TActorIterator<AAudioManager> ActorItr(World); ActorItr; ++ActorItr)
+		{
+			AudioManager = *ActorItr;
+		}
+
 		FTimerHandle TempHandle;
 		World->GetTimerManager().SetTimer(TempHandle, this, &AQuackBoss::StartBoss, DontDoAnythingTime, false);
 		// add variable to character to prevent movement for cutscene
