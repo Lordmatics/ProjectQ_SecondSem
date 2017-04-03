@@ -113,6 +113,9 @@ private:
 		float ElevatorSpeed = 5.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
+		float DoorSpeed = 15.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Elevator")
 		float CollisionTimerDelay = 0.1f;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")

@@ -67,7 +67,8 @@ void AElevator::PostInitializeComponents()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (ArmourComp->PinClassUL != nullptr)
 	{
-		AQuackArmourPin* PinUL = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUL, LeftElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
+		// LeftElevatorDoor->GetComponentLocation()
+		AQuackArmourPin* PinUL = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUL, GetActorLocation(), FRotator(), SpawnParams);
 		if (PinUL != nullptr)
 		{
 			PinUL->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -80,7 +81,7 @@ void AElevator::PostInitializeComponents()
 	}
 	if (ArmourComp->PinClassUR != nullptr)
 	{
-		AQuackArmourPin* PinUR = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUR, RightElevatorDoor->GetComponentLocation(), FRotator(), SpawnParams);
+		AQuackArmourPin* PinUR = World->SpawnActor<AQuackArmourPin>(ArmourComp->PinClassUR, GetActorLocation(), FRotator(), SpawnParams);
 		if (PinUR != nullptr)
 		{
 			PinUR->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -108,47 +109,56 @@ void AElevator::Tick( float DeltaTime)
 	// Elevator Stop true, once reach a certain pos
 	if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Doors Not Null"));
 		if (bOpenDoors)
 		{
-			if (LeftElevatorDoor->GetComponentLocation().X >= DoorPositions.LeftDoorStartX && RightElevatorDoor->GetComponentLocation().X <= DoorPositions.RightDoorStartX)
-			{
-				//LeftElevatorDoor->GetComponentLocation();
-				float LeftX = LeftElevatorDoor->GetComponentLocation().X;
-				float LeftY = LeftElevatorDoor->GetComponentLocation().Y;
-				float LeftZ = LeftElevatorDoor->GetComponentLocation().Z;
+			UE_LOG(LogTemp, Warning, TEXT("Start Openning Doors"));
 
-				LeftX = FMath::FInterpConstantTo(LeftX, DoorPositions.LeftDoorTargetX, DeltaTime, ElevatorSpeed);
+			if (LeftElevatorDoor->GetRelativeTransform().GetLocation().X >= DoorPositions.LeftDoorTargetX && RightElevatorDoor->GetRelativeTransform().GetLocation().X <= DoorPositions.RightDoorTargetX)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Doors Began Openning"));
+
+				//LeftElevatorDoor->GetComponentLocation();
+				float LeftX = LeftElevatorDoor->GetRelativeTransform().GetLocation().X;
+				float LeftY = LeftElevatorDoor->GetRelativeTransform().GetLocation().Y;
+				float LeftZ = LeftElevatorDoor->GetRelativeTransform().GetLocation().Z;
+
+				LeftX = FMath::FInterpConstantTo(LeftX, DoorPositions.LeftDoorTargetX, DeltaTime, DoorSpeed);
 				FVector NewLocationLeft = FVector(LeftX, LeftY, LeftZ);
 				LeftElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
 
-				float RightX = RightElevatorDoor->GetComponentLocation().X;
-				float RightY = RightElevatorDoor->GetComponentLocation().Y;
-				float RightZ = RightElevatorDoor->GetComponentLocation().Z;
+				float RightX = RightElevatorDoor->GetRelativeTransform().GetLocation().X;
+				float RightY = RightElevatorDoor->GetRelativeTransform().GetLocation().Y;
+				float RightZ = RightElevatorDoor->GetRelativeTransform().GetLocation().Z;
 
-				RightX = FMath::FInterpConstantTo(RightX, DoorPositions.RightDoorTargetX, DeltaTime, ElevatorSpeed);
+				RightX = FMath::FInterpConstantTo(RightX, DoorPositions.RightDoorTargetX, DeltaTime, DoorSpeed);
 				FVector NewLocationRight = FVector(RightX, RightY, RightZ);
-				RightElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
+				RightElevatorDoor->SetRelativeLocation(FVector(NewLocationRight), false);
 			}
 		}
 		else 
 		{
-			if (LeftElevatorDoor->GetComponentLocation().X <= DoorPositions.LeftDoorStartX && RightElevatorDoor->GetComponentLocation().X >= DoorPositions.RightDoorStartX)
-			{
-				float LeftX = LeftElevatorDoor->GetComponentLocation().X;
-				float LeftY = LeftElevatorDoor->GetComponentLocation().Y;
-				float LeftZ = LeftElevatorDoor->GetComponentLocation().Z;
+			UE_LOG(LogTemp, Warning, TEXT("Start Closing Doors"));
 
-				LeftX = FMath::FInterpConstantTo(LeftX, DoorPositions.LeftDoorStartX, DeltaTime, ElevatorSpeed);
+			if (LeftElevatorDoor->GetRelativeTransform().GetLocation().X <= DoorPositions.LeftDoorStartX && RightElevatorDoor->GetRelativeTransform().GetLocation().X >= DoorPositions.RightDoorStartX)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Doors Began Closing"));
+
+				float LeftX = LeftElevatorDoor->GetRelativeTransform().GetLocation().X;
+				float LeftY = LeftElevatorDoor->GetRelativeTransform().GetLocation().Y;
+				float LeftZ = LeftElevatorDoor->GetRelativeTransform().GetLocation().Z;
+
+				LeftX = FMath::FInterpConstantTo(LeftX, DoorPositions.LeftDoorStartX, DeltaTime, DoorSpeed);
 				FVector NewLocationLeft = FVector(LeftX, LeftY, LeftZ);
 				LeftElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
 
-				float RightX = RightElevatorDoor->GetComponentLocation().X;
-				float RightY = RightElevatorDoor->GetComponentLocation().Y;
-				float RightZ = RightElevatorDoor->GetComponentLocation().Z;
+				float RightX = RightElevatorDoor->GetRelativeTransform().GetLocation().X;
+				float RightY = RightElevatorDoor->GetRelativeTransform().GetLocation().Y;
+				float RightZ = RightElevatorDoor->GetRelativeTransform().GetLocation().Z;
 
-				RightX = FMath::FInterpConstantTo(RightX, DoorPositions.RightDoorStartX, DeltaTime, ElevatorSpeed);
+				RightX = FMath::FInterpConstantTo(RightX, DoorPositions.RightDoorStartX, DeltaTime, DoorSpeed);
 				FVector NewLocationRight = FVector(RightX, RightY, RightZ);
-				RightElevatorDoor->SetRelativeLocation(FVector(NewLocationLeft), false);
+				RightElevatorDoor->SetRelativeLocation(FVector(NewLocationRight), false);
 			}
 		}
 	}
@@ -198,7 +208,7 @@ void AElevator::Tick( float DeltaTime)
 			// Play Cutscene
 			if (PinRefUL->bHasBeenDestroyed && PinRefUR->bHasBeenDestroyed)
 			{
-				if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr)
+				if (LeftElevatorDoor != nullptr && RightElevatorDoor != nullptr && (PinRefUL->GetAlpha() > 0.5f || PinRefUR->GetAlpha() > 0.5f))
 				{
 					bOpenDoors = true;
 					// Change to open and close code
