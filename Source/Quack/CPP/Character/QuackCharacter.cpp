@@ -942,7 +942,9 @@ void AQuackCharacter::DecreaseHealth(float Amount)
 				TempGameMode->WriteToFile();
 			}
 		}
-		UGameplayStatics::OpenLevel(this, FName("MainMenu"), false);
+		// Getting insta killed by something
+		// NOT A CLUE WHAT
+		//UGameplayStatics::OpenLevel(this, FName("MainMenu"), false);
 	}
 	PlayerConfig.Health = FMath::Clamp(PlayerConfig.Health, 0.0f, PlayerConfig.MaxHealth);
 }

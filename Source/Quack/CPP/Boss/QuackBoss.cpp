@@ -273,7 +273,7 @@ void AQuackBoss::BeginPlay()
 	EMPParticleSystem->SetActive(false);
 
 	EmissiveEyes = MySkeletalMesh->CreateDynamicMaterialInstance(2);
-	GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 0.5f, false);
+	World->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 0.5f, false);
 
 	if (ChandelierDropComponent != nullptr)
 	{
@@ -465,17 +465,31 @@ void AQuackBoss::ChangeBackToPrevious()
 	}
 }
 
-void AQuackBoss::CloseEyes() {
+void AQuackBoss::CloseEyes() 
+{
 	//World->GetTimerManager().SetTimer(MeleeTimerHandle, this, &AQuackBoss::Stab, StabRate * 2, true);
-	if (!bIsDead) {
-		GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::OpenEyes, 0.5f, false);
+	if (!bIsDead) 
+	{
+		UWorld* const World = GetWorld();
+		if (World == nullptr) return;
+		World->GetTimerManager().ClearTimer(BlinkTImer);
+		World->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::OpenEyes, 0.5f, false);
 		TargetBlinkValue = 0.5f;
 	}
 	else TargetBlinkValue = 1.f;
 }
 
-void AQuackBoss::OpenEyes() {
-	if (!bIsDead) GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 7, false);
+void AQuackBoss::OpenEyes() 
+{
+	if (!bIsDead)
+	{
+		UWorld* const World = GetWorld();
+		if (World != nullptr)
+		{
+			World->GetTimerManager().ClearTimer(BlinkTImer);
+			World->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 7.0f, false);
+		}
+	}
 	TargetBlinkValue = 0;
 }
 
@@ -583,6 +597,7 @@ void AQuackBoss::Ascend(float DeltaTime)
 }
 void AQuackBoss::HandleStates(float DeltaTime)
 {
+	if (bIsDead) return;
 	switch (CurrentBossState)
 	{
 		case BossStates::E_Idle:
@@ -1380,7 +1395,7 @@ void AQuackBoss::ResetMultipleAttacksPattern()
 
 void AQuackBoss::ShouldEnterHealingPhase()
 {
-	if (CurrentBossState == BossStates::E_Poisoned) return;
+	if (CurrentBossState == BossStates::E_Poisoned || bIsDead) return;
 	if (LowerPipes.Num() == 0 && UpperPipes.Num() == 0 && TargettedPipe == nullptr)
 	{
 		//ChangeState(BossStates::E_Idle);
@@ -1636,9 +1651,27 @@ void AQuackBoss::CheckForDead()
 	}
 }
 
-void AQuackBoss::BossDeath() {
-	bIsDead = true;
-	GetWorld()->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 3.f, false);
+void AQuackBoss::BossDeath() 
+{
+	if (!bIsDead)
+	{
+		ChangeState(BossStates::E_Idle);
+
+		if(MySkeletalMesh != nullptr)
+			MySkeletalMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+		UWorld* const World = GetWorld();
+		if (World == nullptr) return;
+		World->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 3.0f, false);
+		FTimerHandle DestroyTimer;
+		World->GetTimerManager().SetTimer(DestroyTimer, this, &AQuackBoss::MyDestroy, 7.0f, false);
+		bIsDead = true;
+	}
+}
+
+void AQuackBoss::MyDestroy()
+{
+	Destroy();
 }
 
 void AQuackBoss::CheckForPoisoned(float DeltaTime)
@@ -1921,6 +1954,7 @@ void AQuackBoss::LocateNearbyPipe()
 
 void AQuackBoss::ChangeState(BossStates DesiredState)
 {
+	//if (bIsDead) return;
 	DisableBeam();
 	// MIGHT WANNA CHANGE THIS TO ONLY STORE PREV STATE, IF STATE CHANGE CAME FROM A FIGHTING STATE, 
 	// SINCE THATS WHAT IT IS RETURNING TOO. 

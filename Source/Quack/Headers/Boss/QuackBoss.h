@@ -13,7 +13,9 @@ class QUACK_API AQuackBoss : public AActor
 
 private:
 
-	
+	UFUNCTION()
+		void MyDestroy();
+
 	UFUNCTION()
 		void LowerRedHealthBar();
 

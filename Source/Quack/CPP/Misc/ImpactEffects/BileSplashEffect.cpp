@@ -24,6 +24,8 @@ ABileSplashEffect::ABileSplashEffect()
 	Particle->SetupAttachment(TEMPBile);
 
 	RaycastComp = CreateDefaultSubobject<URaycastComponent>(TEXT("RaycastComponent"));
+
+	InitialLifeSpan = 11.0f;
 }
 
 // Called when the game starts or when spawned
@@ -35,7 +37,24 @@ void ABileSplashEffect::BeginPlay()
 		const FVector NewLocation = RaycastComp->GetDownHit(this).Location;
 		SetActorLocation(NewLocation);
 	}
-	StartDOT();
+
+	FTimerHandle TempHandle;
+	UWorld* const World = GetWorld();
+	if (World == nullptr) return;
+	World->GetTimerManager().SetTimer(TempHandle, this, &ABileSplashEffect::AutoDestroy, 10.0f, false);
+	//StartDOT();
+}
+
+// This might be whats causing instant KO
+
+void ABileSplashEffect::AutoDestroy()
+{
+	if (CharRef != nullptr)
+	{
+		CharRef->OutOfBileEffect();
+		ClearDOT();
+		Destroy();
+	}
 }
 
 // Called every frame

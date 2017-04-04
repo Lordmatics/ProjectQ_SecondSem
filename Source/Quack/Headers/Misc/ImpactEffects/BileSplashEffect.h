@@ -46,6 +46,9 @@ private:
 	UFUNCTION()
 		void DOTDamage();
 
+	UFUNCTION()
+		void AutoDestroy();
+
 	uint32 bInstantDamageOnce : 1;
 public:	
 	// Sets default values for this actor's properties
