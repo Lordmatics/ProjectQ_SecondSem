@@ -57,6 +57,10 @@ public:
 
 	virtual void Shoot() override;
 
+	virtual void HideGun() override;
+
+	virtual void UnHideGun() override;
+
 	USkeletalMeshComponent* GetGunMesh() const override;
 protected:
 	

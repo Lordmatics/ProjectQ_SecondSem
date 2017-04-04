@@ -74,6 +74,10 @@ public:
 
 	virtual void StopMuzzleFlash() override;
 
+	virtual void HideGun() override;
+
+	virtual void UnHideGun() override;
+
 protected:
 
 	virtual void EnableBeam();

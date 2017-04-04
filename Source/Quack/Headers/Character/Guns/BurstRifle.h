@@ -85,6 +85,10 @@ public:
 
 	float Blast();
 
+	virtual void HideGun() override;
+
+	virtual void UnHideGun() override;
+
 protected:
 
 	virtual void AttachMeshToPawn() override;

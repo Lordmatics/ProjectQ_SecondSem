@@ -353,6 +353,10 @@ private:
 public:
 	AQuackCharacter();
 
+	void Hide();
+	UFUNCTION()
+		void UnHide();
+
 	void TeleportOutOfElevator();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")

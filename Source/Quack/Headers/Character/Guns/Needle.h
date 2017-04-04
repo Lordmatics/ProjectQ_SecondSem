@@ -66,6 +66,9 @@ public:
 
 	virtual void Shoot() override;
 
+	virtual void HideGun() override;
+
+	virtual void UnHideGun() override;
 	// Forceinlines
 	FORCEINLINE UAnimMontage* GetNeedleStabAnimation() const { return NeedleStabAnimation; }
 	FORCEINLINE UAnimMontage* GetNeedleRaiseAnimation() const { return NeedleRaiseAnimation; }

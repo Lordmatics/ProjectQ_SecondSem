@@ -76,6 +76,32 @@ AQuackCharacter::AQuackCharacter()
 	bCanFire = true;
 }
 
+void AQuackCharacter::Hide()
+{
+	if(Mesh1P != nullptr)
+		Mesh1P->SetVisibility(false);
+	if (GetMesh() != nullptr)
+		GetMesh()->SetVisibility(false);
+	for (ABaseGun* Gun : GunInventory)
+	{
+		if(Gun != nullptr)
+			Gun->HideGun();
+	}
+}
+
+void AQuackCharacter::UnHide()
+{
+	if (Mesh1P != nullptr)
+		Mesh1P->SetVisibility(true);
+	if (GetMesh() != nullptr)
+		GetMesh()->SetVisibility(true);
+	for (ABaseGun* Gun : GunInventory)
+	{
+		if (Gun != nullptr)
+			Gun->UnHideGun();
+	}
+}
+
 float AQuackCharacter::ChangeGunAnimation(int GunIndex)
 {
 	// Swapping to needle

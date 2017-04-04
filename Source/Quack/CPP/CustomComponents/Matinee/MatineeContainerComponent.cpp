@@ -49,6 +49,22 @@ float UMatineeContainerComponent::GetMatineeLength(const AMatineeActor* MatineeI
 	return 0.0f;
 }
 
+float UMatineeContainerComponent::GetMatineeLengthAt(int Index)
+{
+	if (Matinees.Num() == 0) return 0.0f;
+	if (Index >= Matinees.Num()) return 0.0f;
+	if (Matinees[Index] != nullptr)
+	{
+		if (Matinees[Index]->MatineeData != nullptr)
+		{
+			return (Matinees[Index]->MatineeData->InterpLength * Matinees[Index]->PlayRate);
+		}
+		UE_LOG(LogTemp, Warning, TEXT("ERROR: Matinee Data was nullptr"));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("ERROR: Either Matinee was NULL OR MATINEE LENGTH <= 0.0f"));
+	return 0.0f;
+}
+
 bool UMatineeContainerComponent::PlayLowerPipeRightMatinee()
 {
 	// Returns Success - if logic is dependant on this - like immobility

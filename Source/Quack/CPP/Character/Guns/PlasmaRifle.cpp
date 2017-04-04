@@ -35,6 +35,20 @@ APlasmaRifle::APlasmaRifle()
 
 }
 
+void APlasmaRifle::HideGun()
+{
+	Super::HideGun();
+	if (HarryPlasmaGun != nullptr)
+		HarryPlasmaGun->SetVisibility(false, true);
+}
+
+void APlasmaRifle::UnHideGun()
+{
+	Super::UnHideGun();
+	if (HarryPlasmaGun != nullptr)
+		HarryPlasmaGun->SetVisibility(true, true);
+}
+
 void APlasmaRifle::BeginPlay()
 {
 	Super::BeginPlay();

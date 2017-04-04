@@ -44,6 +44,21 @@ USkeletalMeshComponent* ABurstRifle::GetGunMesh() const
 	return HarryLaserGun;
 }
 
+void ABurstRifle::HideGun()
+{
+	Super::HideGun();
+	if (HarryLaserGun != nullptr)
+		HarryLaserGun->SetVisibility(false, true);
+}
+
+void ABurstRifle::UnHideGun()
+{
+	Super::UnHideGun();
+
+	if (HarryLaserGun != nullptr)
+		HarryLaserGun->SetVisibility(true, true);
+}
+
 void ABurstRifle::BeginPlay()
 {
 	Super::BeginPlay();

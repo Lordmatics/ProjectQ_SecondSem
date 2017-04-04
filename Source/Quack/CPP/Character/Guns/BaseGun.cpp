@@ -24,6 +24,16 @@ void ABaseGun::BeginPlay()
 	
 }
 
+void ABaseGun::HideGun()
+{
+
+}
+
+void ABaseGun::UnHideGun()
+{
+
+}
+
 // Called every frame
 void ABaseGun::Tick( float DeltaTime )
 {

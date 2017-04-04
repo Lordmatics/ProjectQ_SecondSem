@@ -1663,8 +1663,8 @@ void AQuackBoss::BossDeath()
 		UWorld* const World = GetWorld();
 		if (World == nullptr) return;
 		World->GetTimerManager().SetTimer(BlinkTImer, this, &AQuackBoss::CloseEyes, 3.0f, false);
-		FTimerHandle DestroyTimer;
-		World->GetTimerManager().SetTimer(DestroyTimer, this, &AQuackBoss::MyDestroy, 7.0f, false);
+		//FTimerHandle DestroyTimer;
+		//World->GetTimerManager().SetTimer(DestroyTimer, this, &AQuackBoss::MyDestroy, 7.0f, false);
 		bIsDead = true;
 	}
 }

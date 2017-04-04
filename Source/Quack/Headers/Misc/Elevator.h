@@ -93,8 +93,8 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
 		class URadialForceComponent* RadialForce;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
-		class UVerticalMovementComponent* MovementComp;
+	//UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
+	//	class UVerticalMovementComponent* MovementComp;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Elevator")
 		class UMinionFactoryComponent* MinionFactoryComp;
@@ -116,6 +116,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Boss Ref")
 		TArray<class AActor*> QuackBoss;
 
+	UPROPERTY(VisibleAnywhere, Category = "Boss Ref")
+		class AQuackCharacter* CharRef;
+
 	FTimerHandle ResumeMovementHandle;
 	UFUNCTION()
 		void ResumeMovement();
@@ -126,7 +129,7 @@ private:
 		TSubclassOf<UCameraShake> ElevatorShake;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
-		float ElevatorSpeed = 0.5f;
+		float ElevatorSpeed = 300.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		float DoorSpeed = 100.0f;
@@ -161,6 +164,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Elevator")
 		uint32 bPlayDoorCutsceneOnce : 1;
 
+	UPROPERTY(EditAnywhere, Category = "Elevator")
+		uint32 bGo : 1;
+
 	/** Elevator Stops Data */
 	UPROPERTY(EditAnywhere, Category = "Elevator Positions")
 		FElevatorPositions ElevatorPositions = FElevatorPositions();
@@ -168,6 +174,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Elevator Door Positions")
 		FDoorPositions DoorPositions = FDoorPositions();
 private:
+
+	UFUNCTION()
+		void Start();
 
 	UFUNCTION()
 		void OnComponentFracture(const FVector& HitPoint, const FVector& HitDirection);

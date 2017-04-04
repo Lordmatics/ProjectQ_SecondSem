@@ -36,6 +36,24 @@ void AAssaultRifle::BeginPlay()
 
 }
 
+void AAssaultRifle::HideGun()
+{
+	Super::HideGun();
+	if (HarryAssaultRifle != nullptr)
+		HarryAssaultRifle->SetVisibility(false, true);
+	if (Magazine != nullptr)
+		Magazine->SetVisibility(false, true);
+}
+
+void AAssaultRifle::UnHideGun()
+{
+	Super::UnHideGun();
+	if (HarryAssaultRifle != nullptr)
+		HarryAssaultRifle->SetVisibility(true, true);
+	if (Magazine != nullptr)
+		Magazine->SetVisibility(true, true);
+}
+
 void AAssaultRifle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

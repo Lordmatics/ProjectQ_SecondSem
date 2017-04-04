@@ -48,6 +48,25 @@ void ANeedle::Tick(float DeltaSeconds)
 	
 }
 
+void ANeedle::HideGun()
+{
+	Super::HideGun();
+	if (NeedleSkeletalMesh != nullptr)
+		NeedleSkeletalMesh->SetVisibility(false, true);
+	if (NeedleSkeletalMeshForAnimations != nullptr)
+		NeedleSkeletalMeshForAnimations->SetVisibility(false, true);
+}
+
+void ANeedle::UnHideGun()
+{
+	Super::UnHideGun();
+
+	if (NeedleSkeletalMesh != nullptr)
+		NeedleSkeletalMesh->SetVisibility(true, true);
+	if (NeedleSkeletalMeshForAnimations != nullptr)
+		NeedleSkeletalMeshForAnimations->SetVisibility(true, true);
+}
+
 void ANeedle::Shoot()
 {
 	//PlayStabAnimation();

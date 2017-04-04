@@ -42,6 +42,9 @@ public:
 
 	static float GetMatineeLength(const class AMatineeActor* MatineeInQuestion);
 
+	float GetMatineeLengthAt(int Index);
+
+
 	bool PlayLowerPipeRightMatinee();
 	bool PlayLowerPipeLeftMatinee();
 
